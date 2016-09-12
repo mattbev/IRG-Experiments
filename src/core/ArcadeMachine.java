@@ -31,7 +31,7 @@ import tools.StatSummary;
  */
 public class ArcadeMachine
 {
-    public static final boolean VERBOSE = true;
+    public static final boolean VERBOSE = false;
 
     /**
      * Reads and launches a game for a human to be played. Graphics always on.

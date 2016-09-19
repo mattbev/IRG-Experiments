@@ -24,6 +24,10 @@ public class Vector2d
     public Vector2d() {
         this(0, 0);
     }
+    
+    public int hashCode(){
+    	return 1;
+    }
 
     /**
      * Checks if a vector and this are the same.

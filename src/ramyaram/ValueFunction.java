@@ -27,7 +27,15 @@ public class ValueFunction {
 	}
 	
 	public void setOptimalQValue(Vector2d agent, Vector2d obj, Types.ACTIONS action, double value){
+//		System.out.println("agent "+getGridCellFromPixels(agent)+" obj "+getGridCellFromPixels(obj));
+//		System.out.println("XDist "+getXDist(agent, obj));
+//		System.out.println("YDist "+getYDist(agent, obj));
+//		System.out.println("first index "+(getXDist(agent, obj)+Agent.numCols-1));
+//		System.out.println("second index "+(getYDist(agent, obj)+Agent.numRows-1));
+//		System.out.println("action "+action+" "+action.ordinal());
+//		System.out.println("value "+value);
 		optimalQValues[getXDist(agent, obj)+Agent.numCols-1][getYDist(agent, obj)+Agent.numRows-1][action.ordinal()] = value;
+//		System.out.println(optimalQValues[getXDist(agent, obj)+Agent.numCols-1][getYDist(agent, obj)+Agent.numRows-1][action.ordinal()]);
 	}
 
 	public Vector2d getGridCellFromPixels(Vector2d position){

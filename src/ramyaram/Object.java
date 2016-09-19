@@ -9,11 +9,13 @@ import core.game.Observation;
 public class Object {
 	public Observation obs;
 	public int objectClassId;
+	public int category;
 	public int[] features; //each object is represented using a set of features (current features are: [x_agent-x_obj, y_agent-y_obj])
 	
-	public Object(Observation obs, int objectClassId, int[] features) {
+	public Object(Observation obs, int objectClassId, int category, int[] features) {
 		this.obs = obs;
 		this.objectClassId = objectClassId;
+		this.category = category;
 		this.features = features;
 	}
 
@@ -45,7 +47,7 @@ public class Object {
 		for(int i=0; i<features.length; i++){
 			newStateValues[i] = features[i];
 		}
-		return new Object(obs, objectClassId, newStateValues);
+		return new Object(obs, objectClassId, category, newStateValues);
 	}
 
 	public String toString() {

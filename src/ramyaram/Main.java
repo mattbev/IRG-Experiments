@@ -11,13 +11,22 @@ import ontology.Types;
 public class Main {
 	public static double[] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 1;
+	public static int numAveraging = 25;
 	public static int numEpisodes = 1000;
 	public static int interval = 1;
-	public static String fileName = "reward.csv";
-	public static String allDataFileName = "reward_all.csv";
+	public static String fileName;// = "reward.csv";
+	public static String allDataFileName;// = "reward_all.csv";
 	
 	public static void main(String[] args) {
+		if(args.length <= 0 || args.length > 1){
+			System.out.println("Please run with one argument specifying the name of the csv file (e.g., javac Main.java && java Main reward.csv)");
+			System.exit(0);
+		}
+
+		fileName = args[0];
+		int periodIndex = fileName.indexOf('.');
+		allDataFileName = fileName.substring(0,periodIndex)+"_all"+fileName.substring(periodIndex);
+		
 		reward = new double[numEpisodes/interval];
 		wins = new boolean[numEpisodes/interval];
 		
@@ -29,6 +38,7 @@ public class Main {
 			file.delete();
 		
 		String myController = "ramyaram.Agent";
+//		String myController = "controllers.singlePlayer.sampleMCTS.Agent";
 		
 		String gamesPath = "examples/gridphysics/";
         String games[] = new String[]{};
@@ -58,6 +68,7 @@ public class Main {
         
         game = gamesPath + games[gameIdx] + ".txt";
         for(int num=0; num<numAveraging; num++){
+        	Agent.clear();
         	System.out.println("Averaging "+num);
 	        for(int i=0; i<numEpisodes; i++){
 	        	System.out.println("Episode "+i);
@@ -93,5 +104,7 @@ public class Main {
 		}
 //        ArcadeMachine.runOneGame(game, level1, true, myController, null, seed, 0);
 //        ArcadeMachine.playOneGame(game, level1, null, seed);
+        
+        System.exit(0);
 	}
 }

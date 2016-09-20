@@ -11,9 +11,9 @@ import ontology.Types;
 public class Main {
 	public static double[] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 25;
+	public static int numAveraging = 3;
 	public static int numEpisodes = 1000;
-	public static int interval = 1;
+	public static int interval = 10;
 	public static String fileName;// = "reward.csv";
 	public static String allDataFileName;// = "reward_all.csv";
 	
@@ -37,8 +37,8 @@ public class Main {
 		if(file.exists())
 			file.delete();
 		
-		String myController = "ramyaram.Agent";
-//		String myController = "controllers.singlePlayer.sampleMCTS.Agent";
+//		String myController = "ramyaram.Agent";
+		String myController = "controllers.singlePlayer.sampleMCTS.Agent";
 		
 		String gamesPath = "examples/gridphysics/";
         String games[] = new String[]{};
@@ -102,7 +102,9 @@ public class Main {
 		} catch(Exception e){
 			e.printStackTrace();
 		}
-//        ArcadeMachine.runOneGame(game, level1, true, myController, null, seed, 0);
+//        while(true){
+//        	ArcadeMachine.runOneGame(game, level1, true, myController, null, seed, 0);
+//        }
 //        ArcadeMachine.playOneGame(game, level1, null, seed);
         
         System.exit(0);

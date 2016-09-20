@@ -23,31 +23,47 @@ public class ValueFunction {
 	}
 	
 	public double getOptimalQValue(Vector2d agent, Vector2d obj, Types.ACTIONS action){
+		if((getXDist(agent, obj)+Agent.numCols-1) < 0 || (getYDist(agent, obj)+Agent.numRows-1) < 0){
+			System.out.println("less than 0");
+			System.out.println("agent "+agent+" obj "+obj);
+			System.out.println("agent "+getGridCellFromPixels(agent)+" obj "+getGridCellFromPixels(obj));
+			System.out.println("XDist "+getXDist(agent, obj));
+			System.out.println("YDist "+getYDist(agent, obj));
+			System.out.println("first index "+(getXDist(agent, obj)+Agent.numCols-1));
+			System.out.println("second index "+(getYDist(agent, obj)+Agent.numRows-1));
+			System.out.println("action "+action+" "+action.ordinal());
+		}
+		if((getXDist(agent, obj)+Agent.numCols-1) >= optimalQValues.length || (getYDist(agent, obj)+Agent.numRows-1) >= optimalQValues[0].length){
+			System.out.println("greater than size");
+			System.out.println("agent "+agent+" obj "+obj);
+			System.out.println("agent "+getGridCellFromPixels(agent)+" obj "+getGridCellFromPixels(obj));
+			System.out.println("XDist "+getXDist(agent, obj));
+			System.out.println("YDist "+getYDist(agent, obj));
+			System.out.println("first index "+(getXDist(agent, obj)+Agent.numCols-1));
+			System.out.println("second index "+(getYDist(agent, obj)+Agent.numRows-1));
+			System.out.println("action "+action+" "+action.ordinal());
+		}
 		return optimalQValues[getXDist(agent, obj)+Agent.numCols-1][getYDist(agent, obj)+Agent.numRows-1][action.ordinal()];
 	}
 	
 	public void setOptimalQValue(Vector2d agent, Vector2d obj, Types.ACTIONS action, double value){
-//		System.out.println("agent "+getGridCellFromPixels(agent)+" obj "+getGridCellFromPixels(obj));
-//		System.out.println("XDist "+getXDist(agent, obj));
-//		System.out.println("YDist "+getYDist(agent, obj));
-//		System.out.println("first index "+(getXDist(agent, obj)+Agent.numCols-1));
-//		System.out.println("second index "+(getYDist(agent, obj)+Agent.numRows-1));
-//		System.out.println("action "+action+" "+action.ordinal());
-//		System.out.println("value "+value);
 		optimalQValues[getXDist(agent, obj)+Agent.numCols-1][getYDist(agent, obj)+Agent.numRows-1][action.ordinal()] = value;
-//		System.out.println(optimalQValues[getXDist(agent, obj)+Agent.numCols-1][getYDist(agent, obj)+Agent.numRows-1][action.ordinal()]);
 	}
 
-	public Vector2d getGridCellFromPixels(Vector2d position){
-		return new Vector2d(position.x/Agent.blockSize, position.y/Agent.blockSize);
+	 public Vector2d getGridCellFromPixels(Vector2d position){
+	 	int x = position.x >=0 ? ((int)position.x)/Agent.blockSize : 0;
+    	int y = position.y >=0 ? ((int)position.y)/Agent.blockSize : 0;
+    	x = x >= Agent.numCols ? Agent.numCols-1 : x;
+    	y = y >= Agent.numRows ? Agent.numRows-1 : y;
+		return new Vector2d(x, y);
 	}
 	
 	public int getXDist(Vector2d agent, Vector2d obj){
-		return ((int) agent.x)/Agent.blockSize - ((int) obj.x)/Agent.blockSize;
+		return (int) (getGridCellFromPixels(agent).x - getGridCellFromPixels(obj).x);
 	}
 	
 	public int getYDist(Vector2d agent, Vector2d obj){
-		return ((int) agent.y)/Agent.blockSize - ((int) obj.y)/Agent.blockSize;
+		return (int) (getGridCellFromPixels(agent).y - getGridCellFromPixels(obj).y);
 	}
 	
 	public double[][][] getOptimalQValues() {

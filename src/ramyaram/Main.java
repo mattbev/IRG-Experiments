@@ -37,8 +37,8 @@ public class Main {
 		if(file.exists())
 			file.delete();
 		
-//		String myController = "ramyaram.Agent";
-		String myController = "controllers.singlePlayer.sampleMCTS.Agent";
+		String myController = "ramyaram.Agent";
+//		String myController = "controllers.singlePlayer.sampleMCTS.Agent";
 		
 		String gamesPath = "examples/gridphysics/";
         String games[] = new String[]{};

@@ -9,13 +9,13 @@ import core.ArcadeMachine;
 import ontology.Types;
 
 public class Main {
-	public static double[] reward;
+	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 3;
-	public static int numEpisodes = 1000;
-	public static int interval = 10;
-	public static String fileName;// = "reward.csv";
-	public static String allDataFileName;// = "reward_all.csv";
+	public static int numAveraging = 2;
+	public static int numEpisodes = 10;
+	public static int interval = 1;
+	public static String fileName;
+	public static String allDataFileName;
 	
 	public static void main(String[] args) {
 		if(args.length <= 0 || args.length > 1){
@@ -27,7 +27,8 @@ public class Main {
 		int periodIndex = fileName.indexOf('.');
 		allDataFileName = fileName.substring(0,periodIndex)+"_all"+fileName.substring(periodIndex);
 		
-		reward = new double[numEpisodes/interval];
+		int numDataPoints = numEpisodes/interval;
+		reward = new double[Condition.values().length][numDataPoints];
 		wins = new boolean[numEpisodes/interval];
 		
 		File file = new File(fileName);
@@ -37,8 +38,8 @@ public class Main {
 		if(file.exists())
 			file.delete();
 		
-		String myController = "ramyaram.Agent";
-//		String myController = "controllers.singlePlayer.sampleMCTS.Agent";
+		String controller = null;
+//		String controller = "controllers.singlePlayer.sampleMCTS.Agent";
 		
 		String gamesPath = "examples/gridphysics/";
         String games[] = new String[]{};
@@ -65,48 +66,82 @@ public class Main {
         String game = gamesPath + games[gameIdx] + ".txt";
         String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
         int seed = new Random().nextInt();
+        int numConditions = Condition.values().length;
+        
+        String conditionsStr = "";
+        for(Condition c : Condition.values()){
+        	conditionsStr+=c.name();
+        	for(int i=0; i<numDataPoints; i++)
+        		conditionsStr+=", ";
+        	conditionsStr+=",";
+        }
+        conditionsStr+="\n";
+        writeToFile(allDataFileName, conditionsStr);
         
         game = gamesPath + games[gameIdx] + ".txt";
         for(int num=0; num<numAveraging; num++){
-        	Agent.clear();
-        	System.out.println("Averaging "+num);
-	        for(int i=0; i<numEpisodes; i++){
-	        	System.out.println("Episode "+i);
-		        double[] result = ArcadeMachine.runOneGame(game, level1, false, myController, null, seed, 0);
-		        if(i % interval == 0){
-		        	reward[(i/interval)] += result[1]; //score of the game
-		        	if(result[0] == Types.WINNER.PLAYER_WINS.key())
-		        		wins[(i/interval)] = true;
-		        	try{
-			        	BufferedWriter writer = new BufferedWriter(new FileWriter(new File(allDataFileName), true));
-			        	writer.write(result[1]+", ");
-			        	writer.close();
-		        	} catch(Exception e){e.printStackTrace();}
+        	for(int c=0; c<numConditions; c++){
+        		controller = getConditionController(Condition.values()[c]);
+        		if(Agent.INSTANCE != null)
+        			Agent.INSTANCE.clearEachRun();
+	        	System.out.println("Averaging "+num);
+		        for(int i=0; i<numEpisodes; i++){
+		        	System.out.println("Episode "+i);
+			        double[] result = ArcadeMachine.runOneGame(game, level1, false, controller, null, seed, 0);
+			        if(i % interval == 0){
+			        	reward[c][(i/interval)] += result[1]; //score of the game
+			        	if(result[0] == Types.WINNER.PLAYER_WINS.key())
+			        		wins[(i/interval)] = true;
+			        	writeToFile(allDataFileName, result[1]+", ");
+			        }
 		        }
-	        }
-	        try{
-		        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(allDataFileName), true));
-	        	writer.write("\n");
-	        	writer.close();
-	        } catch(Exception e){e.printStackTrace();}
-        }
-        try{
-			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
-			for(int i=1; i<reward.length; i++){ //only record target task runs
-				//divides the total reward by the number of simulation runs and gets the average reward the agent received over time
-				writer.write(""+(reward[i]/numAveraging));
-				if(i<reward.length-1)
-					writer.write(", ");
+		        writeToFile(allDataFileName, ",");
+        	}
+        	writeToFile(allDataFileName, "\n");
+        } 
+        
+	    try{
+	    	BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
+			for(int i=0; i<reward.length; i++){ //all conditions
+				writer.write(Condition.values()[i].name()+", ");
+				for(int j=0; j<reward[i].length; j++){
+					//divides the total reward by the number of simulation runs and gets the average reward the agent received over time
+					writer.write(""+(reward[i][j]/numAveraging));
+					if(j<reward[i].length-1)
+						writer.write(", ");
+				}
+				writer.write("\n");
 			}
 			writer.close();
-		} catch(Exception e){
-			e.printStackTrace();
-		}
+        } catch(Exception e){
+        	e.printStackTrace();
+        }
+        
 //        while(true){
 //        	ArcadeMachine.runOneGame(game, level1, true, myController, null, seed, 0);
 //        }
 //        ArcadeMachine.playOneGame(game, level1, null, seed);
         
         System.exit(0);
+	}
+	
+	public static String getConditionController(Condition condition){
+		switch(condition){
+			case Q_LEARNING:
+				return "ramyaram.QLearningAgent";
+			case OF_Q:
+				return "ramyaram.OFQAgent";
+		}
+		return null;
+	}
+	
+	public static void writeToFile(String fileName, String str){
+		try{
+			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName), true));
+	     	writer.write(str);
+	     	writer.close();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 }

@@ -24,6 +24,8 @@ public abstract class Agent extends AbstractPlayer {
 	protected StateObservation lastStateObs;
 	protected Vector2d lastAvatarPos;
 	protected double lastScore = 0;
+	protected static int EPISODE_NUM = 0;
+	protected boolean updateQValues = true;
 	
 	protected Map<Observation, Object> objectMap = new HashMap<Observation, Object>();
 	protected Map<Vector2d, Object> gridObjectMap = new HashMap<Vector2d, Object>();
@@ -44,61 +46,50 @@ public abstract class Agent extends AbstractPlayer {
     	blockSize = so.getBlockSize();
     }
     
+    public abstract ValueFunction[] run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, ValueFunction[] priorValueFunctions);
+    
+    public abstract Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions);
+    
+    public abstract void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions);
+	
+    public abstract void clearEachRun();
+    
     //Act function. Called every game step, it must return an action in 40 ms maximum.
-    public Types.ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) { 
+    public Types.ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer){
     	processObs(stateObs, objectMap, gridObjectMap);
     	lastStateObs = stateObs.copy();
     	lastAvatarPos = stateObs.getAvatarPosition();
     	
         //Get the available actions in this game and choose one
         ArrayList<Types.ACTIONS> actions = stateObs.getAvailableActions();
-        Types.ACTIONS action = egreedy(stateObs, actions);
+        Types.ACTIONS action = chooseAction(stateObs, actions);
 
         stateObs.advance(action);    
         processObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore(); 
         
-//    	printStateObs(lastStateObs, gridObjectMap);
+//      printStateObs(lastStateObs, gridObjectMap);
 //      System.out.println(action);
 //      printStateObs(stateObs, gridObjectNextStateMap);
 //      System.out.println(currScore+" "+((currScore-lastScore)-0.1));
         
-        updateQValues(lastStateObs, action, stateObs, (currScore-lastScore)-0.1, actions);
+        updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore)-0.1, actions);
         lastScore = currScore;
-        clearEachStep();
+        EPISODE_NUM++;
         //Return the action.
         return action;
     }
     
-    public abstract void updateQValues(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions);
-    
     public double getOneQValueUpdate(double q, double reward, double maxQ){
     	return (1 - alpha) * q + alpha * (reward + gamma * maxQ);
     }
-    
-    public void clearEachStep(){
-    	
-    }
-    
+     
     public Vector2d getGridCellFromPixels(Vector2d position){
     	int x = position.x >=0 ? ((int)position.x)/blockSize : 0;
     	int y = position.y >=0 ? ((int)position.y)/blockSize : 0;
 		return new Vector2d(x, y);
 	}
     
-    public Types.ACTIONS egreedy(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
-    	if(rand.nextDouble() < epsilon){ //choose a random action
-    		int index = rand.nextInt(actions.size());
-            Types.ACTIONS action = actions.get(index);
-            return action;
-    	} else { //choose greedy action based on value function
-    		return greedy(stateObs, actions);
-    	}
-    }
-    
-    
-    public abstract Types.ACTIONS greedy(StateObservation stateObs, ArrayList<Types.ACTIONS> actions);
-	
 	public void processObs(StateObservation stateObs, Map<Observation, Object> map, Map<Vector2d, Object> gridMap){
     	ArrayList<Observation>[][] observationGrid = stateObs.getObservationGrid();
 		for (int c = 0; c < observationGrid.length; c++) {
@@ -135,7 +126,7 @@ public abstract class Agent extends AbstractPlayer {
 		}
     }
 	
-	public static int getNumNonZero(ObjectBasedValueFunction valueFunction){
+	public static int getNumNonZero(ValueFunction valueFunction){
 		int num = 0;
 		double[][][] optimalQValues = valueFunction.optimalQValues;
 		for(int i=0; i<optimalQValues.length; i++){
@@ -149,6 +140,4 @@ public abstract class Agent extends AbstractPlayer {
 		}
 		return num;
 	}
-    
-    public abstract void clearEachRun();
 }

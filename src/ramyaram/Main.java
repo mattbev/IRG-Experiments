@@ -6,16 +6,16 @@ import java.io.FileWriter;
 import java.util.Random;
 
 import core.ArcadeMachine;
-import ontology.Types;
 
 public class Main {
 	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 2;
-	public static int numEpisodes = 10;
+	public static int numAveraging = 20;
+	public static int numEpisodes = 1000;
 	public static int interval = 1;
 	public static String fileName;
 	public static String allDataFileName;
+	public static ValueFunction[] learnedValueFunctions;
 	
 	public static void main(String[] args) {
 		if(args.length <= 0 || args.length > 1){
@@ -39,7 +39,6 @@ public class Main {
 			file.delete();
 		
 		String controller = null;
-//		String controller = "controllers.singlePlayer.sampleMCTS.Agent";
 		
 		String gamesPath = "examples/gridphysics/";
         String games[] = new String[]{};
@@ -77,24 +76,18 @@ public class Main {
         }
         conditionsStr+="\n";
         writeToFile(allDataFileName, conditionsStr);
-        
+                
         game = gamesPath + games[gameIdx] + ".txt";
         for(int num=0; num<numAveraging; num++){
         	for(int c=0; c<numConditions; c++){
         		controller = getConditionController(Condition.values()[c]);
-        		if(Agent.INSTANCE != null)
+                ArcadeMachine.runOneGame(game, level1, false, controller, null, seed, 0);
+        		if(Agent.INSTANCE != null){
+        			System.out.println("Running condition "+Condition.values()[c]);
         			Agent.INSTANCE.clearEachRun();
-	        	System.out.println("Averaging "+num);
-		        for(int i=0; i<numEpisodes; i++){
-		        	System.out.println("Episode "+i);
-			        double[] result = ArcadeMachine.runOneGame(game, level1, false, controller, null, seed, 0);
-			        if(i % interval == 0){
-			        	reward[c][(i/interval)] += result[1]; //score of the game
-			        	if(result[0] == Types.WINNER.PLAYER_WINS.key())
-			        		wins[(i/interval)] = true;
-			        	writeToFile(allDataFileName, result[1]+", ");
-			        }
-		        }
+		        	System.out.println("Averaging "+num);
+			        learnedValueFunctions = Agent.INSTANCE.run(c, numEpisodes, game, level1, controller, seed, learnedValueFunctions);
+        		}
 		        writeToFile(allDataFileName, ",");
         	}
         	writeToFile(allDataFileName, "\n");
@@ -127,10 +120,10 @@ public class Main {
 	
 	public static String getConditionController(Condition condition){
 		switch(condition){
-			case Q_LEARNING:
-				return "ramyaram.QLearningAgent";
 			case OF_Q:
 				return "ramyaram.OFQAgent";
+			case OBT:
+				return "ramyaram.OBTAgent";
 		}
 		return null;
 	}

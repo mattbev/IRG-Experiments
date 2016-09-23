@@ -5,5 +5,6 @@ examples/.DS_Store
 *.jar
 *.class
 src/tools/.DS_Store
+src/.DS_Store
 /bin/
 *.DS_Store

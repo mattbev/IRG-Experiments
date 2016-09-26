@@ -9,8 +9,8 @@ import tools.ElapsedCpuTimer;
 public class OBTAgent extends OFQAgent {
 	private static int[] currMapping;
 	private static double[][] mappingQ; //Q-values over mappings (it specifies for each objClass in the new task, which objClass in the source task it aligns to (or a new class if nothing aligns))
-	private static int numEpisodesMapping = 1;
-	private static int numEpisodesQValues = 9;
+	private static int numEpisodesMapping = 0;
+	private static int numEpisodesQValues = 10;
 	private static double mapping_alpha = 0.1; //the learning rate for the mapping phase
 	private static double mapping_epsilon = 0.1; //the amount an agent explores (as opposed to exploit) mappings of different object classes
 	private static double mapping_epsilon_end = 0.001; //the ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
@@ -19,14 +19,22 @@ public class OBTAgent extends OFQAgent {
 
 	public OBTAgent(StateObservation so, ElapsedCpuTimer elapsedTimer){
 		super(so, elapsedTimer);
-		currMapping = new int[numObjClasses];
-		for(int i=0; i<currMapping.length; i++)
-			currMapping[i] = i;
+		if(currMapping == null)
+			currMapping = new int[numObjClasses];
+		if(qValueFunctions == null || qValueFunctions.length != numObjClasses+1){
+//	        System.out.println("init OBT");
+			qValueFunctions = new ValueFunction[numObjClasses+1];
+	    	for(int i=0; i<qValueFunctions.length; i++)
+				qValueFunctions[i] = new ValueFunction(null);
+		}
+//		System.out.println("init OBT "+qValueFunctions.length);
+//		System.out.println(getNumNonZero(qValueFunctions[3]));
 	}
 	
 	public ValueFunction[] run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, ValueFunction[] priorValueFunctions) {
 		if(priorValueFunctions != null) { //if a previously learned source task exists
 			qValueFunctions = new ValueFunction[priorValueFunctions.length+1];
+			System.out.println("qvaluefunctions size "+qValueFunctions.length);
 			for(int i=0; i<qValueFunctions.length; i++){
 				if(i < priorValueFunctions.length)
 					qValueFunctions[i] = new ValueFunction(priorValueFunctions[i].getOptimalQValues());
@@ -34,15 +42,21 @@ public class OBTAgent extends OFQAgent {
 					qValueFunctions[i] = new ValueFunction(null);
 			}			
 		}
+		System.out.println("run OBT "+qValueFunctions.length);
 		System.out.println("in obt run");
+		currMapping = new int[numObjClasses];
+		for(int i=0; i<currMapping.length; i++)
+			currMapping[i] = i;
 		mappingQ = new double[numObjClasses][qValueFunctions.length];
 		numOfMappings = new int[numObjClasses][qValueFunctions.length];
 		
 		int k=0;
 		//keep value functions constant and learn mappings between objects
-		mappingPhase(conditionNum, k, numEpisodesMapping, game, level1, controller, seed);
-		k+=numEpisodesMapping;
-		currMapping = getGreedyMapping(mappingQ);
+//		mappingPhase(conditionNum, k, numEpisodesMapping, game, level1, controller, seed);
+//		k+=numEpisodesMapping;
+//		currMapping = getGreedyMapping(mappingQ);
+		for(int i=0; i<currMapping.length; i++)
+			currMapping[i] = i;
 		while(k < numEpisodes){
 			//keep mappings constant and update previously learned value functions
 			qValuesPhase(conditionNum, k, numEpisodesQValues, game, level1, controller, seed);
@@ -87,6 +101,9 @@ public class OBTAgent extends OFQAgent {
 	 */
 	public void qValuesPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, String controller, int seed){
 		updateQValues = true;
+		for(int i=0; i<currMapping.length; i++)
+			System.out.print(currMapping[i]+" ");
+		System.out.println();
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++)
 			runOneEpisode(conditionNum, k, game, level1, controller, seed);
 	}
@@ -109,6 +126,9 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	public ValueFunction getValueFunction(Object obj){
+//		System.out.println("get value function for obj class "+obj.objectClassId+" --> "+currMapping[obj.objectClassId]);
+		if(currMapping[obj.objectClassId] > qValueFunctions.length-1)
+			System.err.println(qValueFunctions.length+" "+obj.objectClassId+" "+currMapping[obj.objectClassId]);
 		return qValueFunctions[currMapping[obj.objectClassId]];
 	}
 	
@@ -150,5 +170,12 @@ public class OBTAgent extends OFQAgent {
 			mapping[i] = possibleMappings.get(rand.nextInt(possibleMappings.size()));
 		}
 		return mapping;
+	}
+	
+	public void clearEachRun(){
+		super.clearEachRun();
+		currMapping = null;
+		mappingQ = null;
+		numOfMappings = null;
 	}
 }

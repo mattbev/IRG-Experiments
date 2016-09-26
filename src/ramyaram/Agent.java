@@ -52,7 +52,12 @@ public abstract class Agent extends AbstractPlayer {
     
     public abstract void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions);
 	
-    public abstract void clearEachRun();
+    public void clearEachRun(){
+    	EPISODE_NUM = 0;
+    	lastStateObs = null;
+    	lastAvatarPos = null;
+    	lastScore = 0;
+    }
     
     //Act function. Called every game step, it must return an action in 40 ms maximum.
     public Types.ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer){
@@ -68,10 +73,10 @@ public abstract class Agent extends AbstractPlayer {
         processObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore(); 
         
-//      printStateObs(lastStateObs, gridObjectMap);
-//      System.out.println(action);
-//      printStateObs(stateObs, gridObjectNextStateMap);
-//      System.out.println(currScore+" "+((currScore-lastScore)-0.1));
+//        printStateObs(lastStateObs, gridObjectMap);
+//        System.out.println(action);
+//        printStateObs(stateObs, gridObjectNextStateMap);
+//        System.out.println(currScore+" "+((currScore-lastScore)-0.1));
         
         updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore)-0.1, actions);
         lastScore = currScore;
@@ -81,6 +86,7 @@ public abstract class Agent extends AbstractPlayer {
     }
     
     public double getOneQValueUpdate(double q, double reward, double maxQ){
+//    	System.out.println(q+" "+reward+" "+maxQ);
     	return (1 - alpha) * q + alpha * (reward + gamma * maxQ);
     }
      

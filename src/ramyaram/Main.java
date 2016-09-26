@@ -11,7 +11,7 @@ public class Main {
 	public static double[][] reward;
 	public static boolean[] wins;
 	public static int numAveraging = 20;
-	public static int numEpisodes = 1000;
+	public static int numEpisodes = 100;
 	public static int interval = 1;
 	public static String fileName;
 	public static String allDataFileName;
@@ -22,23 +22,6 @@ public class Main {
 			System.out.println("Please run with one argument specifying the name of the csv file (e.g., javac Main.java && java Main reward.csv)");
 			System.exit(0);
 		}
-
-		fileName = args[0];
-		int periodIndex = fileName.indexOf('.');
-		allDataFileName = fileName.substring(0,periodIndex)+"_all"+fileName.substring(periodIndex);
-		
-		int numDataPoints = numEpisodes/interval;
-		reward = new double[Condition.values().length][numDataPoints];
-		wins = new boolean[numEpisodes/interval];
-		
-		File file = new File(fileName);
-		if(file.exists())
-			file.delete();
-		file = new File(allDataFileName);
-		if(file.exists())
-			file.delete();
-		
-		String controller = null;
 		
 		String gamesPath = "examples/gridphysics/";
         String games[] = new String[]{};
@@ -60,12 +43,31 @@ public class Main {
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
                 "zelda", "zenpuzzle" }; 
         
-        int gameIdx = 0;
+        int gameIdx = 49;
         int levelIdx = 0; //level names from 0 to 4 (game_lvlN.txt).
         String game = gamesPath + games[gameIdx] + ".txt";
         String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
         int seed = new Random().nextInt();
         int numConditions = Condition.values().length;
+        
+        fileName = args[0];
+		int periodIndex = fileName.indexOf('.');
+		fileName = fileName.substring(0,periodIndex)+"_"+games[gameIdx]+fileName.substring(periodIndex);
+		periodIndex = fileName.indexOf('.');
+		allDataFileName = fileName.substring(0,periodIndex)+"_all"+fileName.substring(periodIndex);
+		
+		int numDataPoints = numEpisodes/interval;
+		reward = new double[Condition.values().length][numDataPoints];
+		wins = new boolean[numEpisodes/interval];
+		
+		File file = new File(fileName);
+		if(file.exists())
+			file.delete();
+		file = new File(allDataFileName);
+		if(file.exists())
+			file.delete();
+		
+		String controller = null;
         
         String conditionsStr = "";
         for(Condition c : Condition.values()){
@@ -86,7 +88,7 @@ public class Main {
         			System.out.println("Running condition "+Condition.values()[c]);
         			Agent.INSTANCE.clearEachRun();
 		        	System.out.println("Averaging "+num);
-			        learnedValueFunctions = Agent.INSTANCE.run(c, numEpisodes, game, level1, controller, seed, learnedValueFunctions);
+		        	learnedValueFunctions = Agent.INSTANCE.run(c, numEpisodes, game, level1, controller, seed, learnedValueFunctions);
         		}
 		        writeToFile(allDataFileName, ",");
         	}

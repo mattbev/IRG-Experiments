@@ -3,19 +3,18 @@ package ramyaram;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Random;
-
-import core.ArcadeMachine;
 
 public class Main {
 	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 20;
+	public static int numAveraging = 5;
 	public static int numEpisodes = 100;
 	public static int interval = 1;
 	public static String fileName;
 	public static String allDataFileName;
-	public static ValueFunction[] learnedValueFunctions;
+	public static ArrayList<ValueFunction> learnedValueFunctions;
 	
 	public static void main(String[] args) {
 		if(args.length <= 0 || args.length > 1){
@@ -43,7 +42,7 @@ public class Main {
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
                 "zelda", "zenpuzzle" }; 
         
-        int gameIdx = 49;
+        int gameIdx = 0;
         int levelIdx = 0; //level names from 0 to 4 (game_lvlN.txt).
         String game = gamesPath + games[gameIdx] + ".txt";
         String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
@@ -83,11 +82,14 @@ public class Main {
         for(int num=0; num<numAveraging; num++){
         	for(int c=0; c<numConditions; c++){
         		controller = getConditionController(Condition.values()[c]);
-                ArcadeMachine.runOneGame(game, level1, false, controller, null, seed, 0);
+//                ArcadeMachine.runOneGame(game, level1, false, controller, null, seed, 0);
+        		initializeController(Condition.values()[c]);
         		if(Agent.INSTANCE != null){
         			System.out.println("Running condition "+Condition.values()[c]);
         			Agent.INSTANCE.clearEachRun();
 		        	System.out.println("Averaging "+num);
+//		        	if(c==1)
+//		        		System.out.println("obt");
 		        	learnedValueFunctions = Agent.INSTANCE.run(c, numEpisodes, game, level1, controller, seed, learnedValueFunctions);
         		}
 		        writeToFile(allDataFileName, ",");
@@ -126,6 +128,16 @@ public class Main {
 				return "ramyaram.OFQAgent";
 			case OBT:
 				return "ramyaram.OBTAgent";
+		}
+		return null;
+	}
+	
+	public static Agent initializeController(Condition condition){
+		switch(condition){
+			case OF_Q:
+				return new OFQAgent(null,null);
+			case OBT:
+				return new OBTAgent(null,null);
 		}
 		return null;
 	}

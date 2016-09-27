@@ -2,6 +2,7 @@ package ramyaram;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import core.ArcadeMachine;
 import core.game.Observation;
@@ -11,22 +12,16 @@ import tools.ElapsedCpuTimer;
 import tools.Vector2d;
 
 public class OFQAgent extends Agent {
-    protected static int numObjClasses = 20;
-	protected static ValueFunction[] qValueFunctions;
+	protected static ArrayList<ValueFunction> qValueFunctions;
 
 	public OFQAgent(StateObservation so, ElapsedCpuTimer elapsedTimer){
 		super(so, elapsedTimer);
-		if(qValueFunctions == null){
-//	        System.out.println("init OBQ");
-			qValueFunctions = new ValueFunction[numObjClasses];
-	    	for(int i=0; i<qValueFunctions.length; i++)
-				qValueFunctions[i] = new ValueFunction(null);
-		}
 	}
 	
-	public ValueFunction[] run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, ValueFunction[] priorValueFunctions) {
-		System.out.println("in ofq run");
+	public ArrayList<ValueFunction> run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, ArrayList<ValueFunction> priorValueFunctions) {
+//		System.out.println("in ofq run");
 		updateQValues = true;
+		qValueFunctions = new ArrayList<ValueFunction>();
 		for(int i=0; i<numEpisodes; i++)
         	runOneEpisode(conditionNum, i, game, level1, controller, seed);		
 		return qValueFunctions;
@@ -36,7 +31,8 @@ public class OFQAgent extends Agent {
 		System.out.println("Episode "+episodeNum);
         double[] result = ArcadeMachine.runOneGame(game, level1, false, controller, null, seed, 0);
         if(episodeNum % Main.interval == 0){
-        	System.out.println("episodeNum "+episodeNum+" interval "+Main.interval);
+//        	System.out.println("episodeNum "+episodeNum+" interval "+Main.interval);
+//        	System.out.println(episodeNum+" "+Main.interval+" "+(episodeNum/Main.interval));
         	Main.reward[conditionNum][(episodeNum/Main.interval)] += result[1]; //score of the game
         	if(result[0] == Types.WINNER.PLAYER_WINS.key())
         		Main.wins[(episodeNum/Main.interval)] = true;
@@ -106,8 +102,18 @@ public class OFQAgent extends Agent {
 //    	System.out.println();
     }
     
+    public void processObs(Observation obs, Map<Observation, Object> map){
+    	super.processObs(obs, map);
+    	addValueFunction(obs);
+    }
+    
+    public void addValueFunction(Observation obs){
+		if(itype_to_objClassId.get(obs.itype) >= qValueFunctions.size())
+			qValueFunctions.add(new ValueFunction(null));
+    }
+    
     public ValueFunction getValueFunction(Object obj){
-		return qValueFunctions[obj.objectClassId];
+		return qValueFunctions.get(obj.getObjClassId());
 	}
     
     /**

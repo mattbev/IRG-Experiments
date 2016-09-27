@@ -1,22 +1,20 @@
 package ramyaram;
 
-import core.game.Observation;
-
 /**
  * Representation of an object in the task
  * Each object is part of an object class (objects of the same class are assumed to behave similarly)
  */
 public class Object {
-	public Observation obs;
-	public int objectClassId;
-	public int category;
-	public int[] features; //each object is represented using a set of features (current features are: [x_agent-x_obj, y_agent-y_obj])
+	private int objClassId;
+	private int[] features; //each object is represented using a set of features (current features are: [x_agent-x_obj, y_agent-y_obj])
 	
-	public Object(Observation obs, int objectClassId, int category, int[] features) {
-		this.obs = obs;
-		this.objectClassId = objectClassId;
-		this.category = category;
+	public Object(int objClassId, int[] features) {
+		this.objClassId = objClassId;
 		this.features = features;
+	}
+
+	public int getObjClassId() {
+		return objClassId;
 	}
 
 	public int getFeature(int index) {
@@ -33,8 +31,6 @@ public class Object {
 	
 	public boolean equals(java.lang.Object obj_param){
 		Object obj = (Object)obj_param;
-		if(!obs.equals(obj.obs))
-			return false;
 		for(int i=0; i<features.length; i++){
 			if(features[i] != obj.features[i])
 				return false;
@@ -44,10 +40,9 @@ public class Object {
 	
 	public Object clone(){
 		int[] newStateValues = new int[features.length];
-		for(int i=0; i<features.length; i++){
+		for(int i=0; i<features.length; i++)
 			newStateValues[i] = features[i];
-		}
-		return new Object(obs, objectClassId, category, newStateValues);
+		return new Object(objClassId, newStateValues);
 	}
 
 	public String toString() {

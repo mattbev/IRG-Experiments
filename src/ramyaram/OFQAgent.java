@@ -18,13 +18,13 @@ public class OFQAgent extends Agent {
 		super(so, elapsedTimer);
 	}
 	
-	public ArrayList<ValueFunction> run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, ArrayList<ValueFunction> priorValueFunctions) {
+	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, LearnedModel priorLearnedModel) {
 //		System.out.println("in ofq run");
 		updateQValues = true;
 		qValueFunctions = new ArrayList<ValueFunction>();
 		for(int i=0; i<numEpisodes; i++)
         	runOneEpisode(conditionNum, i, game, level1, controller, seed);		
-		return qValueFunctions;
+		return new LearnedModel(qValueFunctions, itype_to_objClassId);
 	}
 	
 	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, String controller, int seed){

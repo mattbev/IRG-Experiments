@@ -51,7 +51,7 @@ public abstract class Agent extends AbstractPlayer {
     	blockSize = so.getBlockSize();
     }
     
-    public abstract ArrayList<ValueFunction> run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, ArrayList<ValueFunction> priorValueFunctions);
+    public abstract LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, LearnedModel priorLearnedModel);
     
     public abstract Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions);
     
@@ -81,7 +81,7 @@ public abstract class Agent extends AbstractPlayer {
     public void processObs(Observation obs, Map<Observation, Object> map){
     	if(!itype_to_objClassId.containsKey(obs.itype))
 			itype_to_objClassId.put(obs.itype, itype_to_objClassId.size());
-		Object o = new Object(itype_to_objClassId.get(obs.itype), new int[]{(int)obs.position.x, (int)obs.position.y});
+		Object o = new Object(itype_to_objClassId.get(obs.itype), obs.itype, new int[]{(int)obs.position.x, (int)obs.position.y});
 		map.put(obs, o);
 //		for(int index : itype_to_objClassId.keySet())
 //		System.out.println("itype "+index+" --> "+itype_to_objClassId.get(index));
@@ -136,7 +136,8 @@ public abstract class Agent extends AbstractPlayer {
 			for (int c = 0; c < observationGrid.length; c++) {
 				if(gridMap.containsKey(new Vector2d(c,r))){
 					Object o = gridMap.get(new Vector2d(c,r));
-					System.out.print(o.getObjClassId());
+//					System.out.print(o.getObjClassId());
+					System.out.print(o.getItype());
 				} else {
 					System.out.print("-");
 				}

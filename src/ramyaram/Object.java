@@ -6,11 +6,17 @@ package ramyaram;
  */
 public class Object {
 	private int objClassId;
+	private int itype;
 	private int[] features; //each object is represented using a set of features (current features are: [x_agent-x_obj, y_agent-y_obj])
 	
-	public Object(int objClassId, int[] features) {
+	public Object(int objClassId, int itype, int[] features) {
 		this.objClassId = objClassId;
+		this.itype = itype;
 		this.features = features;
+	}
+
+	public int getItype() {
+		return itype;
 	}
 
 	public int getObjClassId() {
@@ -42,7 +48,7 @@ public class Object {
 		int[] newStateValues = new int[features.length];
 		for(int i=0; i<features.length; i++)
 			newStateValues[i] = features[i];
-		return new Object(objClassId, newStateValues);
+		return new Object(objClassId, itype, newStateValues);
 	}
 
 	public String toString() {

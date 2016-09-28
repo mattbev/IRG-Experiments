@@ -3,25 +3,24 @@ package ramyaram;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.ArrayList;
 import java.util.Random;
 
 public class Main {
 	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 5;
-	public static int numEpisodes = 100;
+	public static int numAveraging = 20;
+	public static int numEpisodes = 500;
 	public static int interval = 1;
 	public static String fileName;
 	public static String allDataFileName;
-	public static ArrayList<ValueFunction> learnedValueFunctions;
+	public static LearnedModel[] learnedModels;
 	
 	public static void main(String[] args) {
 		if(args.length <= 0 || args.length > 1){
 			System.out.println("Please run with one argument specifying the name of the csv file (e.g., javac Main.java && java Main reward.csv)");
 			System.exit(0);
 		}
-		
+		learnedModels = new LearnedModel[Condition.values().length];
 		String gamesPath = "examples/gridphysics/";
         String games[] = new String[]{};
         games = new String[]{"aliens", "angelsdemons", "assemblyline", "avoidgeorge", "bait", //0-4
@@ -42,17 +41,15 @@ public class Main {
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
                 "zelda", "zenpuzzle" }; 
         
-        int gameIdx = 0;
+        int gameIdx = -1;
         int levelIdx = 0; //level names from 0 to 4 (game_lvlN.txt).
-        String game = gamesPath + games[gameIdx] + ".txt";
-        String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
         int seed = new Random().nextInt();
         int numConditions = Condition.values().length;
         
         fileName = args[0];
 		int periodIndex = fileName.indexOf('.');
-		fileName = fileName.substring(0,periodIndex)+"_"+games[gameIdx]+fileName.substring(periodIndex);
-		periodIndex = fileName.indexOf('.');
+//		fileName = fileName.substring(0,periodIndex)+"_"+games[gameIdx]+fileName.substring(periodIndex);
+//		periodIndex = fileName.indexOf('.');
 		allDataFileName = fileName.substring(0,periodIndex)+"_all"+fileName.substring(periodIndex);
 		
 		int numDataPoints = numEpisodes/interval;
@@ -78,9 +75,15 @@ public class Main {
         conditionsStr+="\n";
         writeToFile(allDataFileName, conditionsStr);
                 
-        game = gamesPath + games[gameIdx] + ".txt";
         for(int num=0; num<numAveraging; num++){
         	for(int c=0; c<numConditions; c++){
+        		if(c==0)
+        			gameIdx = 0;
+        		else
+        			gameIdx = 49;
+                String game = gamesPath + games[gameIdx] + ".txt";
+                String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
+                System.out.println("PLAYING "+games[gameIdx]);
         		controller = getConditionController(Condition.values()[c]);
 //                ArcadeMachine.runOneGame(game, level1, false, controller, null, seed, 0);
         		initializeController(Condition.values()[c]);
@@ -88,9 +91,7 @@ public class Main {
         			System.out.println("Running condition "+Condition.values()[c]);
         			Agent.INSTANCE.clearEachRun();
 		        	System.out.println("Averaging "+num);
-//		        	if(c==1)
-//		        		System.out.println("obt");
-		        	learnedValueFunctions = Agent.INSTANCE.run(c, numEpisodes, game, level1, controller, seed, learnedValueFunctions);
+		        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes, game, level1, controller, seed, learnedModels[0]);
         		}
 		        writeToFile(allDataFileName, ",");
         	}
@@ -124,9 +125,10 @@ public class Main {
 	
 	public static String getConditionController(Condition condition){
 		switch(condition){
-			case OF_Q:
+			case OF_Q_SOURCE:
+			case OF_Q_TARGET:
 				return "ramyaram.OFQAgent";
-			case OBT:
+			case OBT_TARGET:
 				return "ramyaram.OBTAgent";
 		}
 		return null;
@@ -134,9 +136,10 @@ public class Main {
 	
 	public static Agent initializeController(Condition condition){
 		switch(condition){
-			case OF_Q:
+			case OF_Q_SOURCE:
+			case OF_Q_TARGET:
 				return new OFQAgent(null,null);
-			case OBT:
+			case OBT_TARGET:
 				return new OBTAgent(null,null);
 		}
 		return null;

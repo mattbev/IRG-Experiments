@@ -40,10 +40,6 @@ public abstract class Agent extends AbstractPlayer {
         	init(so);
     }
     
-    public int getNumObjClasses(){
-    	return itype_to_objClassId.size();
-    }
-    
     public void init(StateObservation so){
     	ArrayList<Observation>[][] observationGrid = so.getObservationGrid();
 		numCols = observationGrid.length;
@@ -123,10 +119,12 @@ public abstract class Agent extends AbstractPlayer {
 //    	System.out.println(q+" "+reward+" "+maxQ);
     	return (1 - alpha) * q + alpha * (reward + gamma * maxQ);
     }
-     
-    public Vector2d getGridCellFromPixels(Vector2d position){
-    	int x = position.x >=0 ? ((int)position.x)/blockSize : 0;
-    	int y = position.y >=0 ? ((int)position.y)/blockSize : 0;
+    
+    public static Vector2d getGridCellFromPixels(Vector2d position){
+	 	int x = position.x >=0 ? ((int)position.x)/Agent.blockSize : 0;
+    	int y = position.y >=0 ? ((int)position.y)/Agent.blockSize : 0;
+    	x = x >= Agent.numCols ? Agent.numCols-1 : x;
+    	y = y >= Agent.numRows ? Agent.numRows-1 : y;
 		return new Vector2d(x, y);
 	}
     
@@ -145,19 +143,13 @@ public abstract class Agent extends AbstractPlayer {
 			System.out.println();
 		}
     }
-	
-	public static int getNumNonZero(ValueFunction valueFunction){
-		int num = 0;
-		double[][][] optimalQValues = valueFunction.optimalQValues;
-		for(int i=0; i<optimalQValues.length; i++){
-			for(int j=0; j<optimalQValues[i].length; j++){
-				for(int k=0; k<optimalQValues[i][j].length; k++){
-					if(optimalQValues[i][j][k] > 0 || optimalQValues[i][j][k] < 0){
-						num++;
-					}
-				}
-			}
-		}
-		return num;
-	}
+    
+    public void printITypeMapping(HashMap<Integer,Integer> itype_to_id_mapping, int value){
+    	for(int key : itype_to_id_mapping.keySet()){
+    		if(value == itype_to_id_mapping.get(key))
+    			System.out.println(key+" --> "+itype_to_id_mapping.get(key)+"***");
+    		else
+    			System.out.println(key+" --> "+itype_to_id_mapping.get(key));
+    	}
+    }
 }

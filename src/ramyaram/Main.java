@@ -8,16 +8,16 @@ import java.util.Random;
 public class Main {
 	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 20;
-	public static int numEpisodes = 500;
+	public static int numAveraging = 5;
+	public static int numEpisodes = 1000;
 	public static int interval = 1;
 	public static String fileName;
 	public static String allDataFileName;
 	public static LearnedModel[] learnedModels;
 	
 	public static void main(String[] args) {
-		if(args.length <= 0 || args.length > 1){
-			System.out.println("Please run with one argument specifying the name of the csv file (e.g., javac Main.java && java Main reward.csv)");
+		if(args.length <= 1 || args.length > 2){
+			System.out.println("Please run with two arguments specifying the name of the csv file and the index of the game to be run (e.g., javac Main.java && java Main reward.csv 0)");
 			System.exit(0);
 		}
 		learnedModels = new LearnedModel[Condition.values().length];
@@ -41,15 +41,15 @@ public class Main {
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
                 "zelda", "zenpuzzle" }; 
         
-        int gameIdx = -1;
+        int gameIdx = Integer.parseInt(args[1]);
         int levelIdx = 0; //level names from 0 to 4 (game_lvlN.txt).
         int seed = new Random().nextInt();
         int numConditions = Condition.values().length;
         
         fileName = args[0];
 		int periodIndex = fileName.indexOf('.');
-//		fileName = fileName.substring(0,periodIndex)+"_"+games[gameIdx]+fileName.substring(periodIndex);
-//		periodIndex = fileName.indexOf('.');
+		fileName = fileName.substring(0,periodIndex)+"_"+games[gameIdx]+fileName.substring(periodIndex);
+		periodIndex = fileName.indexOf('.');
 		allDataFileName = fileName.substring(0,periodIndex)+"_all"+fileName.substring(periodIndex);
 		
 		int numDataPoints = numEpisodes/interval;
@@ -62,9 +62,7 @@ public class Main {
 		file = new File(allDataFileName);
 		if(file.exists())
 			file.delete();
-		
-		String controller = null;
-        
+	     
         String conditionsStr = "";
         for(Condition c : Condition.values()){
         	conditionsStr+=c.name();
@@ -77,15 +75,14 @@ public class Main {
                 
         for(int num=0; num<numAveraging; num++){
         	for(int c=0; c<numConditions; c++){
-        		if(c==0)
-        			gameIdx = 0;
-        		else
-        			gameIdx = 49;
+//        		if(c==0)
+//        			gameIdx = 0;
+//        		else
+//        			gameIdx = 49;
                 String game = gamesPath + games[gameIdx] + ".txt";
                 String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
                 System.out.println("PLAYING "+games[gameIdx]);
-        		controller = getConditionController(Condition.values()[c]);
-//                ArcadeMachine.runOneGame(game, level1, false, controller, null, seed, 0);
+        		String controller = getConditionController(Condition.values()[c]);
         		initializeController(Condition.values()[c]);
         		if(Agent.INSTANCE != null){
         			System.out.println("Running condition "+Condition.values()[c]);
@@ -114,13 +111,15 @@ public class Main {
         } catch(Exception e){
         	e.printStackTrace();
         }
+        System.exit(0);
         
+//        String game = gamesPath + games[gameIdx] + ".txt";
+//        String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
+//        String myController = "ramyaram.OFQAgent";
 //        while(true){
 //        	ArcadeMachine.runOneGame(game, level1, true, myController, null, seed, 0);
 //        }
 //        ArcadeMachine.playOneGame(game, level1, null, seed);
-        
-        System.exit(0);
 	}
 	
 	public static String getConditionController(Condition condition){

@@ -26,24 +26,30 @@ public class ValueFunction {
 	public void setOptimalQValue(Vector2d agent, Vector2d obj, Types.ACTIONS action, double value){
 		optimalQValues[getXDist(agent, obj)+Agent.numCols-1][getYDist(agent, obj)+Agent.numRows-1][action.ordinal()] = value;
 	}
-
-	 public Vector2d getGridCellFromPixels(Vector2d position){
-	 	int x = position.x >=0 ? ((int)position.x)/Agent.blockSize : 0;
-    	int y = position.y >=0 ? ((int)position.y)/Agent.blockSize : 0;
-    	x = x >= Agent.numCols ? Agent.numCols-1 : x;
-    	y = y >= Agent.numRows ? Agent.numRows-1 : y;
-		return new Vector2d(x, y);
-	}
 	
 	public int getXDist(Vector2d agent, Vector2d obj){
-		return (int) (getGridCellFromPixels(agent).x - getGridCellFromPixels(obj).x);
+		return (int) (Agent.getGridCellFromPixels(agent).x - Agent.getGridCellFromPixels(obj).x);
 	}
 	
 	public int getYDist(Vector2d agent, Vector2d obj){
-		return (int) (getGridCellFromPixels(agent).y - getGridCellFromPixels(obj).y);
+		return (int) (Agent.getGridCellFromPixels(agent).y - Agent.getGridCellFromPixels(obj).y);
 	}
 
 	public double[][][] getOptimalQValues() {
 		return optimalQValues;
+	}
+	
+	public int getNumNonZero(){
+		int num = 0;
+		for(int i=0; i<optimalQValues.length; i++){
+			for(int j=0; j<optimalQValues[i].length; j++){
+				for(int k=0; k<optimalQValues[i][j].length; k++){
+					if(optimalQValues[i][j][k] > 0 || optimalQValues[i][j][k] < 0){
+						num++;
+					}
+				}
+			}
+		}
+		return num;
 	}
 }

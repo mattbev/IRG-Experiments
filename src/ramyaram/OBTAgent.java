@@ -12,10 +12,11 @@ public class OBTAgent extends OFQAgent {
 	private static ArrayList<Integer> currMapping;
 	private static ArrayList<double[]> mappingQ; //Q-values over mappings (it specifies for each objClass in the new task, which objClass in the source task it aligns to (or a new class if nothing aligns))
 	private static ArrayList<int[]> numOfMappings;
-	private HashMap<Integer, Integer> prior_itype_id_mapping;
+	private static HashMap<Integer, Integer> prior_itype_id_mapping;
+	private String game = "";
 
-	private static int numEpisodesMapping = 50;
-	private static int numEpisodesQValues = 50;
+	private static int numEpisodesMapping = 0;
+	private static int numEpisodesQValues = 1;//Main.numEpisodes-numEpisodesMapping;
 	private static double mapping_alpha = 0.1; //the learning rate for the mapping phase
 	private static double mapping_epsilon = 0.1; //the amount an agent explores (as opposed to exploit) mappings of different object classes
 	private static double mapping_epsilon_end = 0.001; //the ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
@@ -26,17 +27,29 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, LearnedModel priorLearnedModel) {
-		if((numEpisodesMapping+numEpisodesQValues)>Main.numEpisodes){
+		if(numEpisodesMapping > Main.numEpisodes || (numEpisodesMapping+numEpisodesQValues) > Main.numEpisodes){
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
 		}
+//		System.out.println("PRIOR LEARNED MODEL "+(priorLearnedModel==null?null:priorLearnedModel.getCondition()));
+		this.game = game.substring(game.lastIndexOf('/')+1, game.indexOf('.'));
 		this.prior_itype_id_mapping = priorLearnedModel.getLearnedIdMapping();
+//		System.out.println(prior_itype_id_mapping);
 		ArrayList<ValueFunction> priorValueFunctions = priorLearnedModel.getLearnedValueFunctions();
 		if(priorValueFunctions != null) { //if a previously learned source task exists
 			qValueFunctions = new ArrayList<ValueFunction>();//new ValueFunction[priorValueFunctions.length+1];
 			for(int i=0; i<priorValueFunctions.size(); i++)
 				qValueFunctions.add(new ValueFunction(priorValueFunctions.get(i).getOptimalQValues()));		
 		}
+//		System.out.println(itype_to_objClassId.size()+" "+prior_itype_id_mapping.size());
+//		for(int i : itype_to_objClassId.keySet())
+//			System.out.println(i+" "+itype_to_objClassId.get(i));
+//		for(int i : prior_itype_id_mapping.keySet())
+//			System.out.println(i+" "+prior_itype_id_mapping.get(i));
+//		for(int i=0; i<qValueFunctions.size(); i++)
+//			System.out.println(i+" "+qValueFunctions.get(i).getNumNonZero());
+//		for(int i : priorLearnedModel.getLearnedIdMapping().keySet())
+//			System.out.println(i+" "+priorLearnedModel.getLearnedIdMapping().get(i));
 		//create a new empty value function that is learned if no previous ones align well
 		qValueFunctions.add(new ValueFunction(null));
 		currMapping = new ArrayList<Integer>();
@@ -47,17 +60,18 @@ public class OBTAgent extends OFQAgent {
 		//keep value functions constant and learn mappings between objects
 		mappingPhase(conditionNum, k, numEpisodesMapping, game, level1, controller, seed);
 		k+=numEpisodesMapping;
-		currMapping = getGreedyMapping(mappingQ);
 		for(int i=0; i<currMapping.size(); i++)
 			System.out.print(currMapping.get(i)+" ");
 		System.out.println();
 //			currMapping[i] = i;
 		while(k < numEpisodes){
+			currMapping = getGreedyMapping(mappingQ);
+//			System.out.println("CURR MAPPING "+currMapping.size());
 			//keep mappings constant and update previously learned value functions
 			qValuesPhase(conditionNum, k, numEpisodesQValues, game, level1, controller, seed);
 			k+=numEpisodesQValues;
 		}
-		int[] bestMapping = new int[getNumObjClasses()];
+		int[] bestMapping = new int[mappingQ.size()];
 		for(int i=0; i<bestMapping.length; i++){
 			double maxValue = Integer.MIN_VALUE;
 			int maxIndex = -1;
@@ -77,7 +91,7 @@ public class OBTAgent extends OFQAgent {
 		for(int i=0; i<bestMapping.length; i++)
 			System.out.print(bestMapping[i]+" ");
 		System.out.println();
-		return new LearnedModel(qValueFunctions, itype_to_objClassId);
+		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum]);
 	}
 	
 	public void addValueFunction(Observation obs){
@@ -111,9 +125,11 @@ public class OBTAgent extends OFQAgent {
 	 */
 	public void qValuesPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, String controller, int seed){
 		updateQValues = true;
-		for(int i=0; i<currMapping.size(); i++)
-			System.out.print(currMapping.get(i)+" ");
-		System.out.println();
+//		System.out.println(prior_itype_id_mapping);
+
+//		for(int i=0; i<currMapping.size(); i++)
+//			System.out.print(currMapping.get(i)+" ");
+//		System.out.println();
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++)
 			runOneEpisode(conditionNum, k, game, level1, controller, seed);
 	}
@@ -125,9 +141,12 @@ public class OBTAgent extends OFQAgent {
 	public void mappingPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, String controller, int seed){
 		updateQValues = false;
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++){
+//			System.out.println(prior_itype_id_mapping);
 			ArrayList<Integer> mapping = getMapping(mappingQ);
 //			System.out.println("mapping size "+mappingQ.size()+" "+mapping.size());
 			double episodeReward = runOneEpisode(conditionNum, k, game, level1, controller, seed);
+//			System.out.println(prior_itype_id_mapping);
+
 //			System.out.println("mapping size "+mappingQ.size()+" "+mapping.size());
 			for(int i=0; i<mapping.size(); i++){
 				double q = mappingQ.get(i)[mapping.get(i)]; //update mappingQ based on reward received
@@ -138,7 +157,16 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	public ValueFunction getValueFunction(Object obj){
-//		System.out.println("get value function for obj class "+obj.objectClassId+" --> "+currMapping[obj.objectClassId]);
+//		System.out.println("get value function for itype "+obj.getItype()+" id "+obj.getObjClassId()+" --> "+currMapping.get(obj.getObjClassId()));
+//		for(int i=0; i<currMapping.size(); i++)
+//			System.out.print(currMapping.get(i)+" ");
+//		System.out.println();
+//		System.out.println("new task");
+//		printITypeMapping(itype_to_objClassId, obj.getObjClassId());
+//		System.out.println("prior task");
+//		System.out.println(prior_itype_id_mapping);
+//		printITypeMapping(prior_itype_id_mapping, currMapping.get(obj.getObjClassId()));
+//		System.out.println();
 //		System.out.println(obj.getObjClassId());
 //		System.out.println(currMapping.get(obj.getObjClassId()));
 //		System.out.println(qValueFunctions.size());
@@ -146,13 +174,27 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	public int getFixedMappingIType(int newIType){
-		switch(newIType){
-			case 1: return 1; 
-			case 7: return 9; 
-			case 0: return 3; 
-			case 4: return 5; 
-			default: return -1;
+		if(game.equalsIgnoreCase("missilecommand")){
+//			System.out.println("MissileCommand Fixed Mapping");
+			switch(newIType){
+				case 1: return 1; 
+				case 7: return 6; 
+				case 0: return 3; 
+				case 4: return 5; 
+				default: return -1;
+			}
+		} else if(game.equalsIgnoreCase("aliens")){
+//			System.out.println("Aliens Fixed Mapping");
+			switch(newIType){
+				case 3: return 0; 
+				case 5: return 4; 
+				case 6: return 7; 
+				case 9: return 7;
+				case 1: return 1;
+				default: return -1;
+			}
 		}
+		return -1;
 	}
 	
 	/**
@@ -182,15 +224,29 @@ public class OBTAgent extends OFQAgent {
 //			mapping.add(i);
 //		}
 		//fixed mapping for debugging
+//		for(int i=0; i<currMapping.size(); i++)
+//			mapping.add(-1);
+//		for(int new_itype : itype_to_objClassId.keySet()){
+//			int oldIType = getFixedMappingIType(new_itype);
+//			if(oldIType >= 0)
+//				mapping.set(itype_to_objClassId.get(new_itype), prior_itype_id_mapping.get(oldIType));
+//			else
+//				mapping.set(itype_to_objClassId.get(new_itype), qValueFunctions.size()-1);
+//		}
+//		System.out.println(itype_to_objClassId.size()+" "+prior_itype_id_mapping.size());
+//		for(int i : itype_to_objClassId.keySet())
+//			System.out.println(i+" "+itype_to_objClassId.get(i));
+//		for(int i : prior_itype_id_mapping.keySet())
+//			System.out.println(i+" "+prior_itype_id_mapping.get(i));
+		
 		for(int i=0; i<currMapping.size(); i++)
 			mapping.add(-1);
-		for(int new_itype : itype_to_objClassId.keySet()){
-			int oldIType = getFixedMappingIType(new_itype);
-			if(oldIType >= 0)
-				mapping.set(itype_to_objClassId.get(new_itype), prior_itype_id_mapping.get(oldIType));
-			else
-				mapping.set(itype_to_objClassId.get(new_itype), qValueFunctions.size()-1);
+		for(int i : itype_to_objClassId.keySet()){
+//			System.out.println(itype_to_objClassId.get(i));
+//			System.out.println(prior_itype_id_mapping.get(i));
+			mapping.set(itype_to_objClassId.get(i), prior_itype_id_mapping.get(i));
 		}
+		
 //		System.out.println("prior itype to id");
 //		for(int i : prior_itype_id_mapping.keySet())
 //			System.out.println(i+" --> "+prior_itype_id_mapping.get(i));

@@ -20,15 +20,20 @@ public class OFQAgent extends Agent {
 	
 	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, LearnedModel priorLearnedModel) {
 //		System.out.println("in ofq run");
+//		System.out.println("PRIOR LEARNED MODEL "+(priorLearnedModel==null?null:priorLearnedModel.getCondition()));
 		updateQValues = true;
 		qValueFunctions = new ArrayList<ValueFunction>();
+//		for(int i=0; i<qValueFunctions.size(); i++)
+//			System.out.println(i+" "+qValueFunctions.get(i).getNumNonZero());
 		for(int i=0; i<numEpisodes; i++)
         	runOneEpisode(conditionNum, i, game, level1, controller, seed);		
-		return new LearnedModel(qValueFunctions, itype_to_objClassId);
+		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum]);
 	}
 	
 	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, String controller, int seed){
 		System.out.println("Episode "+episodeNum);
+//		for(int i=0; i<qValueFunctions.size(); i++)
+//			System.out.println(i+" "+qValueFunctions.get(i).getNumNonZero());
         double[] result = ArcadeMachine.runOneGame(game, level1, false, controller, null, seed, 0);
         if(episodeNum % Main.interval == 0){
 //        	System.out.println("episodeNum "+episodeNum+" interval "+Main.interval);
@@ -113,6 +118,9 @@ public class OFQAgent extends Agent {
     }
     
     public ValueFunction getValueFunction(Object obj){
+//    	printITypeMapping(itype_to_objClassId);
+//		System.out.println("get value function for obj class "+obj.getObjClassId()+" itype "+obj.getItype());
+//		System.out.println(qValueFunctions.size());
 		return qValueFunctions.get(obj.getObjClassId());
 	}
     

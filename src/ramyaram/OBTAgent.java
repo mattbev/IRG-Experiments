@@ -1,7 +1,6 @@
 package ramyaram;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import core.game.Observation;
@@ -12,11 +11,9 @@ public class OBTAgent extends OFQAgent {
 	private static ArrayList<Integer> currMapping;
 	private static ArrayList<double[]> mappingQ; //Q-values over mappings (it specifies for each objClass in the new task, which objClass in the source task it aligns to (or a new class if nothing aligns))
 	private static ArrayList<int[]> numOfMappings;
-	private static HashMap<Integer, Integer> prior_itype_id_mapping;
-	private String game = "";
+	private static LearnedModel priorLearnedModel;
 
 	private static int numEpisodesMapping = 0;
-	private static int numEpisodesQValues = 1;//Main.numEpisodes-numEpisodesMapping;
 	private static double mapping_alpha = 0.1; //the learning rate for the mapping phase
 	private static double mapping_epsilon = 0.1; //the amount an agent explores (as opposed to exploit) mappings of different object classes
 	private static double mapping_epsilon_end = 0.001; //the ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
@@ -27,13 +24,13 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, LearnedModel priorLearnedModel) {
-		if(numEpisodesMapping > Main.numEpisodes || (numEpisodesMapping+numEpisodesQValues) > Main.numEpisodes){
+		if(numEpisodesMapping > Main.numEpisodes){
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
 		}
 //		System.out.println("PRIOR LEARNED MODEL "+(priorLearnedModel==null?null:priorLearnedModel.getCondition()));
 		this.game = game.substring(game.lastIndexOf('/')+1, game.indexOf('.'));
-		this.prior_itype_id_mapping = priorLearnedModel.getLearnedIdMapping();
+		OBTAgent.priorLearnedModel = priorLearnedModel;
 //		System.out.println(prior_itype_id_mapping);
 		ArrayList<ValueFunction> priorValueFunctions = priorLearnedModel.getLearnedValueFunctions();
 		if(priorValueFunctions != null) { //if a previously learned source task exists
@@ -68,8 +65,8 @@ public class OBTAgent extends OFQAgent {
 			currMapping = getGreedyMapping(mappingQ);
 //			System.out.println("CURR MAPPING "+currMapping.size());
 			//keep mappings constant and update previously learned value functions
-			qValuesPhase(conditionNum, k, numEpisodesQValues, game, level1, controller, seed);
-			k+=numEpisodesQValues;
+			qValuesPhase(conditionNum, k, 1, game, level1, controller, seed);
+			k+=1;
 		}
 		int[] bestMapping = new int[mappingQ.size()];
 		for(int i=0; i<bestMapping.length; i++){
@@ -91,7 +88,7 @@ public class OBTAgent extends OFQAgent {
 		for(int i=0; i<bestMapping.length; i++)
 			System.out.print(bestMapping[i]+" ");
 		System.out.println();
-		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum]);
+		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum], this.game);
 	}
 	
 	public void addValueFunction(Observation obs){
@@ -174,8 +171,10 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	public int getFixedMappingIType(int newIType){
-		if(game.equalsIgnoreCase("missilecommand")){
-//			System.out.println("MissileCommand Fixed Mapping");
+		//identity mapping for transfer to the same game -- used for sanity check
+		if(game.equalsIgnoreCase(priorLearnedModel.getGame())){
+			return newIType;
+		} else if(game.equalsIgnoreCase("missilecommand") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
 			switch(newIType){
 				case 1: return 1; 
 				case 7: return 6; 
@@ -183,8 +182,7 @@ public class OBTAgent extends OFQAgent {
 				case 4: return 5; 
 				default: return -1;
 			}
-		} else if(game.equalsIgnoreCase("aliens")){
-//			System.out.println("Aliens Fixed Mapping");
+		} else if(game.equalsIgnoreCase("aliens") && priorLearnedModel.getGame().equalsIgnoreCase("missilecommand")){
 			switch(newIType){
 				case 3: return 0; 
 				case 5: return 4; 
@@ -219,37 +217,19 @@ public class OBTAgent extends OFQAgent {
 	
 	public ArrayList<Integer> getGreedyMapping(ArrayList<double[]> similarityMatrix){
 		ArrayList<Integer> mapping = new ArrayList<Integer>();
-//		System.out.println("currMapping size "+currMapping.size());
-//		for(int i=0; i<currMapping.size(); i++){ 
-//			mapping.add(i);
-//		}
 		//fixed mapping for debugging
-//		for(int i=0; i<currMapping.size(); i++)
-//			mapping.add(-1);
-//		for(int new_itype : itype_to_objClassId.keySet()){
-//			int oldIType = getFixedMappingIType(new_itype);
-//			if(oldIType >= 0)
-//				mapping.set(itype_to_objClassId.get(new_itype), prior_itype_id_mapping.get(oldIType));
-//			else
-//				mapping.set(itype_to_objClassId.get(new_itype), qValueFunctions.size()-1);
-//		}
-//		System.out.println(itype_to_objClassId.size()+" "+prior_itype_id_mapping.size());
-//		for(int i : itype_to_objClassId.keySet())
-//			System.out.println(i+" "+itype_to_objClassId.get(i));
-//		for(int i : prior_itype_id_mapping.keySet())
-//			System.out.println(i+" "+prior_itype_id_mapping.get(i));
-		
 		for(int i=0; i<currMapping.size(); i++)
 			mapping.add(-1);
-		for(int i : itype_to_objClassId.keySet()){
-//			System.out.println(itype_to_objClassId.get(i));
-//			System.out.println(prior_itype_id_mapping.get(i));
-			mapping.set(itype_to_objClassId.get(i), prior_itype_id_mapping.get(i));
+		for(int new_itype : itype_to_objClassId.keySet()){
+			int oldIType = getFixedMappingIType(new_itype);
+			if(oldIType >= 0)
+				mapping.set(itype_to_objClassId.get(new_itype), priorLearnedModel.getLearnedIdMapping().get(oldIType));
+			else
+				mapping.set(itype_to_objClassId.get(new_itype), qValueFunctions.size()-1);
 		}
-		
 //		System.out.println("prior itype to id");
-//		for(int i : prior_itype_id_mapping.keySet())
-//			System.out.println(i+" --> "+prior_itype_id_mapping.get(i));
+//		for(int i : priorLearnedModel.getLearnedIdMapping().keySet())
+//			System.out.println(i+" --> "+priorLearnedModel.getLearnedIdMapping().get(i));
 //		System.out.println("new itype to id");
 //		for(int i : itype_to_objClassId.keySet())
 //			System.out.println(i+" --> "+itype_to_objClassId.get(i));

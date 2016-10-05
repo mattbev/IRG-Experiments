@@ -9,15 +9,15 @@ public class Main {
 	public static double[][] reward;
 	public static boolean[] wins;
 	public static int numAveraging = 5;
-	public static int numEpisodes = 1000;
+	public static int numEpisodes = 250;
 	public static int interval = 1;
 	public static String fileName;
 	public static String allDataFileName;
 	public static LearnedModel[] learnedModels;
 	
 	public static void main(String[] args) {
-		if(args.length <= 1 || args.length > 2){
-			System.out.println("Please run with two arguments specifying the name of the csv file and the index of the game to be run (e.g., javac Main.java && java Main reward.csv 0)");
+		if(args.length <= 0 || args.length > 1){
+			System.out.println("Please run with one arguments specifying the name of the csv file (e.g., javac Main.java && java Main reward.csv)");
 			System.exit(0);
 		}
 		learnedModels = new LearnedModel[Condition.values().length];
@@ -41,15 +41,15 @@ public class Main {
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
                 "zelda", "zenpuzzle" }; 
         
-        int gameIdx = Integer.parseInt(args[1]);
+        int gameIdx = -1;
         int levelIdx = 0; //level names from 0 to 4 (game_lvlN.txt).
         int seed = new Random().nextInt();
         int numConditions = Condition.values().length;
         
         fileName = args[0];
 		int periodIndex = fileName.indexOf('.');
-		fileName = fileName.substring(0,periodIndex)+"_"+games[gameIdx]+fileName.substring(periodIndex);
-		periodIndex = fileName.indexOf('.');
+//		fileName = fileName.substring(0,periodIndex)+"_"+games[gameIdx]+fileName.substring(periodIndex);
+//		periodIndex = fileName.indexOf('.');
 		allDataFileName = fileName.substring(0,periodIndex)+"_all"+fileName.substring(periodIndex);
 		
 		int numDataPoints = numEpisodes/interval;
@@ -78,7 +78,7 @@ public class Main {
 //        		if(c==0)
 //        			gameIdx = 0;
 //        		else
-//        			gameIdx = 49;
+        			gameIdx = 49;
                 String game = gamesPath + games[gameIdx] + ".txt";
                 String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
                 System.out.println("PLAYING "+games[gameIdx]);

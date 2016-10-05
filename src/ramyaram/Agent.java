@@ -25,6 +25,7 @@ public abstract class Agent extends AbstractPlayer {
 	protected Vector2d lastAvatarPos;
 	protected double lastScore = 0;
 	protected boolean updateQValues = true;
+	protected String game = "";
 	
 	protected Map<Observation, Object> objectMap = new HashMap<Observation, Object>();
 	protected Map<Vector2d, Object> gridObjectMap = new HashMap<Vector2d, Object>();

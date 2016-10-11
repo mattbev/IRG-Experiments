@@ -14,23 +14,23 @@ import tools.Vector2d;
 
 public abstract class Agent extends AbstractPlayer {
 	public static Agent INSTANCE;
-    protected Random rand;
+    protected static Random rand;
     protected static double epsilon = 0.1;
     protected static double alpha = 0.1;
     protected static double gamma = 0.9;
     protected static int numRows;
     protected static int numCols;
     protected static int blockSize;
-	protected StateObservation lastStateObs;
-	protected Vector2d lastAvatarPos;
-	protected double lastScore = 0;
-	protected boolean updateQValues = true;
-	protected String game = "";
+	protected static StateObservation lastStateObs;
+	protected static Vector2d lastAvatarPos;
+	protected static double lastScore = 0;
+	protected static boolean updateQValues = true;
+	protected static String game = "";
 	
-	protected Map<Observation, Object> objectMap = new HashMap<Observation, Object>();
-	protected Map<Vector2d, Object> gridObjectMap = new HashMap<Vector2d, Object>();
-	protected Map<Observation, Object> objectNextStateMap = new HashMap<Observation, Object>();
-	protected Map<Vector2d, Object> gridObjectNextStateMap = new HashMap<Vector2d, Object>();
+	protected static Map<Observation, Object> objectMap = new HashMap<Observation, Object>();
+	protected static Map<Vector2d, Object> gridObjectMap = new HashMap<Vector2d, Object>();
+	protected static Map<Observation, Object> objectNextStateMap = new HashMap<Observation, Object>();
+	protected static Map<Vector2d, Object> gridObjectNextStateMap = new HashMap<Vector2d, Object>();
 	protected static HashMap<Integer, Integer> itype_to_objClassId = new HashMap<Integer, Integer>();
 
     //Constructor. It must return in 1 second maximum.
@@ -48,7 +48,7 @@ public abstract class Agent extends AbstractPlayer {
     	blockSize = so.getBlockSize();
     }
     
-    public abstract LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, LearnedModel priorLearnedModel);
+    public abstract LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, LearnedModel priorLearnedModel);
     
     public abstract Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions);
     
@@ -62,9 +62,16 @@ public abstract class Agent extends AbstractPlayer {
 				ArrayList<Observation> temp = alv[r];
 				ArrayList<Observation> al = new ArrayList<Observation>();
 				for (Observation obs : temp) {
-					//TODO: handle the background/extra observations differently without hardcoding
-					if(obs.itype != 2 && obs.itype != 11)
+					//TODO: remove hardcoding for specific games (currently this is used to focus only on relevant objects)
+					if(game.equals("ramyaFreeway")) {
+						if(obs.itype == 7 || obs.itype == 10 || obs.category == Types.TYPE_AVATAR)
+							al.add(obs);
+					} else if(game.equals("ramyaNormandy")) {
+						if(obs.itype == 7 || obs.itype == 3 || obs.category == Types.TYPE_AVATAR)
+							al.add(obs);	
+					} else {
 						al.add(obs);
+					}
 				}
 				for (Observation obs : al){
 					processObs(obs, map);
@@ -105,6 +112,7 @@ public abstract class Agent extends AbstractPlayer {
         processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore(); 
         
+//		  System.out.println("qValueFunctions size "+((OFQAgent)this).qValueFunctions.size());
 //        printStateObs(lastStateObs, gridObjectMap);
 //        System.out.println(action);
 //        printStateObs(stateObs, gridObjectNextStateMap);

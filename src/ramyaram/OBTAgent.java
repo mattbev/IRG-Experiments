@@ -23,13 +23,13 @@ public class OBTAgent extends OFQAgent {
 		super(so, elapsedTimer);
 	}
 	
-	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, LearnedModel priorLearnedModel) {
+	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, LearnedModel priorLearnedModel) {
 		if(numEpisodesMapping > Main.numEpisodes){
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
 		}
 //		System.out.println("PRIOR LEARNED MODEL "+(priorLearnedModel==null?null:priorLearnedModel.getCondition()));
-		this.game = game.substring(game.lastIndexOf('/')+1, game.indexOf('.'));
+		OBTAgent.game = game.substring(game.lastIndexOf('/')+1, game.indexOf('.'));
 		OBTAgent.priorLearnedModel = priorLearnedModel;
 //		System.out.println(prior_itype_id_mapping);
 		ArrayList<ValueFunction> priorValueFunctions = priorLearnedModel.getLearnedValueFunctions();
@@ -55,7 +55,7 @@ public class OBTAgent extends OFQAgent {
 		
 		int k=0;
 		//keep value functions constant and learn mappings between objects
-		mappingPhase(conditionNum, k, numEpisodesMapping, game, level1, controller, seed);
+		mappingPhase(conditionNum, k, numEpisodesMapping, game, level1, visuals, controller, seed);
 		k+=numEpisodesMapping;
 		for(int i=0; i<currMapping.size(); i++)
 			System.out.print(currMapping.get(i)+" ");
@@ -65,7 +65,7 @@ public class OBTAgent extends OFQAgent {
 			currMapping = getGreedyMapping(mappingQ);
 //			System.out.println("CURR MAPPING "+currMapping.size());
 			//keep mappings constant and update previously learned value functions
-			qValuesPhase(conditionNum, k, 1, game, level1, controller, seed);
+			qValuesPhase(conditionNum, k, 1, game, level1, visuals, controller, seed);
 			k+=1;
 		}
 		int[] bestMapping = new int[mappingQ.size()];
@@ -88,7 +88,7 @@ public class OBTAgent extends OFQAgent {
 		for(int i=0; i<bestMapping.length; i++)
 			System.out.print(bestMapping[i]+" ");
 		System.out.println();
-		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum], this.game);
+		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum], OBTAgent.game);
 	}
 	
 	public void addValueFunction(Observation obs){
@@ -99,15 +99,19 @@ public class OBTAgent extends OFQAgent {
     	super.processObs(obs, map);
 //    	System.out.println(itype_to_objClassId+" "+currMapping);
 		if(itype_to_objClassId.get(obs.itype) >= currMapping.size()){
-			currMapping.add(rand.nextInt(qValueFunctions.size()));
+			int oldIType = getFixedMappingIType(obs.itype);
+			if(oldIType >= 0)
+				currMapping.add(priorLearnedModel.getLearnedIdMapping().get(oldIType));//rand.nextInt(qValueFunctions.size()));
+			else
+				currMapping.add(qValueFunctions.size()-1);
 			mappingQ.add(new double[qValueFunctions.size()]);
 			numOfMappings.add(new int[qValueFunctions.size()]);
 //			System.out.println(currMapping.size()+" "+mappingQ.size()+" "+numOfMappings.size());
 		}
     }
 	
-	public void runEpisode(int conditionNum, int episodeNum, String game, String level1, String controller, int seed){
-		super.runOneEpisode(conditionNum, episodeNum, game, level1, controller, seed);
+	public void runEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller, int seed){
+		super.runOneEpisode(conditionNum, episodeNum, game, level1, visuals, controller, seed);
         
         mapping_epsilon -= mapping_epsilon_delta;
 		if(mapping_epsilon < mapping_epsilon_end)
@@ -120,7 +124,7 @@ public class OBTAgent extends OFQAgent {
 	 * Actions are chosen based on the previously learned value functions (based on mapping)
 	 * and the value function used for action selection is updated
 	 */
-	public void qValuesPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, String controller, int seed){
+	public void qValuesPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed){
 		updateQValues = true;
 //		System.out.println(prior_itype_id_mapping);
 
@@ -128,20 +132,20 @@ public class OBTAgent extends OFQAgent {
 //			System.out.print(currMapping.get(i)+" ");
 //		System.out.println();
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++)
-			runOneEpisode(conditionNum, k, game, level1, controller, seed);
+			runOneEpisode(conditionNum, k, game, level1, visuals, controller, seed);
 	}
 	
 	/**
 	 * Update mappings between object classes of the source and target task
 	 * QValues of the previously learned object classes in the source task are kept constant
 	 */
-	public void mappingPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, String controller, int seed){
+	public void mappingPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed){
 		updateQValues = false;
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++){
 //			System.out.println(prior_itype_id_mapping);
 			ArrayList<Integer> mapping = getMapping(mappingQ);
 //			System.out.println("mapping size "+mappingQ.size()+" "+mapping.size());
-			double episodeReward = runOneEpisode(conditionNum, k, game, level1, controller, seed);
+			double episodeReward = runOneEpisode(conditionNum, k, game, level1, visuals, controller, seed);
 //			System.out.println(prior_itype_id_mapping);
 
 //			System.out.println("mapping size "+mappingQ.size()+" "+mapping.size());
@@ -171,15 +175,30 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	public int getFixedMappingIType(int newIType){
+//		System.out.println(game+" "+priorLearnedModel.getGame());
+//		System.exit(0);
 		//identity mapping for transfer to the same game -- used for sanity check
 		if(game.equalsIgnoreCase(priorLearnedModel.getGame())){
 			return newIType;
+		} else if(game.equalsIgnoreCase("ramyaNormandy") && priorLearnedModel.getGame().equalsIgnoreCase("ramyaFreeway")){
+			if(priorLearnedModel.getLearnedIdMapping().containsKey(newIType))
+				return newIType;
+			else
+				return -1;
 		} else if(game.equalsIgnoreCase("missilecommand") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
 			switch(newIType){
 				case 1: return 1; 
-				case 7: return 6; 
-				case 0: return 3; 
+//				case 7: return 6; 
+//				case 0: return 3; 
 				case 4: return 5; 
+				default: return -1;
+			}
+		} else if(game.equalsIgnoreCase("boulderdash") && priorLearnedModel.getGame().equalsIgnoreCase("digdug")){
+			switch(newIType){
+				case 1: return 1;
+				case 6: return 5;
+				case 10: return 11;
+//				case 4: return 0;
 				default: return -1;
 			}
 		} else if(game.equalsIgnoreCase("aliens") && priorLearnedModel.getGame().equalsIgnoreCase("missilecommand")){

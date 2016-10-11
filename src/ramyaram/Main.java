@@ -8,8 +8,8 @@ import java.util.Random;
 public class Main {
 	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 5;
-	public static int numEpisodes = 250;
+	public static int numAveraging = 20;
+	public static int numEpisodes = 1000;
 	public static int interval = 1;
 	public static String fileName;
 	public static String allDataFileName;
@@ -39,8 +39,9 @@ public class Main {
                 "sheriff", "shipwreck", "sokoban", "solarfox" ,"superman",                    //65-69
                 "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
-                "zelda", "zenpuzzle" }; 
+                "zelda", "zenpuzzle", "ramyaFreeway", "ramyaNormandy"};  					  //80-83
         
+        boolean runGame = true;
         int gameIdx = -1;
         int levelIdx = 0; //level names from 0 to 4 (game_lvlN.txt).
         int seed = new Random().nextInt();
@@ -56,70 +57,72 @@ public class Main {
 		reward = new double[Condition.values().length][numDataPoints];
 		wins = new boolean[numEpisodes/interval];
 		
-		File file = new File(fileName);
-		if(file.exists())
-			file.delete();
-		file = new File(allDataFileName);
-		if(file.exists())
-			file.delete();
-	     
-        String conditionsStr = "";
-        for(Condition c : Condition.values()){
-        	conditionsStr+=c.name();
-        	for(int i=0; i<numDataPoints; i++)
-        		conditionsStr+=", ";
-        	conditionsStr+=",";
-        }
-        conditionsStr+="\n";
-        writeToFile(allDataFileName, conditionsStr);
-                
-        for(int num=0; num<numAveraging; num++){
-        	for(int c=0; c<numConditions; c++){
-//        		if(c==0)
-//        			gameIdx = 0;
-//        		else
-        			gameIdx = 49;
-                String game = gamesPath + games[gameIdx] + ".txt";
-                String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
-                System.out.println("PLAYING "+games[gameIdx]);
-        		String controller = getConditionController(Condition.values()[c]);
-        		initializeController(Condition.values()[c]);
-        		if(Agent.INSTANCE != null){
-        			System.out.println("Running condition "+Condition.values()[c]);
-        			Agent.INSTANCE.clearEachRun();
-		        	System.out.println("Averaging "+num);
-		        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes, game, level1, controller, seed, learnedModels[0]);
-        		}
-		        writeToFile(allDataFileName, ",");
-        	}
-        	writeToFile(allDataFileName, "\n");
-        } 
-        
-	    try{
-	    	BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
-			for(int i=0; i<reward.length; i++){ //all conditions
-				writer.write(Condition.values()[i].name()+", ");
-				for(int j=0; j<reward[i].length; j++){
-					//divides the total reward by the number of simulation runs and gets the average reward the agent received over time
-					writer.write(""+(reward[i][j]/numAveraging));
-					if(j<reward[i].length-1)
-						writer.write(", ");
+		if(runGame){			
+			File file = new File(fileName);
+			if(file.exists())
+				file.delete();
+			file = new File(allDataFileName);
+			if(file.exists())
+				file.delete();
+		     
+	        String conditionsStr = "";
+	        for(Condition c : Condition.values()){
+	        	conditionsStr+=c.name();
+	        	for(int i=0; i<numDataPoints; i++)
+	        		conditionsStr+=", ";
+	        	conditionsStr+=",";
+	        }
+	        conditionsStr+="\n";
+	        writeToFile(allDataFileName, conditionsStr);
+	                
+	        for(int num=0; num<numAveraging; num++){
+	        	for(int c=0; c<numConditions; c++){
+	        		if(c==0)
+	        			gameIdx = 82;
+	        		else
+	        			gameIdx = 83;
+	                String game = gamesPath + games[gameIdx] + ".txt";
+	                String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
+	                System.out.println("PLAYING "+games[gameIdx]);
+	        		String controller = getConditionController(Condition.values()[c]);
+	        		initializeController(Condition.values()[c]);
+	        		if(Agent.INSTANCE != null){
+	        			System.out.println("Running condition "+Condition.values()[c]);
+	        			Agent.INSTANCE.clearEachRun();
+			        	System.out.println("Averaging "+num);
+			        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes, game, level1, false, controller, seed, learnedModels[0]);
+	        		}
+			        writeToFile(allDataFileName, ",");
+	        	}
+	        	writeToFile(allDataFileName, "\n");
+	        } 
+	        
+		    try{
+		    	BufferedWriter writer = new BufferedWriter(new FileWriter(new File(fileName)));
+				for(int i=0; i<reward.length; i++){ //all conditions
+					writer.write(Condition.values()[i].name()+", ");
+					for(int j=0; j<reward[i].length; j++){
+						//divides the total reward by the number of simulation runs and gets the average reward the agent received over time
+						writer.write(""+(reward[i][j]/numAveraging));
+						if(j<reward[i].length-1)
+							writer.write(", ");
+					}
+					writer.write("\n");
 				}
-				writer.write("\n");
-			}
-			writer.close();
-        } catch(Exception e){
-        	e.printStackTrace();
-        }
-        System.exit(0);
-        
-//        String game = gamesPath + games[gameIdx] + ".txt";
-//        String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
-//        String myController = "ramyaram.OFQAgent";
-//        while(true){
-//        	ArcadeMachine.runOneGame(game, level1, true, myController, null, seed, 0);
-//        }
-//        ArcadeMachine.playOneGame(game, level1, null, seed);
+				writer.close();
+	        } catch(Exception e){
+	        	e.printStackTrace();
+	        }
+	        System.exit(0);
+		} else {
+			System.out.println("Playing "+games[gameIdx]);
+	        String game = gamesPath + games[gameIdx] + ".txt";
+	        String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
+	        String myController = "ramyaram.OFQAgent";
+	        initializeController(Condition.OF_Q_SOURCE);
+	        Agent.INSTANCE.run(0, 1, game, level1, true, myController, seed, null);
+//	        ArcadeMachine.playOneGame(game, level1, null, seed);
+		}
 	}
 	
 	public static String getConditionController(Condition condition){

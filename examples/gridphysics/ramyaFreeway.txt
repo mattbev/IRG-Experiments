@@ -1,0 +1,38 @@
+BasicGame square_size=30
+    SpriteSet
+        floor > Immovable img=newset/highway hidden=True
+        goal  > Passive color=GREEN img=newset/exit2
+        truck  >
+            rightTruck  > Missile   orientation=RIGHT 
+                fastRtruck  > speed=0.5  color=ORANGE img=newset/car1R
+                slowRtruck  > speed=0.3  color=RED img=newset/car2R
+            leftTruck  > Missile   orientation=LEFT
+                fastLtruck  > speed=0.5  color=ORANGE img=newset/car1
+                slowLtruck  > speed=0.3  color=RED img=newset/car2
+
+        avatar >  healthPoints=1
+            moving > MovingAvatar img=newset/man3 frameRate=8
+            dead > MissileAvatar orientation=DOWN img=oryx/ghost1 speed=1.0
+
+        wall > Immovable img=oryx/wall1
+
+    LevelMapping
+        . > floor
+        r > floor slowRtruck
+        l > floor slowLtruck
+        g > floor goal
+        A > floor moving
+
+    InteractionSet
+        goal moving  > killSprite scoreChange=10
+
+        moving truck > subtractHealthPoints scoreChange=-10
+        moving truck > transformTo stype=dead 
+
+        dead wall > transformTo stype=moving
+        moving wall  > stepBack
+        truck  EOS   > wrapAround
+    
+    TerminationSet
+        SpriteCounter stype=goal limit=11 win=True
+        SpriteCounter stype=moving limit=0 win=False   

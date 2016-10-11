@@ -18,8 +18,8 @@ public class OFQAgent extends Agent {
 		super(so, elapsedTimer);
 	}
 	
-	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, String controller, int seed, LearnedModel priorLearnedModel) {
-		this.game = game.substring(game.lastIndexOf('/')+1, game.indexOf('.'));
+	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, LearnedModel priorLearnedModel) {
+		OFQAgent.game = game.substring(game.lastIndexOf('/')+1, game.indexOf('.'));
 //		System.out.println("in ofq run");
 //		System.out.println("PRIOR LEARNED MODEL "+(priorLearnedModel==null?null:priorLearnedModel.getCondition()));
 		updateQValues = true;
@@ -27,11 +27,11 @@ public class OFQAgent extends Agent {
 //		for(int i=0; i<qValueFunctions.size(); i++)
 //			System.out.println(i+" "+qValueFunctions.get(i).getNumNonZero());
 		for(int i=0; i<numEpisodes; i++)
-        	runOneEpisode(conditionNum, i, game, level1, controller, seed);		
-		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum], this.game);
+        	runOneEpisode(conditionNum, i, game, level1, visuals, controller, seed);		
+		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum], OFQAgent.game);
 	}
 	
-	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, String controller, int seed){
+	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller, int seed){
 		System.out.println("Episode "+episodeNum);
 //		for(int i=0; i<qValueFunctions.size(); i++)
 //			System.out.println(i+" "+qValueFunctions.get(i).getNumNonZero());
@@ -64,6 +64,8 @@ public class OFQAgent extends Agent {
     	double maxValue = Integer.MIN_VALUE;
 		List<Types.ACTIONS> possibleActions = new ArrayList<Types.ACTIONS>();
 		for(Observation obs : objectMap.keySet()){
+//			if(obs.category == Types.TYPE_AVATAR)
+//				continue;
 			Object obj = objectMap.get(obs);
 			for(Types.ACTIONS action : actions){//safeActions){
 				double value = getValueFunction(obj).getOptimalQValue(stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action);
@@ -114,8 +116,10 @@ public class OFQAgent extends Agent {
     }
     
     public void addValueFunction(Observation obs){
-		if(itype_to_objClassId.get(obs.itype) >= qValueFunctions.size())
-			qValueFunctions.add(new ValueFunction(null));
+		if(itype_to_objClassId.get(obs.itype) >= qValueFunctions.size()){
+//			if(obs.category != Types.TYPE_AVATAR)
+				qValueFunctions.add(new ValueFunction(null));
+		}
     }
     
     public ValueFunction getValueFunction(Object obj){

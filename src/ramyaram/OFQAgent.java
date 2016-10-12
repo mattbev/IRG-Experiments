@@ -19,7 +19,7 @@ public class OFQAgent extends Agent {
 	}
 	
 	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, LearnedModel priorLearnedModel) {
-		OFQAgent.game = game.substring(game.lastIndexOf('/')+1, game.indexOf('.'));
+		OFQAgent.game = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 //		System.out.println("in ofq run");
 //		System.out.println("PRIOR LEARNED MODEL "+(priorLearnedModel==null?null:priorLearnedModel.getCondition()));
 		updateQValues = true;

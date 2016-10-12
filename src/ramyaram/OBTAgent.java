@@ -30,7 +30,7 @@ public class OBTAgent extends OFQAgent {
 			System.exit(0);
 		}
 //		System.out.println("PRIOR LEARNED MODEL "+(priorLearnedModel==null?null:priorLearnedModel.getCondition()));
-		OBTAgent.game = game.substring(game.lastIndexOf('/')+1, game.indexOf('.'));
+		OBTAgent.game = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		OBTAgent.priorLearnedModel = priorLearnedModel;
 //		System.out.println(prior_itype_id_mapping);
 		ArrayList<ValueFunction> priorValueFunctions = priorLearnedModel.getLearnedValueFunctions();
@@ -83,8 +83,10 @@ public class OBTAgent extends OFQAgent {
 			numOfMappings.get(i)[bestMapping.get(i)]++;
 		}
 		System.out.println("-------");
-
+		System.out.println("Best Mapping based on mappingQ:");
 		printItypeMapping(bestMapping);
+		System.out.println("Current Mapping:");
+		printItypeMapping(currMapping);
 		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum], OBTAgent.game);
 	}
 	

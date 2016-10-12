@@ -152,13 +152,4 @@ public abstract class Agent extends AbstractPlayer {
 			System.out.println();
 		}
     }
-    
-    public void printITypeMapping(HashMap<Integer,Integer> itype_to_id_mapping, int value){
-    	for(int key : itype_to_id_mapping.keySet()){
-    		if(value == itype_to_id_mapping.get(key))
-    			System.out.println(key+" --> "+itype_to_id_mapping.get(key)+"***");
-    		else
-    			System.out.println(key+" --> "+itype_to_id_mapping.get(key));
-    	}
-    }
 }

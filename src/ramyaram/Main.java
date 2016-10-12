@@ -8,8 +8,10 @@ import java.util.Random;
 public class Main {
 	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 20;
+	public static int numAveraging = 50;
 	public static int numEpisodes = 1000;
+    public static boolean runGame = true;
+    public static boolean fixedMapping = true;
 	public static int interval = 1;
 	public static String fileName;
 	public static String allDataFileName;
@@ -41,7 +43,6 @@ public class Main {
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
                 "zelda", "zenpuzzle", "ramyaFreeway", "ramyaNormandy"};  					  //80-83
         
-        boolean runGame = true;
         int gameIdx = -1;
         int levelIdx = 0; //level names from 0 to 4 (game_lvlN.txt).
         int seed = new Random().nextInt();

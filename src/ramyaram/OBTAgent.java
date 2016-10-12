@@ -2,6 +2,7 @@ package ramyaram;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import core.game.Observation;
 import core.game.StateObservation;
@@ -13,7 +14,7 @@ public class OBTAgent extends OFQAgent {
 	private static ArrayList<int[]> numOfMappings;
 	private static LearnedModel priorLearnedModel;
 
-	private static int numEpisodesMapping = 0;
+	private static int numEpisodesMapping = 10;
 	private static double mapping_alpha = 0.1; //the learning rate for the mapping phase
 	private static double mapping_epsilon = 0.1; //the amount an agent explores (as opposed to exploit) mappings of different object classes
 	private static double mapping_epsilon_end = 0.001; //the ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
@@ -57,19 +58,17 @@ public class OBTAgent extends OFQAgent {
 		//keep value functions constant and learn mappings between objects
 		mappingPhase(conditionNum, k, numEpisodesMapping, game, level1, visuals, controller, seed);
 		k+=numEpisodesMapping;
-		for(int i=0; i<currMapping.size(); i++)
-			System.out.print(currMapping.get(i)+" ");
-		System.out.println();
-//			currMapping[i] = i;
+		printItypeMapping(currMapping);
 		while(k < numEpisodes){
 			currMapping = getGreedyMapping(mappingQ);
+//			printItypeMapping(currMapping);
 //			System.out.println("CURR MAPPING "+currMapping.size());
 			//keep mappings constant and update previously learned value functions
 			qValuesPhase(conditionNum, k, 1, game, level1, visuals, controller, seed);
 			k+=1;
 		}
-		int[] bestMapping = new int[mappingQ.size()];
-		for(int i=0; i<bestMapping.length; i++){
+		ArrayList<Integer> bestMapping = new ArrayList<Integer>();
+		for(int i=0; i<mappingQ.size(); i++){
 			double maxValue = Integer.MIN_VALUE;
 			int maxIndex = -1;
 			for(int j=0; j<priorValueFunctions.size(); j++){
@@ -80,15 +79,28 @@ public class OBTAgent extends OFQAgent {
 				}
 			}
 			System.out.println();
-			bestMapping[i] = maxIndex;
-			numOfMappings.get(i)[bestMapping[i]]++;
+			bestMapping.add(maxIndex);
+			numOfMappings.get(i)[bestMapping.get(i)]++;
 		}
 		System.out.println("-------");
 
-		for(int i=0; i<bestMapping.length; i++)
-			System.out.print(bestMapping[i]+" ");
-		System.out.println();
+		printItypeMapping(bestMapping);
 		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum], OBTAgent.game);
+	}
+	
+	public void printItypeMapping(ArrayList<Integer> mapping){
+		System.out.println("MAPPING");
+		for(int new_itype : itype_to_objClassId.keySet()){
+			int newObjClassId = itype_to_objClassId.get(new_itype);
+			int oldObjClassId = mapping.get(newObjClassId);
+			int oldIType = -1;
+			for(Entry<Integer, Integer> entry : priorLearnedModel.getLearnedIdMapping().entrySet()){
+				if(entry.getValue() == oldObjClassId)
+					oldIType = entry.getKey();
+			}
+//			System.out.println(new_itype+" "+newObjClassId+" "+oldObjClassId+" "+oldIType);
+			System.out.println(new_itype+" --> "+oldIType);
+		}
 	}
 	
 	public void addValueFunction(Observation obs){
@@ -99,11 +111,15 @@ public class OBTAgent extends OFQAgent {
     	super.processObs(obs, map);
 //    	System.out.println(itype_to_objClassId+" "+currMapping);
 		if(itype_to_objClassId.get(obs.itype) >= currMapping.size()){
-			int oldIType = getFixedMappingIType(obs.itype);
-			if(oldIType >= 0)
-				currMapping.add(priorLearnedModel.getLearnedIdMapping().get(oldIType));//rand.nextInt(qValueFunctions.size()));
-			else
-				currMapping.add(qValueFunctions.size()-1);
+			if(Main.fixedMapping){
+				int oldIType = getFixedMappingIType(obs.itype);
+				if(oldIType >= 0)
+					currMapping.add(priorLearnedModel.getLearnedIdMapping().get(oldIType));//rand.nextInt(qValueFunctions.size()));
+				else
+					currMapping.add(qValueFunctions.size()-1);
+			} else {
+				currMapping.add(rand.nextInt(qValueFunctions.size()));
+			}
 			mappingQ.add(new double[qValueFunctions.size()]);
 			numOfMappings.add(new int[qValueFunctions.size()]);
 //			System.out.println(currMapping.size()+" "+mappingQ.size()+" "+numOfMappings.size());
@@ -220,31 +236,54 @@ public class OBTAgent extends OFQAgent {
 	 * With probability 1-epsilon, the previous object class (or new class) that has the highest Q-value is chosen as the objClass that aligns best with each new object class
 	 */
 	public ArrayList<Integer> getMapping(ArrayList<double[]> similarityMatrix){
-		return getGreedyMapping(similarityMatrix);
-		//epsilon-greedy approach to choosing an mapping
-//		if(rand.nextDouble() < mapping_epsilon){
-//			// choose a random mapping
-//			ArrayList<Integer> mapping = new ArrayList<Integer>();
-//			for(int i=0; i<currMapping.size(); i++){
-//				mapping.add(rand.nextInt(getNumObjClasses()));
-//			}
-//			return mapping;
-//		} else { // otherwise, chooses the best mapping/the one with the highest Q-value
-//			return getGreedyMapping(similarityMatrix);
-//		}
+		if(Main.fixedMapping){
+			return getGreedyMapping(similarityMatrix);
+		} else {
+			//epsilon-greedy approach to choosing an mapping
+			if(rand.nextDouble() < mapping_epsilon){
+				// choose a random mapping
+				ArrayList<Integer> mapping = new ArrayList<Integer>();
+				for(int i=0; i<currMapping.size(); i++){
+					mapping.add(rand.nextInt(mappingQ.get(i).length));
+				}
+				return mapping;
+			} else { // otherwise, chooses the best mapping/the one with the highest Q-value
+				return getGreedyMapping(similarityMatrix);
+			}
+		}
 	}
 	
 	public ArrayList<Integer> getGreedyMapping(ArrayList<double[]> similarityMatrix){
 		ArrayList<Integer> mapping = new ArrayList<Integer>();
-		//fixed mapping for debugging
-		for(int i=0; i<currMapping.size(); i++)
-			mapping.add(-1);
-		for(int new_itype : itype_to_objClassId.keySet()){
-			int oldIType = getFixedMappingIType(new_itype);
-			if(oldIType >= 0)
-				mapping.set(itype_to_objClassId.get(new_itype), priorLearnedModel.getLearnedIdMapping().get(oldIType));
-			else
-				mapping.set(itype_to_objClassId.get(new_itype), qValueFunctions.size()-1);
+		if(Main.fixedMapping){
+			//fixed mapping for debugging
+			for(int i=0; i<currMapping.size(); i++)
+				mapping.add(-1);
+			for(int new_itype : itype_to_objClassId.keySet()){
+				int oldIType = getFixedMappingIType(new_itype);
+				if(oldIType >= 0)
+					mapping.set(itype_to_objClassId.get(new_itype), priorLearnedModel.getLearnedIdMapping().get(oldIType));
+				else
+					mapping.set(itype_to_objClassId.get(new_itype), qValueFunctions.size()-1);
+			}
+		} else {
+			for(int i=0; i<currMapping.size(); i++){ // for each new object class
+				ArrayList<Integer> possibleMappings = new ArrayList<Integer>();
+				double maxQ = Integer.MIN_VALUE;
+				for(int j=0; j<similarityMatrix.get(i).length; j++){
+					double q = similarityMatrix.get(i)[j];
+					if(Math.abs(q - maxQ) < 0.0001){ //basically equal
+						possibleMappings.add(j);
+						maxQ = Math.max(q, maxQ);
+					}
+					else if(q > maxQ){
+						maxQ = q;
+						possibleMappings.clear();
+						possibleMappings.add(j);
+					}
+				}
+				mapping.add(possibleMappings.get(rand.nextInt(possibleMappings.size())));
+			}
 		}
 //		System.out.println("prior itype to id");
 //		for(int i : priorLearnedModel.getLearnedIdMapping().keySet())
@@ -255,26 +294,8 @@ public class OBTAgent extends OFQAgent {
 //		System.out.println("mapping between classes, new --> old");
 //		for(int i=0; i<mapping.size(); i++)
 //			System.out.println(i+" --> "+mapping.get(i));
+//		printItypeMapping(mapping);
 		return mapping;
-//		System.out.println(mappingQ.size());
-//		for(int i=0; i<currMapping.size(); i++){ // for each new object class
-//			ArrayList<Integer> possibleMappings = new ArrayList<Integer>();
-//			double maxQ = Integer.MIN_VALUE;
-//			for(int j=0; j<similarityMatrix.get(i).length; j++){
-//				double q = similarityMatrix.get(i)[j];
-//				if(Math.abs(q - maxQ) < 0.0001){ //basically equal
-//					possibleMappings.add(j);
-//					maxQ = Math.max(q, maxQ);
-//				}
-//				else if(q > maxQ){
-//					maxQ = q;
-//					possibleMappings.clear();
-//					possibleMappings.add(j);
-//				}
-//			}
-//			mapping.add(possibleMappings.get(rand.nextInt(possibleMappings.size())));
-//		}
-//		return mapping;
 	}
 	
 	public void clearEachRun(){

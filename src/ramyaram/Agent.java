@@ -64,10 +64,13 @@ public abstract class Agent extends AbstractPlayer {
 				for (Observation obs : temp) {
 					//TODO: remove hardcoding for specific games (currently this is used to focus only on relevant objects)
 					if(game.equals("ramyaFreeway")) {
-						if(obs.itype == 7 || obs.itype == 10 || obs.category == Types.TYPE_AVATAR)
+						if(obs.itype == 7 || obs.itype == 10)
 							al.add(obs);
 					} else if(game.equals("ramyaNormandy")) {
-						if(obs.itype == 7 || obs.itype == 3 || obs.category == Types.TYPE_AVATAR)
+						if(obs.itype == 7 || obs.itype == 3)
+							al.add(obs);	
+					} else if(game.equals("ramyaNormandy2") || game.equals("ramyaNormandy3")) {
+						if(obs.itype == 6 || obs.itype == 3)
 							al.add(obs);	
 					} else {
 						al.add(obs);

@@ -14,7 +14,7 @@ public class OBTAgent extends OFQAgent {
 	private static ArrayList<int[]> numOfMappings;
 	private static LearnedModel priorLearnedModel;
 
-	private static int numEpisodesMapping = 10;
+	private static int numEpisodesMapping = 0;
 	private static double mapping_alpha = 0.1; //the learning rate for the mapping phase
 	private static double mapping_epsilon = 0.1; //the amount an agent explores (as opposed to exploit) mappings of different object classes
 	private static double mapping_epsilon_end = 0.001; //the ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
@@ -92,6 +92,9 @@ public class OBTAgent extends OFQAgent {
 	
 	public void printItypeMapping(ArrayList<Integer> mapping){
 		System.out.println("MAPPING");
+//		for(int mapping_value : mapping)
+//			System.out.print(mapping_value+" ");
+//		System.out.println();
 		for(int new_itype : itype_to_objClassId.keySet()){
 			int newObjClassId = itype_to_objClassId.get(new_itype);
 			int oldObjClassId = mapping.get(newObjClassId);
@@ -162,6 +165,7 @@ public class OBTAgent extends OFQAgent {
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++){
 //			System.out.println(prior_itype_id_mapping);
 			ArrayList<Integer> mapping = getMapping(mappingQ);
+			printItypeMapping(mapping);
 //			System.out.println("mapping size "+mappingQ.size()+" "+mapping.size());
 			double episodeReward = runOneEpisode(conditionNum, k, game, level1, visuals, controller, seed);
 //			System.out.println(prior_itype_id_mapping);
@@ -203,6 +207,11 @@ public class OBTAgent extends OFQAgent {
 				return newIType;
 			else
 				return -1;
+		} else if((game.equalsIgnoreCase("ramyaNormandy2") || game.equalsIgnoreCase("ramyaNormandy3")) && priorLearnedModel.getGame().equalsIgnoreCase("ramyaFreeway")){
+			switch(newIType){
+				case 6: return 7; 
+				default: return -1;
+			}
 		} else if(game.equalsIgnoreCase("missilecommand") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
 			switch(newIType){
 				case 1: return 1; 

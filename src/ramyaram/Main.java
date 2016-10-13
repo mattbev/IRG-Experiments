@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.Random;
 
+import core.ArcadeMachine;
+
 public class Main {
 	public static double[][] reward;
 	public static boolean[] wins;
@@ -41,10 +43,10 @@ public class Main {
                 "sheriff", "shipwreck", "sokoban", "solarfox" ,"superman",                    //65-69
                 "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
-                "zelda", "zenpuzzle", "ramyaFreeway", "ramyaNormandy"};  					  //80-83
+                "zelda", "zenpuzzle", "ramyaFreeway", "ramyaNormandy", "ramyaNormandy2", "ramyaNormandy3"};  //80-85
         
         int gameIdx = -1;
-        int levelIdx = 0; //level names from 0 to 4 (game_lvlN.txt).
+        int levelIdx = -1; //level names from 0 to 4 (game_lvlN.txt).
         int seed = new Random().nextInt();
         int numConditions = Condition.values().length;
         
@@ -78,13 +80,16 @@ public class Main {
 	                
 	        for(int num=0; num<numAveraging; num++){
 	        	for(int c=0; c<numConditions; c++){
-	        		if(c==0)
+	        		if(c==0) {
 	        			gameIdx = 82;
-	        		else
+	        			levelIdx = 0;
+	        		} else {
 	        			gameIdx = 83;
+	        			levelIdx = 0;
+	        		}
 	                String game = gamesPath + games[gameIdx] + ".txt";
 	                String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
-	                System.out.println("PLAYING "+games[gameIdx]);
+	                System.out.println("PLAYING "+games[gameIdx]+" level "+levelIdx);
 	        		String controller = getConditionController(Condition.values()[c]);
 	        		initializeController(Condition.values()[c]);
 	        		if(Agent.INSTANCE != null){
@@ -116,13 +121,15 @@ public class Main {
 	        }
 	        System.exit(0);
 		} else {
+			gameIdx = 49;
+			levelIdx = 0; 
 			System.out.println("Playing "+games[gameIdx]);
 	        String game = gamesPath + games[gameIdx] + ".txt";
 	        String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
 	        String myController = "ramyaram.OFQAgent";
 	        initializeController(Condition.OF_Q_SOURCE);
-	        Agent.INSTANCE.run(0, 1, game, level1, true, myController, seed, null);
-//	        ArcadeMachine.playOneGame(game, level1, null, seed);
+//	        Agent.INSTANCE.run(0, 1, game, level1, true, myController, seed, null);
+	        ArcadeMachine.playOneGame(game, level1, null, seed);
 		}
 	}
 	

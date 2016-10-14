@@ -7,12 +7,16 @@ import java.util.Random;
 
 import core.ArcadeMachine;
 
+/**
+ * Main method that runs simulations of agents playing various games and analyzes the data
+ */
 public class Main {
+	public enum RunType {PLAY_GAME, RUN_ONE_GAME, RUN_ALL}
 	public static double[][] reward;
 	public static boolean[] wins;
 	public static int numAveraging = 50;
 	public static int numEpisodes = 1000;
-    public static boolean runGame = true;
+    public static RunType runType = RunType.RUN_ONE_GAME;
     public static boolean fixedMapping = true;
 	public static int interval = 1;
 	public static String fileName;
@@ -52,15 +56,13 @@ public class Main {
         
         fileName = args[0];
 		int periodIndex = fileName.indexOf('.');
-//		fileName = fileName.substring(0,periodIndex)+"_"+games[gameIdx]+fileName.substring(periodIndex);
-//		periodIndex = fileName.indexOf('.');
 		allDataFileName = fileName.substring(0,periodIndex)+"_all"+fileName.substring(periodIndex);
 		
 		int numDataPoints = numEpisodes/interval;
 		reward = new double[Condition.values().length][numDataPoints];
 		wins = new boolean[numEpisodes/interval];
 		
-		if(runGame){			
+		if(runType == RunType.RUN_ALL){			
 			File file = new File(fileName);
 			if(file.exists())
 				file.delete();
@@ -121,15 +123,19 @@ public class Main {
 	        }
 	        System.exit(0);
 		} else {
-			gameIdx = 49;
+			gameIdx = 85;
 			levelIdx = 0; 
 			System.out.println("Playing "+games[gameIdx]);
 	        String game = gamesPath + games[gameIdx] + ".txt";
 	        String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
-	        String myController = "ramyaram.OFQAgent";
-	        initializeController(Condition.OF_Q_SOURCE);
-//	        Agent.INSTANCE.run(0, 1, game, level1, true, myController, seed, null);
-	        ArcadeMachine.playOneGame(game, level1, null, seed);
+	        if(runType == RunType.RUN_ONE_GAME){
+		        String myController = "ramyaram.OFQAgent";
+		        initializeController(Condition.OF_Q_SOURCE);
+		        Agent.INSTANCE.run(0, 1, game, level1, true, myController, seed, null);
+	        }
+	        if(runType == RunType.PLAY_GAME){
+	        	ArcadeMachine.playOneGame(game, level1, null, seed);
+	        }
 		}
 	}
 	

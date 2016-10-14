@@ -3,6 +3,11 @@ package ramyaram;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Model learned after a number of episodes
+ * Includes learned value functions for each object class in the given game
+ * And the mapping between itype sprite ids in the game to internal object class ids
+ */
 public class LearnedModel {
 	private ArrayList<ValueFunction> learnedValueFunctions;
 	private HashMap<Integer, Integer> learnedIdMapping;

@@ -7,7 +7,7 @@ package ramyaram;
 public class Object {
 	private int objClassId;
 	private int itype;
-	private int[] features; //each object is represented using a set of features (current features are: [x_agent-x_obj, y_agent-y_obj])
+	private int[] features; //Each object is represented using a set of features (current features are: [x_agent-x_obj, y_agent-y_obj])
 	
 	public Object(int objClassId, int itype, int[] features) {
 		this.objClassId = objClassId;

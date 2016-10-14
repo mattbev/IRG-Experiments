@@ -3,6 +3,9 @@ package ramyaram;
 import ontology.Types;
 import tools.Vector2d;
 
+/**
+ * Represents an object-based value function Q(s_a, s_o, a)
+ */
 public class ValueFunction {
 	public double[][][] optimalQValues;
 	

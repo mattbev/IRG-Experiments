@@ -1,7 +1,9 @@
 package ramyaram;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -12,6 +14,9 @@ import ontology.Types;
 import tools.ElapsedCpuTimer;
 import tools.Vector2d;
 
+/**
+ * Abstract agent controller class with common fields and methods
+ */
 public abstract class Agent extends AbstractPlayer {
 	public static Agent INSTANCE;
     protected static Random rand;
@@ -33,7 +38,9 @@ public abstract class Agent extends AbstractPlayer {
 	protected static Map<Vector2d, Object> gridObjectNextStateMap = new HashMap<Vector2d, Object>();
 	protected static HashMap<Integer, Integer> itype_to_objClassId = new HashMap<Integer, Integer>();
 
-    //Constructor. It must return in 1 second maximum.
+    /**
+     * Constructor. It must return in 1 second maximum.
+     */
     public Agent(StateObservation so, ElapsedCpuTimer elapsedTimer) {
         rand = new Random();
         INSTANCE = this;
@@ -48,12 +55,24 @@ public abstract class Agent extends AbstractPlayer {
     	blockSize = so.getBlockSize();
     }
     
+    /**
+     * Runs multiple episodes of the given game and level using the given controller
+     */
     public abstract LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, LearnedModel priorLearnedModel);
     
+    /**
+     * Action selection method
+     */
     public abstract Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions);
     
+    /**
+     * Any updates to the agent's learning model after each experience
+     */
     public abstract void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions);
 	
+    /**
+     * Take the given stateObs and add objects to a map to keep track
+     */
     public void processStateObs(StateObservation stateObs, Map<Observation, Object> map, Map<Vector2d, Object> gridMap){
     	ArrayList<Observation>[][] observationGrid = stateObs.getObservationGrid();
 		for (int c = 0; c < observationGrid.length; c++) {
@@ -62,44 +81,47 @@ public abstract class Agent extends AbstractPlayer {
 				ArrayList<Observation> temp = alv[r];
 				ArrayList<Observation> al = new ArrayList<Observation>();
 				for (Observation obs : temp) {
-					//TODO: remove hardcoding for specific games (currently this is used to focus only on relevant objects)
-					if(game.equals("ramyaFreeway")) {
-						if(obs.itype == 7 || obs.itype == 10)
-							al.add(obs);
-					} else if(game.equals("ramyaNormandy")) {
-						if(obs.itype == 7 || obs.itype == 3)
-							al.add(obs);	
-					} else if(game.equals("ramyaNormandy2") || game.equals("ramyaNormandy3")) {
-						if(obs.itype == 6 || obs.itype == 3)
-							al.add(obs);	
-					} else if(game.equals("aliens")) {
-						if(obs.itype == 3 || obs.itype == 9 || obs.itype == 6 || obs.itype == 5)
-							al.add(obs);	
-					} else if(game.equals("missilecommand")) {
-						if(obs.itype == 3 || obs.itype == 4 || obs.itype == 7)
-							al.add(obs);	
-					} else {
+					if(getImportantObjects(game).contains(obs.itype))
 						al.add(obs);
-					}
 				}
-				for (Observation obs : al){
+				for (Observation obs : al)
 					processObs(obs, map);
-				}
 			}
 		}
 		for(Object o : map.values())
 			gridMap.put(getGridCellFromPixels(new Vector2d(o.getFeature(0), o.getFeature(1))), o);
     }
     
+    /**
+     * Temporarily, hand-specify "important" objects in each game so that the agent can focus its learning on those objects
+     * (Don't include background, wall, floor, etc)
+     */
+    //TODO: Remove hard-coding
+    public List<Integer> getImportantObjects(String game){
+    	switch(game){
+	    	case "ramyaFreeway": return Arrays.asList(7,10);
+	    	case "ramyaNormandy": return Arrays.asList(7,3);
+	    	case "ramyaNormandy2": return Arrays.asList(6,3);
+	    	case "ramyaNormandy3": return Arrays.asList(6,3);
+	    	case "aliens": return Arrays.asList(3,9,6,5);
+	    	case "missilecommand": return Arrays.asList(3,4,7);
+    	}
+    	return null;
+    }
+    
+    /**
+     * Process a single observation
+     */
     public void processObs(Observation obs, Map<Observation, Object> map){
     	if(!itype_to_objClassId.containsKey(obs.itype))
 			itype_to_objClassId.put(obs.itype, itype_to_objClassId.size());
 		Object o = new Object(itype_to_objClassId.get(obs.itype), obs.itype, new int[]{(int)obs.position.x, (int)obs.position.y});
 		map.put(obs, o);
-//		for(int index : itype_to_objClassId.keySet())
-//		System.out.println("itype "+index+" --> "+itype_to_objClassId.get(index));
     }
     
+    /**
+     * Clear any fields at the end of each run (which runs N episodes)
+     */
     public void clearEachRun(){
     	lastStateObs = null;
     	lastAvatarPos = null;
@@ -107,7 +129,9 @@ public abstract class Agent extends AbstractPlayer {
     	itype_to_objClassId.clear();
     }
     
-    //Act function. Called every game step, it must return an action in 40 ms maximum.
+    /**
+     * Act function. Called every game step, it must return an action in 40 ms maximum.
+     */
     public Types.ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer){
     	processStateObs(stateObs, objectMap, gridObjectMap);
     	lastStateObs = stateObs.copy();
@@ -121,11 +145,11 @@ public abstract class Agent extends AbstractPlayer {
         processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore(); 
         
-//		System.out.println("qValueFunctions size "+((OFQAgent)this).qValueFunctions.size());
-//        printStateObs(lastStateObs, gridObjectMap);
-//        System.out.println(action);
-//        printStateObs(stateObs, gridObjectNextStateMap);
-//        System.out.println(currScore+" "+((currScore-lastScore)-0.1));
+//		System.out.println("QValueFunctions size "+OFQAgent.qValueFunctions.size());
+//		printStateObs(lastStateObs, gridObjectMap);
+//		System.out.println(action);
+//		printStateObs(stateObs, gridObjectNextStateMap);
+//		System.out.println(currScore+" "+((currScore-lastScore)-0.1));
         
         updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore)-0.1, actions);
         lastScore = currScore;
@@ -133,11 +157,16 @@ public abstract class Agent extends AbstractPlayer {
         return action;
     }
     
+    /**
+     * Calculates the updated qValue given the given quantities
+     */
     public double getOneQValueUpdate(double q, double reward, double maxQ){
-//    	System.out.println(q+" "+reward+" "+maxQ);
     	return (1 - alpha) * q + alpha * (reward + gamma * maxQ);
     }
     
+    /**
+     * Convert position in pixels to grid coordinates
+     */
     public static Vector2d getGridCellFromPixels(Vector2d position){
 	 	int x = position.x >=0 ? ((int)position.x)/Agent.blockSize : 0;
     	int y = position.y >=0 ? ((int)position.y)/Agent.blockSize : 0;
@@ -152,7 +181,6 @@ public abstract class Agent extends AbstractPlayer {
 			for (int c = 0; c < observationGrid.length; c++) {
 				if(gridMap.containsKey(new Vector2d(c,r))){
 					Object o = gridMap.get(new Vector2d(c,r));
-//					System.out.print(o.getObjClassId());
 					System.out.print(o.getItype());
 				} else {
 					System.out.print("-");

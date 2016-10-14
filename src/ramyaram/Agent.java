@@ -72,6 +72,12 @@ public abstract class Agent extends AbstractPlayer {
 					} else if(game.equals("ramyaNormandy2") || game.equals("ramyaNormandy3")) {
 						if(obs.itype == 6 || obs.itype == 3)
 							al.add(obs);	
+					} else if(game.equals("aliens")) {
+						if(obs.itype == 3 || obs.itype == 9 || obs.itype == 6 || obs.itype == 5)
+							al.add(obs);	
+					} else if(game.equals("missilecommand")) {
+						if(obs.itype == 3 || obs.itype == 4 || obs.itype == 7)
+							al.add(obs);	
 					} else {
 						al.add(obs);
 					}
@@ -115,7 +121,7 @@ public abstract class Agent extends AbstractPlayer {
         processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore(); 
         
-//		  System.out.println("qValueFunctions size "+((OFQAgent)this).qValueFunctions.size());
+//		System.out.println("qValueFunctions size "+((OFQAgent)this).qValueFunctions.size());
 //        printStateObs(lastStateObs, gridObjectMap);
 //        System.out.println(action);
 //        printStateObs(stateObs, gridObjectNextStateMap);

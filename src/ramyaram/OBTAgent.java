@@ -214,10 +214,9 @@ public class OBTAgent extends OFQAgent {
 			}
 		} else if(game.equalsIgnoreCase("missilecommand") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
 			switch(newIType){
-				case 1: return 1; 
-//				case 7: return 6; 
-//				case 0: return 3; 
+				case 7: return 6; 
 				case 4: return 5; 
+				case 3: return 3;
 				default: return -1;
 			}
 		} else if(game.equalsIgnoreCase("boulderdash") && priorLearnedModel.getGame().equalsIgnoreCase("digdug")){

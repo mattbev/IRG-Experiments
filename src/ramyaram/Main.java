@@ -81,10 +81,10 @@ public class Main {
 	        for(int num=0; num<numAveraging; num++){
 	        	for(int c=0; c<numConditions; c++){
 	        		if(c==0) {
-	        			gameIdx = 82;
+	        			gameIdx = 0;
 	        			levelIdx = 0;
 	        		} else {
-	        			gameIdx = 83;
+	        			gameIdx = 49;
 	        			levelIdx = 0;
 	        		}
 	                String game = gamesPath + games[gameIdx] + ".txt";

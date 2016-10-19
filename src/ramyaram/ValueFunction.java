@@ -23,19 +23,11 @@ public class ValueFunction {
 	}
 	
 	public double getOptimalQValue(Vector2d agent, Vector2d obj, Types.ACTIONS action){
-		return optimalQValues[getXDist(agent, obj)+Agent.numCols-1][getYDist(agent, obj)+Agent.numRows-1][action.ordinal()];
+		return optimalQValues[Agent.getXDist(agent, obj)+Agent.numCols-1][Agent.getYDist(agent, obj)+Agent.numRows-1][action.ordinal()];
 	}
 	
 	public void setOptimalQValue(Vector2d agent, Vector2d obj, Types.ACTIONS action, double value){
-		optimalQValues[getXDist(agent, obj)+Agent.numCols-1][getYDist(agent, obj)+Agent.numRows-1][action.ordinal()] = value;
-	}
-	
-	public int getXDist(Vector2d agent, Vector2d obj){
-		return (int) (Agent.getGridCellFromPixels(agent).x - Agent.getGridCellFromPixels(obj).x);
-	}
-	
-	public int getYDist(Vector2d agent, Vector2d obj){
-		return (int) (Agent.getGridCellFromPixels(agent).y - Agent.getGridCellFromPixels(obj).y);
+		optimalQValues[Agent.getXDist(agent, obj)+Agent.numCols-1][Agent.getYDist(agent, obj)+Agent.numRows-1][action.ordinal()] = value;
 	}
 
 	public double[][][] getOptimalQValues() {

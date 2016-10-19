@@ -29,14 +29,14 @@ public abstract class Agent extends AbstractPlayer {
 	protected static StateObservation lastStateObs;
 	protected static Vector2d lastAvatarPos;
 	protected static double lastScore = 0;
-	protected static boolean updateQValues = true;
+	protected static boolean updateQValues;
 	protected static String game = "";
 	
 	protected static Map<Observation, Object> objectMap = new HashMap<Observation, Object>();
 	protected static Map<Vector2d, Object> gridObjectMap = new HashMap<Vector2d, Object>();
 	protected static Map<Observation, Object> objectNextStateMap = new HashMap<Observation, Object>();
 	protected static Map<Vector2d, Object> gridObjectNextStateMap = new HashMap<Vector2d, Object>();
-	protected static HashMap<Integer, Integer> itype_to_objClassId = new HashMap<Integer, Integer>();
+	protected static Model model;
 
     /**
      * Constructor. It must return in 1 second maximum.
@@ -58,7 +58,7 @@ public abstract class Agent extends AbstractPlayer {
     /**
      * Runs multiple episodes of the given game and level using the given controller
      */
-    public abstract LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, LearnedModel priorLearnedModel);
+    public abstract Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel);
     
     /**
      * Action selection method
@@ -81,7 +81,7 @@ public abstract class Agent extends AbstractPlayer {
 				ArrayList<Observation> temp = alv[r];
 				ArrayList<Observation> al = new ArrayList<Observation>();
 				for (Observation obs : temp) {
-					if(getImportantObjects(game).contains(obs.itype))
+					if(getImportantObjects(game) != null && getImportantObjects(game).contains(obs.itype))
 						al.add(obs);
 				}
 				for (Observation obs : al)
@@ -113,9 +113,9 @@ public abstract class Agent extends AbstractPlayer {
      * Process a single observation
      */
     public void processObs(Observation obs, Map<Observation, Object> map){
-    	if(!itype_to_objClassId.containsKey(obs.itype))
-			itype_to_objClassId.put(obs.itype, itype_to_objClassId.size());
-		Object o = new Object(itype_to_objClassId.get(obs.itype), obs.itype, new int[]{(int)obs.position.x, (int)obs.position.y});
+    	if(!model.getItype_to_objClassId().containsKey(obs.itype))
+    		model.getItype_to_objClassId().put(obs.itype, model.getItype_to_objClassId().size());
+		Object o = new Object(model.getItype_to_objClassId().get(obs.itype), obs.itype, new int[]{(int)obs.position.x, (int)obs.position.y});
 		map.put(obs, o);
     }
     
@@ -126,7 +126,8 @@ public abstract class Agent extends AbstractPlayer {
     	lastStateObs = null;
     	lastAvatarPos = null;
     	lastScore = 0;
-    	itype_to_objClassId.clear();
+    	if(model != null)
+    		model.getItype_to_objClassId().clear();
     }
     
     /**
@@ -145,7 +146,7 @@ public abstract class Agent extends AbstractPlayer {
         processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore(); 
         
-//		System.out.println("QValueFunctions size "+OFQAgent.qValueFunctions.size());
+//		System.out.println("QValueFunctions size "+model.qValueFunctions.size());
 //		printStateObs(lastStateObs, gridObjectMap);
 //		System.out.println(action);
 //		printStateObs(stateObs, gridObjectNextStateMap);
@@ -153,7 +154,12 @@ public abstract class Agent extends AbstractPlayer {
         
         updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore)-0.1, actions);
         lastScore = currScore;
-        //Return the action.
+        
+        objectMap.clear();
+        objectNextStateMap.clear();
+        gridObjectMap.clear();
+        gridObjectNextStateMap.clear();
+
         return action;
     }
     
@@ -189,4 +195,12 @@ public abstract class Agent extends AbstractPlayer {
 			System.out.println();
 		}
     }
+    
+    public static int getXDist(Vector2d agent, Vector2d obj){
+		return (int) (getGridCellFromPixels(agent).x - getGridCellFromPixels(obj).x);
+	}
+	
+	public static int getYDist(Vector2d agent, Vector2d obj){
+		return (int) (getGridCellFromPixels(agent).y - getGridCellFromPixels(obj).y);
+	}
 }

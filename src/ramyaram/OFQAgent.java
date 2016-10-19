@@ -16,19 +16,17 @@ import tools.Vector2d;
  * Learns a value function for each object class in the task rather than one big value function for the entire task
  */
 public class OFQAgent extends Agent {
-	protected static ArrayList<ValueFunction> qValueFunctions;
-
 	public OFQAgent(StateObservation so, ElapsedCpuTimer elapsedTimer){
 		super(so, elapsedTimer);
 	}
 	
-	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, LearnedModel priorLearnedModel) {
+	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel) {
+		model = new Model(game);
 		OFQAgent.game = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		updateQValues = true;
-		qValueFunctions = new ArrayList<ValueFunction>();
 		for(int i=0; i<numEpisodes; i++)
         	runOneEpisode(conditionNum, i, game, level1, visuals, controller, seed);		
-		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum], OFQAgent.game);
+		return model;
 	}
 	
 	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller, int seed){
@@ -99,17 +97,12 @@ public class OFQAgent extends Agent {
     
     public void processObs(Observation obs, Map<Observation, Object> map){
     	super.processObs(obs, map);
-    	addValueFunction(obs);
-    }
-    
-    public void addValueFunction(Observation obs){
-		if(itype_to_objClassId.get(obs.itype) >= qValueFunctions.size()){
-			qValueFunctions.add(new ValueFunction(null));
-		}
+    	if(model.getItype_to_objClassId().get(obs.itype) >= model.qValueFunctions.size())
+			model.addObjToModel();
     }
     
     public ValueFunction getValueFunction(Object obj){
-		return qValueFunctions.get(obj.getObjClassId());
+		return model.qValueFunctions.get(obj.getObjClassId());
 	}
     
     /**
@@ -128,14 +121,11 @@ public class OFQAgent extends Agent {
     public void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions) {
         if(updateQValues)
         	updateQValues(stateObs, action, nextStateObs, reward, actions);
-    	objectMap.clear();
-        objectNextStateMap.clear();
-        gridObjectMap.clear();
-        gridObjectNextStateMap.clear();
     }
     
     public void clearEachRun(){
     	super.clearEachRun();
-    	qValueFunctions = null;
+    	if(model != null)
+    		model.qValueFunctions = null;
     }
 }

@@ -14,21 +14,22 @@ public class Main {
 	public enum RunType {PLAY_GAME, RUN_ONE_GAME, RUN_ALL}
 	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 50;
-	public static int numEpisodes = 1000;
-    public static RunType runType = RunType.RUN_ONE_GAME;
+	public static int numAveraging = 1;
+	public static int numEpisodes = 10;
+	public static int numEpisodesMapping = 10;
+    public static RunType runType = RunType.RUN_ALL;
     public static boolean fixedMapping = true;
 	public static int interval = 1;
 	public static String fileName;
 	public static String allDataFileName;
-	public static LearnedModel[] learnedModels;
+	public static Model[] learnedModels;
 	
 	public static void main(String[] args) {
 		if(args.length <= 0 || args.length > 1){
 			System.out.println("Please run with one arguments specifying the name of the csv file (e.g., javac Main.java && java Main reward.csv)");
 			System.exit(0);
 		}
-		learnedModels = new LearnedModel[Condition.values().length];
+		learnedModels = new Model[Condition.values().length];
 		String gamesPath = "examples/gridphysics/";
         String games[] = new String[]{};
         games = new String[]{"aliens", "angelsdemons", "assemblyline", "avoidgeorge", "bait", //0-4
@@ -92,13 +93,12 @@ public class Main {
 	                String game = gamesPath + games[gameIdx] + ".txt";
 	                String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
 	                System.out.println("PLAYING "+games[gameIdx]+" level "+levelIdx);
-	        		String controller = getConditionController(Condition.values()[c]);
-	        		initializeController(Condition.values()[c]);
+	        		String controller = initController(Condition.values()[c]);
 	        		if(Agent.INSTANCE != null){
 	        			System.out.println("Running condition "+Condition.values()[c]);
 	        			Agent.INSTANCE.clearEachRun();
 			        	System.out.println("Averaging "+num);
-			        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes, game, level1, false, controller, seed, learnedModels[0]);
+			        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes, game, level1, false, controller, seed, learnedModels[0]).clone();
 	        		}
 			        writeToFile(allDataFileName, ",");
 	        	}
@@ -130,33 +130,25 @@ public class Main {
 	        String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
 	        if(runType == RunType.RUN_ONE_GAME){
 		        String myController = "ramyaram.OFQAgent";
-		        initializeController(Condition.OF_Q_SOURCE);
+		        initController(Condition.OF_Q_SOURCE);
 		        Agent.INSTANCE.run(0, 1, game, level1, true, myController, seed, null);
 	        }
 	        if(runType == RunType.PLAY_GAME){
-	        	ArcadeMachine.playOneGame(game, level1, null, seed);
+	        	while(true)
+	        		ArcadeMachine.playOneGame(game, level1, null, seed);
 	        }
 		}
 	}
 	
-	public static String getConditionController(Condition condition){
+	public static String initController(Condition condition){
 		switch(condition){
 			case OF_Q_SOURCE:
 			case OF_Q_TARGET:
+				new OFQAgent(null,null);
 				return "ramyaram.OFQAgent";
 			case OBT_TARGET:
+				new OBTAgent(null,null);
 				return "ramyaram.OBTAgent";
-		}
-		return null;
-	}
-	
-	public static Agent initializeController(Condition condition){
-		switch(condition){
-			case OF_Q_SOURCE:
-			case OF_Q_TARGET:
-				return new OFQAgent(null,null);
-			case OBT_TARGET:
-				return new OBTAgent(null,null);
 		}
 		return null;
 	}

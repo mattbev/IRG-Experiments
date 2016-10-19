@@ -27,10 +27,6 @@ public class Object {
 		return features[index];
 	}
 	
-	public int setFeature(int index, int value) {
-		return features[index] = value;
-	}
-	
 	public int hashCode(){
 		return 2;
 	}
@@ -42,13 +38,6 @@ public class Object {
 				return false;
 		}
 		return true;
-	}
-	
-	public Object clone(){
-		int[] newStateValues = new int[features.length];
-		for(int i=0; i<features.length; i++)
-			newStateValues[i] = features[i];
-		return new Object(objClassId, itype, newStateValues);
 	}
 
 	public String toString() {

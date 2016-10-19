@@ -6,19 +6,27 @@ import java.util.Map.Entry;
 
 import core.game.Observation;
 import core.game.StateObservation;
+import ontology.Types;
 import tools.ElapsedCpuTimer;
+import tools.Vector2d;
 
 /**
  * Object-Based Transfer agent
  * Learns a mapping between objects in the target and source tasks to speed up learning
  */
 public class OBTAgent extends OFQAgent {
+	private static Model priorLearnedModel;
 	private static ArrayList<Integer> currMapping;
+	private static ArrayList<int[]> numOfMappings;	
+	private static ArrayList<double[]> weightedSim;
 	private static ArrayList<double[]> mappingQ; //Q-values over mappings (it specifies for each objClass in the new task, which objClass in the source task it aligns to (or a new class if nothing aligns))
-	private static ArrayList<int[]> numOfMappings;
-	private static LearnedModel priorLearnedModel;
+	private static ArrayList<double[]> objTransitionSim;
+	private static ArrayList<double[]> objRewardSim;
+	
+	private static double[] weights; //weights for each similarity metric (metric indices below - performance, transition, reward)
+	private static final int PERFORMANCE=0, TRANSITION=1, REWARD=2;
+	private static final int numWeights = 3;
 
-	private static int numEpisodesMapping = 0;
 	private static double mapping_alpha = 0.1; //The learning rate for the mapping phase
 	private static double mapping_epsilon = 0.1; //The amount an agent explores (as opposed to exploit) mappings of different object classes
 	private static double mapping_epsilon_end = 0.001; //The ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
@@ -28,32 +36,37 @@ public class OBTAgent extends OFQAgent {
 		super(so, elapsedTimer);
 	}
 	
-	public LearnedModel run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, LearnedModel priorLearnedModel) {
-		if(numEpisodesMapping > Main.numEpisodes){
+	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel) {
+		model = new Model(game);
+		if(Main.numEpisodesMapping > Main.numEpisodes){
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
 		}
 		OBTAgent.game = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		OBTAgent.priorLearnedModel = priorLearnedModel;
-		ArrayList<ValueFunction> priorValueFunctions = priorLearnedModel.getLearnedValueFunctions();
-		if(priorValueFunctions != null) { //If a previously learned source task exists
-			qValueFunctions = new ArrayList<ValueFunction>();
-			for(int i=0; i<priorValueFunctions.size(); i++)
-				qValueFunctions.add(new ValueFunction(priorValueFunctions.get(i).getOptimalQValues()));		
-		}
-		//Create a new empty value function that is learned if no previous ones align well
-		qValueFunctions.add(new ValueFunction(null));
+		
 		currMapping = new ArrayList<Integer>();
+		numOfMappings = new ArrayList<int[]>();	
+		weightedSim = new ArrayList<double[]>();
 		mappingQ = new ArrayList<double[]>();
-		numOfMappings = new ArrayList<int[]>();
+		objTransitionSim = new ArrayList<double[]>();
+		objRewardSim = new ArrayList<double[]>();
+		
+		weights = new double[numWeights];
+//		weights[PERFORMANCE] = 1;
+		for(int i=0; i<weights.length; i++)
+			weights[i] = 1/(double)weights.length;
 		
 		int k=0;
 		//Learn mappings between objects without making any changes to the value functions
-		mappingPhase(conditionNum, k, numEpisodesMapping, game, level1, visuals, controller, seed);
-		k+=numEpisodesMapping;
+		mappingPhase(conditionNum, k, Main.numEpisodesMapping, game, level1, visuals, controller, seed);
+		k+=Main.numEpisodesMapping;
 		printItypeMapping(currMapping);
+		//copy value functions from previously learned task for new objects based on current mapping
+		copyMappedValueFunctions();
 		while(k < numEpisodes){
-			currMapping = getGreedyMapping(mappingQ);
+//			weightedSim = newWeightedSim();
+//			currMapping = getGreedyMapping(weightedSim);
 			//Update value functions based on the learned mapping
 			qValuesPhase(conditionNum, k, 1, game, level1, visuals, controller, seed);
 			k+=1;
@@ -62,7 +75,7 @@ public class OBTAgent extends OFQAgent {
 		for(int i=0; i<mappingQ.size(); i++){
 			double maxValue = Integer.MIN_VALUE;
 			int maxIndex = -1;
-			for(int j=0; j<priorValueFunctions.size(); j++){
+			for(int j=0; j<mappingQ.get(i).length; j++){
 				System.out.print(mappingQ.get(i)[j]+" ");
 				if(mappingQ.get(i)[j]>maxValue){
 					maxValue = mappingQ.get(i)[j];
@@ -78,16 +91,129 @@ public class OBTAgent extends OFQAgent {
 		printItypeMapping(bestMapping);
 		System.out.println("Current Mapping:");
 		printItypeMapping(currMapping);
-		return new LearnedModel(qValueFunctions, itype_to_objClassId, Condition.values()[conditionNum], OBTAgent.game);
+		return model;
+	}
+	
+	public void copyMappedValueFunctions(){
+		System.out.println(currMapping.size());
+		for(int i=0; i<currMapping.size(); i++){
+			if(currMapping.get(i) >= priorLearnedModel.qValueFunctions.size())
+				model.qValueFunctions.set(i, new ValueFunction(null));
+			else
+				model.qValueFunctions.set(i, new ValueFunction(priorLearnedModel.qValueFunctions.get(currMapping.get(i)).getOptimalQValues()));
+		}
+		System.out.println(model.qValueFunctions.size());
+	}
+	
+	public ArrayList<double[]> newWeightedSim(){
+//		System.out.println("mappingQ");
+//		printMatrix(mappingQ);
+//		System.out.println("objTransitionSim");
+//		printMatrix(objTransitionSim);
+//		System.out.println("objRewardSim");
+//		printMatrix(objRewardSim);
+		ArrayList<double[]> sim = new ArrayList<double[]>();
+		for(int i=0; i<weightedSim.size(); i++){
+			sim.add(new double[weightedSim.get(i).length]);
+			for(int j=0; j<weightedSim.get(i).length; j++){
+				for(int k=0; k<weights.length; k++){
+					sim.get(i)[j] += weights[k]*getSimMatrix(k).get(i)[j];
+				}
+			}
+		}
+//		System.out.println("newWeightedSim");
+//		printMatrix(sim);
+		return sim;
+	}
+	
+	public ArrayList<double[]> getSimMatrix(int index){
+		switch(index){
+			case PERFORMANCE:
+				return mappingQ;
+			case TRANSITION:
+				return objTransitionSim;
+			case REWARD:
+				return objRewardSim;
+		}
+		return null;
+	}
+	
+	public void updateModelSimilarity(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward){
+		//update model similarity of object classes
+		double [][] tempTransSim = new double[weightedSim.size()][weightedSim.get(0).length];
+		double [][] tempRewardSim = new double[weightedSim.size()][weightedSim.get(0).length];
+		for(Observation obs : objectMap.keySet()){
+			Object obj = objectMap.get(obs);
+			Object nextObj = objectNextStateMap.get(obs);
+			if(nextObj != null){
+				for(int j=0; j<priorLearnedModel.qValueFunctions.size(); j++){
+//					System.out.println(nextStateObs+" "+nextObj);
+					System.out.println("priorModel: ");
+					priorLearnedModel.numNonZeroTransReward();
+					System.out.println("newModel: ");
+					model.numNonZeroTransReward();
+					int newTransitionCounts = model.getTransitionCounts(obj.getObjClassId(), stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
+		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
+					int previousTransitionCounts = priorLearnedModel.getTransitionCounts(j, stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
+		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
+					System.out.println("transition "+newTransitionCounts+" "+previousTransitionCounts);
+					if(newTransitionCounts>0 && previousTransitionCounts>0){
+						tempTransSim[obj.getObjClassId()][j]++;
+					}
+					int newRewardCounts = model.getRewardCounts(obj.getObjClassId(), stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
+		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
+					int previousRewardCounts = priorLearnedModel.getRewardCounts(j, stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
+		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
+					System.out.println("reward "+newRewardCounts+" "+previousRewardCounts);
+					if(newRewardCounts>0 && previousRewardCounts>0){
+						tempRewardSim[obj.getObjClassId()][j]++;
+					}
+				}
+			}
+		}
+		normalize(tempTransSim);
+		normalize(tempRewardSim);
+		for(int i=0; i<tempTransSim.length; i++){
+			for(int j=0; j<tempTransSim[i].length; j++){
+				objTransitionSim.get(i)[j] = (objTransitionSim.get(i)[j]+tempTransSim[i][j])/2;
+				objRewardSim.get(i)[j] = (objRewardSim.get(i)[j]+tempRewardSim[i][j])/2;
+			}
+		}
+	}
+	
+    public void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions) {
+    	super.updateEachStep(stateObs, action, nextStateObs, reward, actions);
+    	for(Observation obs : objectMap.keySet()){
+			Object obj = objectMap.get(obs);
+			Object nextObj = objectNextStateMap.get(obs);
+			if(nextObj != null){
+				model.updateModelEstimate(obj.getObjClassId(), stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
+    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
+				updateModelSimilarity(stateObs, action, nextStateObs, reward);
+			}
+    	}
+    }
+	
+	public double[][] normalize(double[][] matrix){
+		for(int i=0; i<matrix.length; i++){
+			double sum = 0;
+			for(int j=0; j<matrix[i].length; j++)
+				sum += matrix[i][j];
+			for(int j=0; j<matrix[i].length; j++){
+				if(sum > 0)
+					matrix[i][j] /= sum;
+			}
+		}
+		return matrix;
 	}
 	
 	public void printItypeMapping(ArrayList<Integer> mapping){
 		System.out.println("MAPPING");
-		for(int new_itype : itype_to_objClassId.keySet()){
-			int newObjClassId = itype_to_objClassId.get(new_itype);
+		for(int new_itype : model.getItype_to_objClassId().keySet()){
+			int newObjClassId = model.getItype_to_objClassId().get(new_itype);
 			int oldObjClassId = mapping.get(newObjClassId);
 			int oldIType = -1;
-			for(Entry<Integer, Integer> entry : priorLearnedModel.getLearnedIdMapping().entrySet()){
+			for(Entry<Integer, Integer> entry : priorLearnedModel.getItype_to_objClassId().entrySet()){
 				if(entry.getValue() == oldObjClassId)
 					oldIType = entry.getKey();
 			}
@@ -95,24 +221,23 @@ public class OBTAgent extends OFQAgent {
 		}
 	}
 	
-	public void addValueFunction(Observation obs){
-		
-	}
-	
 	public void processObs(Observation obs, Map<Observation, Object> map){
     	super.processObs(obs, map);
-		if(itype_to_objClassId.get(obs.itype) >= currMapping.size()){
+		if(model.getItype_to_objClassId().get(obs.itype) >= currMapping.size()){
 			if(Main.fixedMapping){
 				int oldIType = getFixedMappingIType(obs.itype);
 				if(oldIType >= 0)
-					currMapping.add(priorLearnedModel.getLearnedIdMapping().get(oldIType));//rand.nextInt(qValueFunctions.size()));
+					currMapping.add(priorLearnedModel.getItype_to_objClassId().get(oldIType));//rand.nextInt(model.qValueFunctions.size()));
 				else
-					currMapping.add(qValueFunctions.size()-1);
+					currMapping.add(priorLearnedModel.qValueFunctions.size());
 			} else {
-				currMapping.add(rand.nextInt(qValueFunctions.size()));
+				currMapping.add(rand.nextInt(priorLearnedModel.qValueFunctions.size()+1));
 			}
-			mappingQ.add(new double[qValueFunctions.size()]);
-			numOfMappings.add(new int[qValueFunctions.size()]);
+			weightedSim.add(new double[priorLearnedModel.qValueFunctions.size()+1]);
+			mappingQ.add(new double[priorLearnedModel.qValueFunctions.size()+1]);
+			objTransitionSim.add(new double[priorLearnedModel.qValueFunctions.size()+1]);
+			objRewardSim.add(new double[priorLearnedModel.qValueFunctions.size()+1]);
+			numOfMappings.add(new int[priorLearnedModel.qValueFunctions.size()+1]);
 		}
     }
 	
@@ -143,7 +268,8 @@ public class OBTAgent extends OFQAgent {
 	public void mappingPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed){
 		updateQValues = false;
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++){
-			ArrayList<Integer> mapping = getMapping(mappingQ);
+			weightedSim = newWeightedSim();
+			ArrayList<Integer> mapping = getMapping(weightedSim);
 			printItypeMapping(mapping);
 			double episodeReward = runOneEpisode(conditionNum, k, game, level1, visuals, controller, seed);
 			for(int i=0; i<mapping.size(); i++){
@@ -158,7 +284,14 @@ public class OBTAgent extends OFQAgent {
 	 * Gets the value function of the object mapped to object obj
 	 */
 	public ValueFunction getValueFunction(Object obj){
-		return qValueFunctions.get(currMapping.get(obj.getObjClassId()));
+		if(updateQValues)
+			return model.qValueFunctions.get(obj.getObjClassId());
+		else{
+			if(currMapping.get(obj.getObjClassId()) >= priorLearnedModel.qValueFunctions.size())
+				return new ValueFunction(null);
+			else
+				return priorLearnedModel.qValueFunctions.get(currMapping.get(obj.getObjClassId()));
+		}
 	}
 	
 	/**
@@ -169,7 +302,7 @@ public class OBTAgent extends OFQAgent {
 		if(game.equalsIgnoreCase(priorLearnedModel.getGame())){
 			return newIType;
 		} else if(game.equalsIgnoreCase("ramyaNormandy") && priorLearnedModel.getGame().equalsIgnoreCase("ramyaFreeway")){
-			if(priorLearnedModel.getLearnedIdMapping().containsKey(newIType))
+			if(priorLearnedModel.getItype_to_objClassId().containsKey(newIType))
 				return newIType;
 			else
 				return -1;
@@ -234,12 +367,12 @@ public class OBTAgent extends OFQAgent {
 			//Fixed mapping for debugging
 			for(int i=0; i<currMapping.size(); i++)
 				mapping.add(-1);
-			for(int new_itype : itype_to_objClassId.keySet()){
+			for(int new_itype : model.getItype_to_objClassId().keySet()){
 				int oldIType = getFixedMappingIType(new_itype);
 				if(oldIType >= 0)
-					mapping.set(itype_to_objClassId.get(new_itype), priorLearnedModel.getLearnedIdMapping().get(oldIType));
+					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.getItype_to_objClassId().get(oldIType));
 				else
-					mapping.set(itype_to_objClassId.get(new_itype), qValueFunctions.size()-1);
+					mapping.set(model.getItype_to_objClassId().get(new_itype), model.qValueFunctions.size()-1);
 			}
 		} else {
 			for(int i=0; i<currMapping.size(); i++){ //For each new object class
@@ -266,7 +399,19 @@ public class OBTAgent extends OFQAgent {
 	public void clearEachRun(){
 		super.clearEachRun();
 		currMapping = null;
+		weightedSim = null;
 		mappingQ = null;
+		objTransitionSim = null;
+		objRewardSim = null;
 		numOfMappings = null;
+	}
+	
+	public void printMatrix(ArrayList<double[]> matrix){
+		for(int i=0; i<matrix.size(); i++){
+			for(int j=0; j<matrix.get(i).length; j++){
+				System.out.print(matrix.get(i)[j]+" ");
+			}
+			System.out.println();
+		}
 	}
 }

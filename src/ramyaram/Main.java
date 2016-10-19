@@ -14,7 +14,7 @@ public class Main {
 	public enum RunType {PLAY_GAME, RUN_ONE_GAME, RUN_ALL}
 	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 10;
+	public static int numAveraging = 50;
 	public static int numEpisodes = 1000;
     public static RunType runType = RunType.RUN_ALL;
     public static boolean fixedMapping = true;

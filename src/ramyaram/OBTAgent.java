@@ -173,6 +173,7 @@ public class OBTAgent extends OFQAgent {
 				case 12: case 13: case 14: case 15: return 9; 
 				case 16: return 6; 
 				case 5: return 5;
+				case 3: return 3;
 				default: return -1;
 			}
 		} else if(game.equalsIgnoreCase("ramyaNormandy") && priorLearnedModel.getGame().equalsIgnoreCase("ramyaFreeway")){

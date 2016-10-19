@@ -14,9 +14,9 @@ public class Main {
 	public enum RunType {PLAY_GAME, RUN_ONE_GAME, RUN_ALL}
 	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 50;
+	public static int numAveraging = 10;
 	public static int numEpisodes = 1000;
-    public static RunType runType = RunType.RUN_ONE_GAME;
+    public static RunType runType = RunType.RUN_ALL;
     public static boolean fixedMapping = true;
 	public static int interval = 1;
 	public static String fileName;
@@ -84,10 +84,10 @@ public class Main {
 	        	for(int c=0; c<numConditions; c++){
 	        		if(c==0) {
 	        			gameIdx = 0;
-	        			levelIdx = 0;
+	        			levelIdx = 5;
 	        		} else {
-	        			gameIdx = 49;
-	        			levelIdx = 0;
+	        			gameIdx = 65;
+	        			levelIdx = 5;
 	        		}
 	                String game = gamesPath + games[gameIdx] + ".txt";
 	                String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";

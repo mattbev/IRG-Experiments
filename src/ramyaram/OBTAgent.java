@@ -168,6 +168,13 @@ public class OBTAgent extends OFQAgent {
 		//Identity mapping for transfer to the same game -- used for sanity check
 		if(game.equalsIgnoreCase(priorLearnedModel.getGame())){
 			return newIType;
+		} else if(game.equalsIgnoreCase("sheriff") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
+			switch(newIType){
+				case 12: case 13: case 14: case 15: return 9; 
+				case 16: return 6; 
+				case 5: return 5;
+				default: return -1;
+			}
 		} else if(game.equalsIgnoreCase("ramyaNormandy") && priorLearnedModel.getGame().equalsIgnoreCase("ramyaFreeway")){
 			if(priorLearnedModel.getLearnedIdMapping().containsKey(newIType))
 				return newIType;

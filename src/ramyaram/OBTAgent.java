@@ -18,7 +18,7 @@ public class OBTAgent extends OFQAgent {
 	private static ArrayList<int[]> numOfMappings;
 	private static LearnedModel priorLearnedModel;
 
-	private static int numEpisodesMapping = 0;
+	private static int numEpisodesMapping = Main.numEpisodes;
 	private static double mapping_alpha = 0.1; //The learning rate for the mapping phase
 	private static double mapping_epsilon = 0.1; //The amount an agent explores (as opposed to exploit) mappings of different object classes
 	private static double mapping_epsilon_end = 0.001; //The ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
@@ -144,7 +144,7 @@ public class OBTAgent extends OFQAgent {
 		updateQValues = false;
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++){
 			ArrayList<Integer> mapping = getMapping(mappingQ);
-			printItypeMapping(mapping);
+//			printItypeMapping(mapping);
 			double episodeReward = runOneEpisode(conditionNum, k, game, level1, visuals, controller, seed);
 			for(int i=0; i<mapping.size(); i++){
 				double q = mappingQ.get(i)[mapping.get(i)]; //update mappingQ based on reward received
@@ -170,10 +170,27 @@ public class OBTAgent extends OFQAgent {
 			return newIType;
 		} else if(game.equalsIgnoreCase("sheriff") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
 			switch(newIType){
-				case 12: case 13: case 14: case 15: return 9; 
+				case 12: case 13: return 3;
+				case 14: case 15: return 9; 
 				case 16: return 6; 
 				case 5: return 5;
-				case 3: return 3;
+//				case 3: return 3;
+				default: return -1;
+			}
+		} else if(game.equalsIgnoreCase("solarfox") && priorLearnedModel.getGame().equalsIgnoreCase("sheriff")){
+			switch(newIType){
+				case 8: return 14; 
+				case 9: return 15; 
+				case 11: return 16;
+				case 12: return 16;
+				default: return -1;
+			}
+		} else if(game.equalsIgnoreCase("aliens") && priorLearnedModel.getGame().equalsIgnoreCase("sheriff")){
+			switch(newIType){
+				case 9: return 14;
+				case 6: return 16; 
+				case 5: return 5;
+//				case 3: return 3;
 				default: return -1;
 			}
 		} else if(game.equalsIgnoreCase("ramyaNormandy") && priorLearnedModel.getGame().equalsIgnoreCase("ramyaFreeway")){

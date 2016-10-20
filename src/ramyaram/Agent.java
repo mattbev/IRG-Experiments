@@ -81,8 +81,10 @@ public abstract class Agent extends AbstractPlayer {
 				ArrayList<Observation> temp = alv[r];
 				ArrayList<Observation> al = new ArrayList<Observation>();
 				for (Observation obs : temp) {
-					if(getImportantObjects(game).contains(obs.itype))
-						al.add(obs);
+					if(getImportantObjects(game) != null){
+						if(getImportantObjects(game).contains(obs.itype))
+							al.add(obs);
+					} 
 				}
 				for (Observation obs : al)
 					processObs(obs, map);
@@ -106,6 +108,7 @@ public abstract class Agent extends AbstractPlayer {
 	    	case "aliens": return Arrays.asList(3,9,6,5);
 	    	case "missilecommand": return Arrays.asList(3,4,7);
 	    	case "sheriff": return Arrays.asList(3,5,12,13,14,15,16);
+	    	case "solarfox": return Arrays.asList(8,9,6,11,12);
     	}
     	return null;
     }
@@ -150,9 +153,9 @@ public abstract class Agent extends AbstractPlayer {
 //		printStateObs(lastStateObs, gridObjectMap);
 //		System.out.println(action);
 //		printStateObs(stateObs, gridObjectNextStateMap);
-//		System.out.println(currScore+" "+((currScore-lastScore)-0.1));
+//		System.out.println(currScore+" "+(currScore-lastScore));
         
-        updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore)-0.1, actions);
+        updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore), actions);
         lastScore = currScore;
         //Return the action.
         return action;

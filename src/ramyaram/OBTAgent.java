@@ -193,6 +193,20 @@ public class OBTAgent extends OFQAgent {
 //				case 3: return 3;
 				default: return -1;
 			}
+		} else if(game.equalsIgnoreCase("aliens") && priorLearnedModel.getGame().equalsIgnoreCase("solarfox")){
+			switch(newIType){
+				case 9: return 8;
+				case 6: return 12; 
+				default: return -1;
+			}
+		} else if(game.equalsIgnoreCase("solarfox") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
+			switch(newIType){
+//				case 8: return 9;
+//				case 9: return 9; 
+//				case 11: return 6;
+				case 12: return 6;
+				default: return -1;
+			}
 		} else if(game.equalsIgnoreCase("ramyaNormandy") && priorLearnedModel.getGame().equalsIgnoreCase("ramyaFreeway")){
 			if(priorLearnedModel.getLearnedIdMapping().containsKey(newIType))
 				return newIType;

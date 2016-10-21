@@ -14,8 +14,8 @@ public class Main {
 	public enum RunType {PLAY_GAME, RUN_ONE_GAME, RUN_ALL}
 	public static double[][] reward;
 	public static boolean[] wins;
-	public static int numAveraging = 1;
-	public static int numEpisodes = 10;
+	public static int numAveraging = 100;
+	public static int numEpisodes = 1000;
 	public static int numEpisodesMapping = 10;
     public static RunType runType = RunType.RUN_ALL;
     public static boolean fixedMapping = true;
@@ -84,11 +84,11 @@ public class Main {
 	        for(int num=0; num<numAveraging; num++){
 	        	for(int c=0; c<numConditions; c++){
 	        		if(c==0) {
-	        			gameIdx = 0;
-	        			levelIdx = 0;
+	        			gameIdx = 68;
+	        			levelIdx = 5;
 	        		} else {
-	        			gameIdx = 49;
-	        			levelIdx = 0;
+	        			gameIdx = 0;
+	        			levelIdx = 5;
 	        		}
 	                String game = gamesPath + games[gameIdx] + ".txt";
 	                String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";

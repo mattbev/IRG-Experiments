@@ -26,7 +26,6 @@ public class OBTAgent extends OFQAgent {
 	private static double[] weights; //weights for each similarity metric (metric indices below - performance, transition, reward)
 	private static final int PERFORMANCE=0, TRANSITION=1, REWARD=2;
 	private static final int numWeights = 3;
-
 	private static double mapping_alpha = 0.1; //The learning rate for the mapping phase
 	private static double mapping_epsilon = 0.1; //The amount an agent explores (as opposed to exploit) mappings of different object classes
 	private static double mapping_epsilon_end = 0.001; //The ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
@@ -301,6 +300,45 @@ public class OBTAgent extends OFQAgent {
 		//Identity mapping for transfer to the same game -- used for sanity check
 		if(game.equalsIgnoreCase(priorLearnedModel.getGame())){
 			return newIType;
+		} else if(game.equalsIgnoreCase("sheriff") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
+			switch(newIType){
+				case 12: case 13: return 3;
+				case 14: case 15: return 9; 
+				case 16: return 6; 
+				case 5: return 5;
+//				case 3: return 3;
+				default: return -1;
+			}
+		} else if(game.equalsIgnoreCase("solarfox") && priorLearnedModel.getGame().equalsIgnoreCase("sheriff")){
+			switch(newIType){
+				case 8: return 14; 
+				case 9: return 15; 
+				case 11: return 16;
+				case 12: return 16;
+				default: return -1;
+			}
+		} else if(game.equalsIgnoreCase("aliens") && priorLearnedModel.getGame().equalsIgnoreCase("sheriff")){
+			switch(newIType){
+				case 9: return 14;
+				case 6: return 16; 
+				case 5: return 5;
+//				case 3: return 3;
+				default: return -1;
+			}
+		} else if(game.equalsIgnoreCase("aliens") && priorLearnedModel.getGame().equalsIgnoreCase("solarfox")){
+			switch(newIType){
+				case 9: return 8;
+				case 6: return 12; 
+				default: return -1;
+			}
+		} else if(game.equalsIgnoreCase("solarfox") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
+			switch(newIType){
+//				case 8: return 9;
+//				case 9: return 9; 
+//				case 11: return 6;
+				case 12: return 6;
+				default: return -1;
+			}
 		} else if(game.equalsIgnoreCase("ramyaNormandy") && priorLearnedModel.getGame().equalsIgnoreCase("ramyaFreeway")){
 			if(priorLearnedModel.getItype_to_objClassId().containsKey(newIType))
 				return newIType;

@@ -26,10 +26,6 @@ public class OBTAgent extends OFQAgent {
 	private static double[] weights; //weights for each similarity metric (metric indices below - performance, transition, reward)
 	private static final int PERFORMANCE=0, TRANSITION=1, REWARD=2;
 	private static final int numWeights = 3;
-	private static double mapping_alpha = 0.1; //The learning rate for the mapping phase
-	private static double mapping_epsilon = 0.1; //The amount an agent explores (as opposed to exploit) mappings of different object classes
-	private static double mapping_epsilon_end = 0.001; //The ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
-	private static double mapping_epsilon_delta = 0.01; //Exploration over mappings decreases by this delta value over time
 
 	public OBTAgent(StateObservation so, ElapsedCpuTimer elapsedTimer){
 		super(so, elapsedTimer);
@@ -147,15 +143,15 @@ public class OBTAgent extends OFQAgent {
 			if(nextObj != null){
 				for(int j=0; j<priorLearnedModel.qValueFunctions.size(); j++){
 //					System.out.println(nextStateObs+" "+nextObj);
-					System.out.println("priorModel: ");
-					priorLearnedModel.numNonZeroTransReward();
-					System.out.println("newModel: ");
-					model.numNonZeroTransReward();
+//					System.out.println("priorModel: ");
+//					priorLearnedModel.numNonZeroTransReward();
+//					System.out.println("newModel: ");
+//					model.numNonZeroTransReward();
 					int newTransitionCounts = model.getTransitionCounts(obj.getObjClassId(), stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
 		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
 					int previousTransitionCounts = priorLearnedModel.getTransitionCounts(j, stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
 		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
-					System.out.println("transition "+newTransitionCounts+" "+previousTransitionCounts);
+//					System.out.println("transition "+newTransitionCounts+" "+previousTransitionCounts);
 					if(newTransitionCounts>0 && previousTransitionCounts>0){
 						tempTransSim[obj.getObjClassId()][j]++;
 					}
@@ -163,7 +159,7 @@ public class OBTAgent extends OFQAgent {
 		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
 					int previousRewardCounts = priorLearnedModel.getRewardCounts(j, stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
 		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
-					System.out.println("reward "+newRewardCounts+" "+previousRewardCounts);
+//					System.out.println("reward "+newRewardCounts+" "+previousRewardCounts);
 					if(newRewardCounts>0 && previousRewardCounts>0){
 						tempRewardSim[obj.getObjClassId()][j]++;
 					}
@@ -223,8 +219,8 @@ public class OBTAgent extends OFQAgent {
 	public void processObs(Observation obs, Map<Observation, Object> map){
     	super.processObs(obs, map);
 		if(model.getItype_to_objClassId().get(obs.itype) >= currMapping.size()){
-			if(Main.fixedMapping){
-				int oldIType = getFixedMappingIType(obs.itype);
+			if(Main.isFixedMapping){
+				int oldIType = Main.fixedMapping.containsKey(obs.itype)? Main.fixedMapping.get(obs.itype) : -1;
 				if(oldIType >= 0)
 					currMapping.add(priorLearnedModel.getItype_to_objClassId().get(oldIType));//rand.nextInt(model.qValueFunctions.size()));
 				else
@@ -243,9 +239,9 @@ public class OBTAgent extends OFQAgent {
 	public void runEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller, int seed){
 		super.runOneEpisode(conditionNum, episodeNum, game, level1, visuals, controller, seed);
         
-        mapping_epsilon -= mapping_epsilon_delta;
-		if(mapping_epsilon < mapping_epsilon_end)
-			mapping_epsilon = mapping_epsilon_end;
+        Main.mapping_epsilon -= Main.mapping_epsilon_delta;
+		if(Main.mapping_epsilon < Main.mapping_epsilon_end)
+			Main.mapping_epsilon = Main.mapping_epsilon_end;
 	}
 	
 	/**
@@ -273,7 +269,7 @@ public class OBTAgent extends OFQAgent {
 			double episodeReward = runOneEpisode(conditionNum, k, game, level1, visuals, controller, seed);
 			for(int i=0; i<mapping.size(); i++){
 				double q = mappingQ.get(i)[mapping.get(i)]; //update mappingQ based on reward received
-		        double qValue = (1 - mapping_alpha) * q + mapping_alpha * episodeReward;
+		        double qValue = (1 - Main.mapping_alpha) * q + Main.mapping_alpha * episodeReward;
 		        mappingQ.get(i)[mapping.get(i)] = qValue;
 			}
 		}
@@ -294,99 +290,16 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	/**
-	 * Specify a fixed mapping for certain games to check if performance is improved given a mapping
-	 */
-	public int getFixedMappingIType(int newIType){
-		//Identity mapping for transfer to the same game -- used for sanity check
-		if(game.equalsIgnoreCase(priorLearnedModel.getGame())){
-			return newIType;
-		} else if(game.equalsIgnoreCase("sheriff") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
-			switch(newIType){
-				case 12: case 13: return 3;
-				case 14: case 15: return 9; 
-				case 16: return 6; 
-				case 5: return 5;
-//				case 3: return 3;
-				default: return -1;
-			}
-		} else if(game.equalsIgnoreCase("solarfox") && priorLearnedModel.getGame().equalsIgnoreCase("sheriff")){
-			switch(newIType){
-				case 8: return 14; 
-				case 9: return 15; 
-				case 11: return 16;
-				case 12: return 16;
-				default: return -1;
-			}
-		} else if(game.equalsIgnoreCase("aliens") && priorLearnedModel.getGame().equalsIgnoreCase("sheriff")){
-			switch(newIType){
-				case 9: return 14;
-				case 6: return 16; 
-				case 5: return 5;
-//				case 3: return 3;
-				default: return -1;
-			}
-		} else if(game.equalsIgnoreCase("aliens") && priorLearnedModel.getGame().equalsIgnoreCase("solarfox")){
-			switch(newIType){
-				case 9: return 8;
-				case 6: return 12; 
-				default: return -1;
-			}
-		} else if(game.equalsIgnoreCase("solarfox") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
-			switch(newIType){
-//				case 8: return 9;
-//				case 9: return 9; 
-//				case 11: return 6;
-				case 12: return 6;
-				default: return -1;
-			}
-		} else if(game.equalsIgnoreCase("ramyaNormandy") && priorLearnedModel.getGame().equalsIgnoreCase("ramyaFreeway")){
-			if(priorLearnedModel.getItype_to_objClassId().containsKey(newIType))
-				return newIType;
-			else
-				return -1;
-		} else if((game.equalsIgnoreCase("ramyaNormandy2") || game.equalsIgnoreCase("ramyaNormandy3")) && priorLearnedModel.getGame().equalsIgnoreCase("ramyaFreeway")){
-			switch(newIType){
-				case 6: return 7; 
-				default: return -1;
-			}
-		} else if(game.equalsIgnoreCase("missilecommand") && priorLearnedModel.getGame().equalsIgnoreCase("aliens")){
-			switch(newIType){
-				case 7: return 6; 
-				case 4: return 5; 
-				case 3: return 3;
-				default: return -1;
-			}
-		} else if(game.equalsIgnoreCase("boulderdash") && priorLearnedModel.getGame().equalsIgnoreCase("digdug")){
-			switch(newIType){
-				case 1: return 1;
-				case 6: return 5;
-				case 10: return 11;
-				default: return -1;
-			}
-		} else if(game.equalsIgnoreCase("aliens") && priorLearnedModel.getGame().equalsIgnoreCase("missilecommand")){
-			switch(newIType){
-				case 3: return 0; 
-				case 5: return 4; 
-				case 6: return 7; 
-				case 9: return 7;
-				case 1: return 1;
-				default: return -1;
-			}
-		}
-		return -1;
-	}
-	
-	/**
 	 * Uses an epsilon-greedy approach to choose an mapping from the mapping value function
 	 * With probability epsilon, a random prior object class (or a new class) is chosen for each new object class
 	 * With probability 1-epsilon, the previous object class (or new class) that has the highest Q-value is chosen as the objClass that aligns best with each new object class
 	 */
 	public ArrayList<Integer> getMapping(ArrayList<double[]> similarityMatrix){
-		if(Main.fixedMapping){
+		if(Main.isFixedMapping){
 			return getGreedyMapping(similarityMatrix);
 		} else {
 			//Epsilon-greedy approach to choosing an mapping
-			if(rand.nextDouble() < mapping_epsilon){
+			if(rand.nextDouble() < Main.mapping_epsilon){
 				//Choose a random mapping
 				ArrayList<Integer> mapping = new ArrayList<Integer>();
 				for(int i=0; i<currMapping.size(); i++){
@@ -401,12 +314,12 @@ public class OBTAgent extends OFQAgent {
 	
 	public ArrayList<Integer> getGreedyMapping(ArrayList<double[]> similarityMatrix){
 		ArrayList<Integer> mapping = new ArrayList<Integer>();
-		if(Main.fixedMapping){
+		if(Main.isFixedMapping){
 			//Fixed mapping for debugging
 			for(int i=0; i<currMapping.size(); i++)
 				mapping.add(-1);
 			for(int new_itype : model.getItype_to_objClassId().keySet()){
-				int oldIType = getFixedMappingIType(new_itype);
+				int oldIType = Main.fixedMapping.containsKey(new_itype)? Main.fixedMapping.get(new_itype) : -1;
 				if(oldIType >= 0)
 					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.getItype_to_objClassId().get(oldIType));
 				else

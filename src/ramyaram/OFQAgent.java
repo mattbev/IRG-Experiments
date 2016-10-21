@@ -36,7 +36,7 @@ public class OFQAgent extends Agent {
         	Main.reward[conditionNum][(episodeNum/Main.interval)] += result[1]; //score of the game
         	if(result[0] == Types.WINNER.PLAYER_WINS.key())
         		Main.wins[(episodeNum/Main.interval)] = true;
-        	Main.writeToFile(Main.allDataFileName, result[1]+", ");
+        	Main.writeToFile(Main.allRewardFile, result[1]+", ");
         }
         return result[1];
 	}
@@ -45,7 +45,7 @@ public class OFQAgent extends Agent {
 	 * Epislon-greedy approach to choosing an action
 	 */
 	public Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
-    	if(rand.nextDouble() < epsilon){ //choose a random action
+    	if(rand.nextDouble() < Main.epsilon){ //choose a random action
     		int index = rand.nextInt(actions.size());
             Types.ACTIONS action = actions.get(index);
             return action;

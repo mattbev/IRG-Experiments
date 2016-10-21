@@ -20,15 +20,12 @@ import tools.Vector2d;
 public abstract class Agent extends AbstractPlayer {
 	public static Agent INSTANCE;
     protected static Random rand;
-    protected static double epsilon = 0.1;
-    protected static double alpha = 0.1;
-    protected static double gamma = 0.9;
     protected static int numRows;
     protected static int numCols;
     protected static int blockSize;
 	protected static StateObservation lastStateObs;
 	protected static Vector2d lastAvatarPos;
-	protected static double lastScore = 0;
+	protected static double lastScore;
 	protected static boolean updateQValues;
 	protected static String game = "";
 	
@@ -171,7 +168,7 @@ public abstract class Agent extends AbstractPlayer {
      * Calculates the updated qValue given the given quantities
      */
     public double getOneQValueUpdate(double q, double reward, double maxQ){
-    	return (1 - alpha) * q + alpha * (reward + gamma * maxQ);
+    	return (1 - Main.alpha) * q + Main.alpha * (reward + Main.gamma * maxQ);
     }
     
     /**

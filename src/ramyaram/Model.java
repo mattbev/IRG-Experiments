@@ -59,9 +59,11 @@ public class Model {
 			for(int j=0; j<transitionEstimates.get(i).length; j++){
 				for(int k=0; k<transitionEstimates.get(i)[j].length; k++){
 					for(int l=0; l<transitionEstimates.get(i)[j][k].length; l++){
-						for(int m=0; m<transitionEstimates.get(i)[j][k][l].length; m++){
+						for(int m=0; m<rewardEstimates.get(i)[j][k][l].length; m++){
 							if(rewardEstimates.get(i)[j][k][l][m] > 0 || rewardEstimates.get(i)[j][k][l][m] < 0)
 								rewardNum++;
+						}
+						for(int m=0; m<transitionEstimates.get(i)[j][k][l].length; m++){
 							for(int n=0; n<transitionEstimates.get(i)[j][k][l][m].length; n++){
 								if(transitionEstimates.get(i)[j][k][l][m][n] > 0 || transitionEstimates.get(i)[j][k][l][m][n] < 0)
 									transNum++;

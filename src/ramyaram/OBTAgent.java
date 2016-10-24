@@ -48,17 +48,22 @@ public class OBTAgent extends OFQAgent {
 		objRewardSim = new ArrayList<double[]>();
 		
 		weights = new double[numWeights];
-//		weights[PERFORMANCE] = 1;
-		for(int i=0; i<weights.length; i++)
-			weights[i] = 1/(double)weights.length;
+		weights[PERFORMANCE] = 1;
+//		for(int i=0; i<weights.length; i++)
+//			weights[i] = 1/(double)weights.length;
 		
 		int k=0;
 		//Learn mappings between objects without making any changes to the value functions
 		mappingPhase(conditionNum, k, Main.numEpisodesMapping, game, level1, visuals, controller, seed);
 		k+=Main.numEpisodesMapping;
-		printItypeMapping(currMapping);
+//		printItypeMapping(currMapping);
+//		System.out.println(currMapping);
+//		for(int i=0; i<model.qValueFunctions.size(); i++)
+//			System.out.println(model.qValueFunctions.get(i)+" "+model.qValueFunctions.get(i).getNumNonZero());
 		//copy value functions from previously learned task for new objects based on current mapping
 		copyMappedValueFunctions();
+//		for(int i=0; i<model.qValueFunctions.size(); i++)
+//			System.out.println(model.qValueFunctions.get(i)+" "+model.qValueFunctions.get(i).getNumNonZero());
 		while(k < numEpisodes){
 //			weightedSim = newWeightedSim();
 //			currMapping = getGreedyMapping(weightedSim);
@@ -90,14 +95,14 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	public void copyMappedValueFunctions(){
-		System.out.println(currMapping.size());
+//		System.out.println(currMapping.size());
 		for(int i=0; i<currMapping.size(); i++){
 			if(currMapping.get(i) >= priorLearnedModel.qValueFunctions.size())
 				model.qValueFunctions.set(i, new ValueFunction(null));
 			else
 				model.qValueFunctions.set(i, new ValueFunction(priorLearnedModel.qValueFunctions.get(currMapping.get(i)).getOptimalQValues()));
 		}
-		System.out.println(model.qValueFunctions.size());
+//		System.out.println(model.qValueFunctions.size());
 	}
 	
 	public ArrayList<double[]> newWeightedSim(){
@@ -219,7 +224,7 @@ public class OBTAgent extends OFQAgent {
 	public void processObs(Observation obs, Map<Observation, Object> map){
     	super.processObs(obs, map);
 		if(model.getItype_to_objClassId().get(obs.itype) >= currMapping.size()){
-			if(Main.isFixedMapping){
+			if(Main.fixedMapping != null){
 				int oldIType = Main.fixedMapping.containsKey(obs.itype)? Main.fixedMapping.get(obs.itype) : -1;
 				if(oldIType >= 0)
 					currMapping.add(priorLearnedModel.getItype_to_objClassId().get(oldIType));//rand.nextInt(model.qValueFunctions.size()));
@@ -237,6 +242,7 @@ public class OBTAgent extends OFQAgent {
     }
 	
 	public void runEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller, int seed){
+//		printItypeMapping(currMapping);
 		super.runOneEpisode(conditionNum, episodeNum, game, level1, visuals, controller, seed);
         
         Main.mapping_epsilon -= Main.mapping_epsilon_delta;
@@ -264,14 +270,19 @@ public class OBTAgent extends OFQAgent {
 		updateQValues = false;
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++){
 			weightedSim = newWeightedSim();
-			ArrayList<Integer> mapping = getMapping(weightedSim);
-			printItypeMapping(mapping);
+			currMapping = getMapping(weightedSim);
+//			printItypeMapping(currMapping);
 			double episodeReward = runOneEpisode(conditionNum, k, game, level1, visuals, controller, seed);
-			for(int i=0; i<mapping.size(); i++){
-				double q = mappingQ.get(i)[mapping.get(i)]; //update mappingQ based on reward received
+			for(int i=0; i<currMapping.size(); i++){
+//				System.out.println(currMapping.size()+" "+mappingQ.size()+" "+i);
+//				System.out.println(mappingQ.get(i));
+//				System.out.println(mappingQ.get(i).length);
+//				System.out.println(currMapping.get(i));
+				double q = mappingQ.get(i)[currMapping.get(i)]; //update mappingQ based on reward received
 		        double qValue = (1 - Main.mapping_alpha) * q + Main.mapping_alpha * episodeReward;
-		        mappingQ.get(i)[mapping.get(i)] = qValue;
+		        mappingQ.get(i)[currMapping.get(i)] = qValue;
 			}
+//			printMatrix(mappingQ);
 		}
 	}
 	
@@ -282,6 +293,11 @@ public class OBTAgent extends OFQAgent {
 		if(updateQValues)
 			return model.qValueFunctions.get(obj.getObjClassId());
 		else{
+//			System.out.println(currMapping);
+//			System.out.println(priorLearnedModel);
+//			System.out.println(priorLearnedModel.qValueFunctions);
+//			System.out.println(currMapping);
+//			printItypeMapping(currMapping);
 			if(currMapping.get(obj.getObjClassId()) >= priorLearnedModel.qValueFunctions.size())
 				return new ValueFunction(null);
 			else
@@ -295,7 +311,7 @@ public class OBTAgent extends OFQAgent {
 	 * With probability 1-epsilon, the previous object class (or new class) that has the highest Q-value is chosen as the objClass that aligns best with each new object class
 	 */
 	public ArrayList<Integer> getMapping(ArrayList<double[]> similarityMatrix){
-		if(Main.isFixedMapping){
+		if(Main.fixedMapping != null){
 			return getGreedyMapping(similarityMatrix);
 		} else {
 			//Epsilon-greedy approach to choosing an mapping
@@ -314,7 +330,7 @@ public class OBTAgent extends OFQAgent {
 	
 	public ArrayList<Integer> getGreedyMapping(ArrayList<double[]> similarityMatrix){
 		ArrayList<Integer> mapping = new ArrayList<Integer>();
-		if(Main.isFixedMapping){
+		if(Main.fixedMapping != null){
 			//Fixed mapping for debugging
 			for(int i=0; i<currMapping.size(); i++)
 				mapping.add(-1);
@@ -323,7 +339,7 @@ public class OBTAgent extends OFQAgent {
 				if(oldIType >= 0)
 					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.getItype_to_objClassId().get(oldIType));
 				else
-					mapping.set(model.getItype_to_objClassId().get(new_itype), model.qValueFunctions.size()-1);
+					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.qValueFunctions.size());
 			}
 		} else {
 			for(int i=0; i<currMapping.size(); i++){ //For each new object class

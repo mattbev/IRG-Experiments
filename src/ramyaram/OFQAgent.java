@@ -24,14 +24,16 @@ public class OFQAgent extends Agent {
 		model = new Model(game);
 		OFQAgent.game = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		updateQValues = true;
-		for(int i=0; i<numEpisodes; i++)
-        	runOneEpisode(conditionNum, i, game, level1, visuals, controller, seed);		
+//		runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
+		for(int i=1; i<numEpisodes; i++)
+        	runOneEpisode(conditionNum, i, game, level1, visuals, controller, seed);	
+//		runOneEpisode(conditionNum, numEpisodes, game, level1, true, controller, seed);
 		return model;
 	}
 	
 	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller, int seed){
 		System.out.println("Episode "+episodeNum);
-        double[] result = ArcadeMachine.runOneGame(game, level1, false, controller, null, seed, 0);
+        double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         if(episodeNum % Main.interval == 0){
         	Main.reward[conditionNum][(episodeNum/Main.interval)] += result[1]; //score of the game
         	if(result[0] == Types.WINNER.PLAYER_WINS.key())
@@ -121,11 +123,5 @@ public class OFQAgent extends Agent {
     public void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions) {
         if(updateQValues)
         	updateQValues(stateObs, action, nextStateObs, reward, actions);
-    }
-    
-    public void clearEachRun(){
-    	super.clearEachRun();
-    	if(model != null)
-    		model.qValueFunctions = null;
     }
 }

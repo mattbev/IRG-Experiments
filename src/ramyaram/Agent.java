@@ -27,7 +27,7 @@ public abstract class Agent extends AbstractPlayer {
 	protected static Vector2d lastAvatarPos;
 	protected static double lastScore;
 	protected static boolean updateQValues;
-	protected static String game = "";
+	protected static String game;
 	
 	protected static Map<Observation, Object> objectMap = new HashMap<Observation, Object>();
 	protected static Map<Vector2d, Object> gridObjectMap = new HashMap<Vector2d, Object>();
@@ -98,10 +98,6 @@ public abstract class Agent extends AbstractPlayer {
     //TODO: Remove hard-coding
     public List<Integer> getImportantObjects(String game){
     	switch(game){
-	    	case "ramyaFreeway": return Arrays.asList(7,10);
-	    	case "ramyaNormandy": return Arrays.asList(7,3);
-	    	case "ramyaNormandy2": return Arrays.asList(6,3);
-	    	case "ramyaNormandy3": return Arrays.asList(6,3);
 	    	case "aliens": return Arrays.asList(3,9,6,5);
 	    	case "missilecommand": return Arrays.asList(3,4,7);
 	    	case "sheriff": return Arrays.asList(3,5,12,13,14,15,16);
@@ -128,7 +124,7 @@ public abstract class Agent extends AbstractPlayer {
     	lastAvatarPos = null;
     	lastScore = 0;
     	if(model != null)
-    		model.getItype_to_objClassId().clear();
+    		model.clear();
     }
     
     /**

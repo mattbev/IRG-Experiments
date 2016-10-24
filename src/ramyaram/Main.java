@@ -18,8 +18,8 @@ public class Main {
 	public static boolean[] wins;
 	public static Model[] learnedModels;
     //parameters to denote number of episodes
-	public static int numAveraging = 1;
-	public static int numEpisodes = 10;
+	public static int numAveraging = 50;
+	public static int numEpisodes = 1000;
 	public static int numEpisodesMapping = numEpisodes;
 	public static int interval = 1;	
 	//parameters for standard Q-learning
@@ -37,7 +37,6 @@ public class Main {
 	public static File runInfoFile;
 	//settings for current run
     public static RunType runType;
-    public static boolean isFixedMapping;
 	public static int[] sourceGame; //this array has 2 indices, the first specifies the game index and the second is the level index
 	public static int[] targetGame; //this array has 2 indices, the first specifies the game index and the second is the level index
 	public static HashMap<Integer, Integer> fixedMapping; //fixed mapping if given prior to running the task
@@ -71,12 +70,10 @@ public class Main {
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
                 "zelda", "zenpuzzle"};
 		
-		learnedModels = new Model[Condition.values().length];
 		sourceGame = getGameLvlIdx(args[0], games);
 		targetGame = args.length > 1? getGameLvlIdx(args[1], games): null;
 		fixedMapping = args.length > 2? parseGivenMapping(args[2]): null;
 		runType = args.length > 1? RunType.RUN : RunType.PLAY;
-		isFixedMapping = args.length > 2? true : false;
 		
         int seed = new Random().nextInt();
         int numConditions = Condition.values().length;
@@ -87,7 +84,7 @@ public class Main {
         dirStr += args[0];
         if(targetGame != null)
         	dirStr += "_"+args[1];
-        if(isFixedMapping)
+        if(fixedMapping != null)
         	dirStr += "_fixed";
         int count = 2;
         while(new File(dirStr).exists()){
@@ -105,10 +102,6 @@ public class Main {
         runInfoFile = new File(dir.getPath()+"/runInfo.txt");
         writeInfoToFile(runInfoFile, args);
 
-        int gameIdx = sourceGame[0];
-        int levelIdx = sourceGame[1];
-        String game = gamesPath + games[gameIdx] + ".txt";
-        String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
 		int numDataPoints = numEpisodes/interval;
 		reward = new double[Condition.values().length][numDataPoints];
 		wins = new boolean[numDataPoints];
@@ -126,13 +119,12 @@ public class Main {
 		        writeToFile(allRewardFile, conditionsStr);
 		                
 		        for(int num=0; num<numAveraging; num++){
+		        	learnedModels = new Model[Condition.values().length];
 		        	for(int c=0; c<numConditions; c++){
-		        		if(c > 0) {
-		        			gameIdx = targetGame[0];
-		        			levelIdx = targetGame[1];
-		        			game = gamesPath + games[gameIdx] + ".txt";
-		        			level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
-		        		}
+		        		int gameIdx = (c == 0)? sourceGame[0] : targetGame[0];
+		        		int levelIdx = (c == 0)? sourceGame[1] : targetGame[1];
+		        		String game = gamesPath + games[gameIdx] + ".txt";
+		        		String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
 		                System.out.println("PLAYING "+games[gameIdx]+" level "+levelIdx);
 		        		String controller = initController(Condition.values()[c]);
 		        		if(Agent.INSTANCE != null){
@@ -163,8 +155,10 @@ public class Main {
 		        System.exit(0);
 		        
 			case PLAY:
-				System.out.println("Playing "+games[gameIdx]);
+				System.out.println("Playing "+games[sourceGame[0]]);
 		        if(runType == RunType.PLAY){
+		        	String game = gamesPath + games[sourceGame[0]] + ".txt";
+		        	String level1 = gamesPath + games[sourceGame[0]] + "_lvl" + sourceGame[1] +".txt";
 		        	while(true)
 		        		ArcadeMachine.playOneGame(game, level1, null, seed);
 		        }
@@ -176,7 +170,6 @@ public class Main {
         writeToFile(runInfoFile, "sourceGame="+args[0]+"\n");
         if(targetGame != null)
         	writeToFile(runInfoFile, "targetGame="+args[1]+"\n");
-        writeToFile(runInfoFile, "isFixedMapping="+isFixedMapping+"\n");
         if(fixedMapping != null)
         	writeToFile(runInfoFile, "fixedMapping="+fixedMapping.entrySet()+"\n");
         writeToFile(runInfoFile, "epsilon="+epsilon+"\n");
@@ -213,6 +206,8 @@ public class Main {
 	
 	public static int[] getGameLvlIdx(String game_lvl, String[] allGames){
 		int[] gameLvlIdx = new int[2];
+		for(int i=0; i<gameLvlIdx.length; i++)
+			gameLvlIdx[i] = -1;
 		String gameStr = game_lvl.substring(0, game_lvl.length()-1);
 		for(int i=0; i<allGames.length; i++){
 			if(gameStr.equalsIgnoreCase(allGames[i]))

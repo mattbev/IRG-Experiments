@@ -103,4 +103,12 @@ public class Model {
 		return new Model(game, new ArrayList<ValueFunction>(qValueFunctions), new HashMap<Integer, Integer>(itype_to_objClassId), 
 				new ArrayList<int[][][][][]>(transitionEstimates), new ArrayList<int[][][][]>(rewardEstimates));
 	}
+	
+	public void clear(){
+		qValueFunctions = null;
+		itype_to_objClassId = null;
+		transitionEstimates = null;
+		rewardEstimates = null;
+		game = "";
+	}
 }

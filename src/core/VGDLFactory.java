@@ -53,7 +53,8 @@ public class VGDLFactory
              "RandomNPC", "AlternateChaser", "RandomAltChaser","PathAltChaser", "RandomPathAltChaser",
              "Bomber", "RandomBomber", "Portal", "SpawnPoint", "SpriteProducer", "Door",
              "FlakAvatar", "HorizontalAvatar", "VerticalAvatar", "MovingAvatar","MissileAvatar",
-             "OrientedAvatar","ShootAvatar", "OngoingAvatar", "OngoingTurningAvatar", "BomberRandomMissile"};
+             "OrientedAvatar","ShootAvatar", "OngoingAvatar", "OngoingTurningAvatar", "BomberRandomMissile",
+             "OngoingShootAvatar"};
 
 
     /**
@@ -66,7 +67,8 @@ public class VGDLFactory
              RandomNPC.class, AlternateChaser.class, RandomAltChaser.class, PathAltChaser.class, RandomPathAltChaser.class,
              Bomber.class, RandomBomber.class, Portal.class, SpawnPoint.class, SpriteProducer.class, Door.class,
              FlakAvatar.class, HorizontalAvatar.class, VerticalAvatar.class, MovingAvatar.class,MissileAvatar.class,
-             OrientedAvatar.class,ShootAvatar.class, OngoingAvatar.class, OngoingTurningAvatar.class, BomberRandomMissile.class};
+             OrientedAvatar.class,ShootAvatar.class, OngoingAvatar.class, OngoingTurningAvatar.class, BomberRandomMissile.class,
+             OngoingShootAvatar.class};
 
     /**
      * Available effects for VGDL.

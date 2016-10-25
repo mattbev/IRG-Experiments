@@ -25,7 +25,7 @@ public class OFQAgent extends Agent {
 		OFQAgent.game = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		updateQValues = true;
 //		runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
-		for(int i=1; i<numEpisodes; i++)
+		for(int i=0; i<numEpisodes; i++)
         	runOneEpisode(conditionNum, i, game, level1, visuals, controller, seed);	
 //		runOneEpisode(conditionNum, numEpisodes, game, level1, true, controller, seed);
 		return model;

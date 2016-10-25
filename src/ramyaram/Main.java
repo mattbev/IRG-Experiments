@@ -68,7 +68,7 @@ public class Main {
                 "sheriff", "shipwreck", "sokoban", "solarfox" ,"superman",                    //65-69
                 "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
-                "zelda", "zenpuzzle","solarfoxShoot"};
+                "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem"};
 		
 		sourceGame = getGameLvlIdx(args[0], games);
 		targetGame = args.length > 1? getGameLvlIdx(args[1], games): null;

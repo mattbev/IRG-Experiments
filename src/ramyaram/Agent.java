@@ -146,9 +146,9 @@ public abstract class Agent extends AbstractPlayer {
         double currScore = stateObs.getGameScore(); 
         
 //		System.out.println("QValueFunctions size "+model.qValueFunctions.size());
-//		printStateObs(lastStateObs, gridObjectMap);
+//		System.out.println(stateObsStr(lastStateObs, gridObjectMap));
 //		System.out.println(action);
-//		printStateObs(stateObs, gridObjectNextStateMap);
+//		System.out.println(stateObsStr(stateObs, gridObjectNextStateMap));
 //		System.out.println(currScore+" "+(currScore-lastScore));
         
         updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore), actions);
@@ -180,19 +180,21 @@ public abstract class Agent extends AbstractPlayer {
 		return new Vector2d(x, y);
 	}
     
-    public void printStateObs(StateObservation stateObs, Map<Vector2d, Object> gridMap){
+    public String stateObsStr(StateObservation stateObs, Map<Vector2d, Object> gridMap){
+    	String str = "";
     	ArrayList<Observation>[][] observationGrid = stateObs.getObservationGrid();
     	for (int r = 0; r < observationGrid[0].length; r++) {
 			for (int c = 0; c < observationGrid.length; c++) {
 				if(gridMap.containsKey(new Vector2d(c,r))){
 					Object o = gridMap.get(new Vector2d(c,r));
-					System.out.print(o.getItype());
+					str += o.getItype();
 				} else {
-					System.out.print("-");
+					str += "-";
 				}
 			}
-			System.out.println();
+			str += "\n";
 		}
+    	return str;
     }
     
     public static int getXDist(Vector2d agent, Vector2d obj){

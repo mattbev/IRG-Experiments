@@ -31,10 +31,11 @@ public class Main {
 	public static double mapping_epsilon = 0.1; //The amount an agent explores (as opposed to exploit) mappings of different object classes
 	public static double mapping_epsilon_end = 0.001; //The ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
 	public static double mapping_epsilon_delta = 0.01; //Exploration over mappings decreases by this delta value over time	
-	//files for saving simulation results
+	//files for saving results
 	public static File avgRewardFile;
 	public static File allRewardFile;
 	public static File runInfoFile;
+	public static File humanDataFile;
 	//settings for current run
     public static RunType runType;
 	public static int[] sourceGame; //this array has 2 indices, the first specifies the game index and the second is the level index
@@ -97,10 +98,14 @@ public class Main {
         File dir = new File(dirStr);	
         dir.mkdir();
         
-        avgRewardFile = new File(dir.getPath()+"/reward.csv");
-        allRewardFile = new File(dir.getPath()+"/allReward.csv");
-        runInfoFile = new File(dir.getPath()+"/runInfo.txt");
-        writeInfoToFile(runInfoFile, args);
+        if(runType == RunType.RUN){
+	        avgRewardFile = new File(dir.getPath()+"/reward.csv");
+	        allRewardFile = new File(dir.getPath()+"/allReward.csv");
+	        runInfoFile = new File(dir.getPath()+"/runInfo.txt");
+	        writeInfoToFile(runInfoFile, args);
+        } else if(runType == RunType.PLAY){
+        	humanDataFile = new File(dir.getPath()+"/humanData.txt");
+        }
 
 		int numDataPoints = numEpisodes/interval;
 		reward = new double[Condition.values().length][numDataPoints];
@@ -159,9 +164,15 @@ public class Main {
 		        if(runType == RunType.PLAY){
 		        	String game = gamesPath + games[sourceGame[0]] + ".txt";
 		        	String level1 = gamesPath + games[sourceGame[0]] + "_lvl" + sourceGame[1] +".txt";
-		        	while(true)
-		        		ArcadeMachine.playOneGame(game, level1, null, seed);
-		        }
+		        	new HumanAgent(null,null);
+		        	String controller = "ramyaram.HumanAgent";
+		        	int num = 0;
+		        	while(true){
+		        		writeToFile(humanDataFile, "PLAY #"+num+"\n");
+	        			Agent.INSTANCE.run(-1, -1, game, level1, true, controller, seed, null);
+		        		num++;
+		        	}
+		       }
 		}
 	}
 	

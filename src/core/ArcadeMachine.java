@@ -1296,7 +1296,8 @@ public class ArcadeMachine
     private static final boolean isHuman(String agentName)
     {
         if( agentName.equalsIgnoreCase("controllers.multiPlayer.human.Agent") ||
-            agentName.equalsIgnoreCase("controllers.singlePlayer.human.Agent")    )
+            agentName.equalsIgnoreCase("controllers.singlePlayer.human.Agent") ||
+            agentName.equalsIgnoreCase("ramyaram.HumanAgent"))
             return true;
         return false;
     }

@@ -101,6 +101,7 @@ public abstract class Agent extends AbstractPlayer {
 	    	case "aliens": return Arrays.asList(3,9,6,5);
 	    	case "missilecommand": return Arrays.asList(3,4,7);
 	    	case "sheriff": return Arrays.asList(3,5,12,13,14,15,16);
+	    	case "sheriffTopBottom": return Arrays.asList(3,5,14,15,16);
 	    	case "solarfox": return Arrays.asList(8,9,6,11,12);
 	    	case "solarfoxShoot": return Arrays.asList(4,7,9,10,12,13);
 	    	case "solarfoxShootGem": return Arrays.asList(4,7,9,10,12,13);

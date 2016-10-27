@@ -6,8 +6,6 @@ import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Random;
 
-import core.ArcadeMachine;
-
 /**
  * Main method that runs simulations of agents playing various games and analyzes the data
  */
@@ -69,7 +67,7 @@ public class Main {
                 "sheriff", "shipwreck", "sokoban", "solarfox" ,"superman",                    //65-69
                 "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
-                "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem"};
+                "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem", "sheriffTopBottom"};
 		
 		sourceGame = getGameLvlIdx(args[0], games);
 		targetGame = args.length > 1? getGameLvlIdx(args[1], games): null;

@@ -7,12 +7,12 @@ BasicGame square_size=50
         avatar  > OngoingAvatar color=YELLOW img=oryx/spaceship1 speed=0.15
         powerblib > Passive img=oryx/diamond3
         powerblibturning > Flicker limit=8 img=oryx/sparkle4
-        blib > Passive img=oryx/diamond1
-        enemy > Missile cooldown=3 img=oryx/necromancer1
-            top > orientation=RIGHT shrinkfactor=1
-            btm > orientation=LEFT shrinkfactor=1
+        blib > Passive img=oryx/knight1
+        enemy > Missile cooldown=3 
+            top > orientation=RIGHT shrinkfactor=1 img=oryx/diamond1
+            btm > orientation=LEFT shrinkfactor=1 img=oryx/diamond3
         shot > Missile shrinkfactor=0.7
-            upshot > orientation=UP speed=0.15 img=oryx/fireup1
+            upshot > orientation=UP speed=0.15 img=oryx/planet
             downshot > orientation=DOWN speed=0.15 img=oryx/firedown1
         res > Resource color=GREEN value=0 limit=4 img=oryx/diamond2
         wall > Immovable img=oryx/wall3 autotiling=True

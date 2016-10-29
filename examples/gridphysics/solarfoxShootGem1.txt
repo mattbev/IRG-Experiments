@@ -4,16 +4,17 @@ BasicGame square_size=50
     SpriteSet
         floor > Immovable img=oryx/backGrey
         enemyground > Immovable img=newset/water
-        avatar  > OngoingAvatar color=YELLOW img=oryx/spaceship1 speed=0.15
+        bullet > Missile color=BLUE img=oryx/rogue
+        avatar  > OngoingShootAvatar stype=bullet img=oryx/spaceship1 speed=0.15
         powerblib > Passive img=oryx/diamond3
         powerblibturning > Flicker limit=8 img=oryx/sparkle4
-        blib > Passive img=oryx/diamond1
-        enemy > Missile cooldown=3 img=oryx/necromancer1
-            top > orientation=RIGHT shrinkfactor=1
-            btm > orientation=LEFT shrinkfactor=1
+        blib > Passive img=oryx/door2
+        enemy > Missile cooldown=3 
+            top > orientation=RIGHT shrinkfactor=1 img=oryx/pickaxe
+            btm > orientation=LEFT shrinkfactor=1 img=oryx/eye1
         shot > Missile shrinkfactor=0.7
-            upshot > orientation=UP speed=0.15 img=oryx/fireup1
-            downshot > orientation=DOWN speed=0.15 img=oryx/firedown1
+            upshot > orientation=UP speed=0.15 img=oryx/cloak3
+            downshot > orientation=DOWN speed=0.15 img=oryx/spike3
         res > Resource color=GREEN value=0 limit=4 img=oryx/diamond2
         wall > Immovable img=oryx/wall3 autotiling=True
         
@@ -37,6 +38,8 @@ BasicGame square_size=50
         avatar wall enemy enemyground shot > killSprite scoreChange=-10
 
         blib avatar > killSprite scoreChange=1
+        enemy bullet > killBoth scoreChange=5
+        blib bullet > killBoth scoreChange=-5
 
         powerblib powerblibturning > spawnIfHasMore resource=res stype=blib limit=2
         powerblibturning avatar > killSprite

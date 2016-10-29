@@ -36,10 +36,12 @@ public class Model {
 	}
 
 	public void updateModelEstimate(int index, Vector2d agent, Vector2d obj, Types.ACTIONS action, Vector2d agentNext, Vector2d objNext, double reward){
+//		numNonZeroTransReward();
 		transitionEstimates.get(index)[Agent.getXDist(agent, obj)+Agent.numCols-1][Agent.getYDist(agent, obj)+Agent.numRows-1][action.ordinal()]
 				[Agent.getXDist(agentNext, objNext)+Agent.numCols-1][Agent.getYDist(agentNext, objNext)+Agent.numRows-1]++;
 		rewardEstimates.get(index)[Agent.getXDist(agent, obj)+Agent.numCols-1][Agent.getYDist(agent, obj)+Agent.numRows-1][action.ordinal()]
 				[getRewardIndex(reward)]++;
+//		numNonZeroTransReward();
 	}
 	
 	public int getTransitionCounts(int index, Vector2d agent, Vector2d obj, Types.ACTIONS action, Vector2d agentNext, Vector2d objNext, double reward){

@@ -107,11 +107,11 @@ public class OBTAgent extends OFQAgent {
 	
 	public ArrayList<double[]> newWeightedSim(){
 //		System.out.println("mappingQ");
-//		printMatrix(mappingQ);
+//		printList(mappingQ);
 //		System.out.println("objTransitionSim");
-//		printMatrix(objTransitionSim);
+//		printList(objTransitionSim);
 //		System.out.println("objRewardSim");
-//		printMatrix(objRewardSim);
+//		printList(objRewardSim);
 		ArrayList<double[]> sim = new ArrayList<double[]>();
 		for(int i=0; i<weightedSim.size(); i++){
 			sim.add(new double[weightedSim.get(i).length]);
@@ -122,7 +122,7 @@ public class OBTAgent extends OFQAgent {
 			}
 		}
 //		System.out.println("newWeightedSim");
-//		printMatrix(sim);
+//		printList(sim);
 		return sim;
 	}
 	
@@ -171,6 +171,8 @@ public class OBTAgent extends OFQAgent {
 				}
 			}
 		}
+//		printMatrix(tempTransSim);
+//		printMatrix(tempRewardSim);
 		normalize(tempTransSim);
 		normalize(tempRewardSim);
 		for(int i=0; i<tempTransSim.length; i++){
@@ -282,7 +284,8 @@ public class OBTAgent extends OFQAgent {
 		        double qValue = (1 - Main.mapping_alpha) * q + Main.mapping_alpha * episodeReward;
 		        mappingQ.get(i)[currMapping.get(i)] = qValue;
 			}
-//			printMatrix(mappingQ);
+//			printList(mappingQ);
+//			System.out.print("");
 		}
 	}
 	
@@ -373,10 +376,20 @@ public class OBTAgent extends OFQAgent {
 		numOfMappings = null;
 	}
 	
-	public void printMatrix(ArrayList<double[]> matrix){
-		for(int i=0; i<matrix.size(); i++){
-			for(int j=0; j<matrix.get(i).length; j++){
-				System.out.print(matrix.get(i)[j]+" ");
+	public void printList(ArrayList<double[]> list){
+		for(int i=0; i<list.size(); i++){
+			
+			for(int j=0; j<list.get(i).length; j++){
+				System.out.print(list.get(i)[j]+" ");
+			}
+			System.out.println();
+		}
+	}
+	
+	public void printMatrix(double[][] matrix){
+		for(int i=0; i<matrix.length; i++){
+			for(int j=0; j<matrix[i].length; j++){
+				System.out.print(matrix[i][j]+" ");
 			}
 			System.out.println();
 		}

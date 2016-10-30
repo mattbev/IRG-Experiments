@@ -76,6 +76,9 @@ public class Main {
 		targetGame = args.length > 2? getGameLvlIdx(args[2], games): null;
 		fixedMapping = args.length > 3? parseGivenMapping(args[3]): null;
 		runType = args.length > 2? RunType.RUN : RunType.PLAY;
+		
+		numAveraging = args.length > 4? Integer.parseInt(args[4]) : numAveraging;
+		numEpisodes = args.length > 5? Integer.parseInt(args[5]) : numEpisodes;
 				
 		if(fixedMapping != null){
 			if(fixedMapping.isEmpty())

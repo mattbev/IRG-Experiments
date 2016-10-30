@@ -81,7 +81,10 @@ public abstract class Agent extends AbstractPlayer {
 					if(getImportantObjects(game) != null){
 						if(getImportantObjects(game).contains(obs.itype))
 							al.add(obs);
-					} 
+					} else {
+						if(!Arrays.asList().contains(obs.itype))
+							al.add(obs);
+					}
 				}
 				for (Observation obs : al)
 					processObs(obs, map);
@@ -105,6 +108,9 @@ public abstract class Agent extends AbstractPlayer {
 	    	case "solarfox": return Arrays.asList(8,9,6,11,12);
 	    	case "solarfoxShoot": return Arrays.asList(4,7,9,10,12,13);
 	    	case "solarfoxShootGem": return Arrays.asList(4,7,9,10,12,13);
+	    	case "butterflies": return Arrays.asList(3,5);
+	    	case "firestorms": return Arrays.asList(3,4,5,6);
+	    	case "firecaster": return Arrays.asList(4,5,6,8);
     	}
     	return null;
     }

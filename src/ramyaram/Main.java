@@ -18,7 +18,7 @@ public class Main {
     //parameters to denote number of episodes
 	public static int numAveraging = 50;
 	public static int numEpisodes = 1000;
-	public static int numEpisodesMapping = numEpisodes;
+	public static int numEpisodesMapping = -1;
 	public static int interval = 1;	
 	//parameters for standard Q-learning
 	public static double epsilon = 0.1;
@@ -74,6 +74,13 @@ public class Main {
 		targetGame = args.length > 1? getGameLvlIdx(args[1], games): null;
 		fixedMapping = args.length > 2? parseGivenMapping(args[2]): null;
 		runType = args.length > 1? RunType.RUN : RunType.PLAY;
+		
+		if(fixedMapping != null){
+			if(fixedMapping.isEmpty())
+				numEpisodesMapping = 0;
+			else
+				numEpisodesMapping = numEpisodes;
+		}
 		
         int seed = new Random().nextInt();
         int numConditions = Condition.values().length;

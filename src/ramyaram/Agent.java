@@ -111,6 +111,7 @@ public abstract class Agent extends AbstractPlayer {
 	    	case "butterflies": return Arrays.asList(3,5);
 	    	case "firestorms": return Arrays.asList(3,4,5,6);
 	    	case "firecaster": return Arrays.asList(4,5,6,8);
+	    	case "crossfire": return Arrays.asList(3,4,6);
     	}
     	return null;
     }

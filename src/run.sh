@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ $# -le 0 ] || [ $# -gt 3 ]; then
+echo 'Please run with the following notation:'	
+echo './run.sh <first game> <(optional) second game> <mapping between object itypes in the first and second games>'	
+echo 'To play a game (e.g., aliens level 0): ./run.sh aliens0'
+echo 'To run transfer between two games (e.g., aliens level0 to sheriff level 0) with a given fixed mapping (ids are itypes of objects in the game): ./run.sh aliens5 sheriff0 {9:3,5:4,1:0}'
+echo 'To run transfer between two games (e.g., aliens level 0 to sheriff level 0) where the agent learns a mapping: ./run.sh aliens0 sheriff0'
+exit 1
+fi
+
+dir=$1
+if [ $# -ge 2 ]; then
+	dir+="_$2"
+fi
+if [ $# -ge 3 ]; then
+	dir+="_fixed"
+fi
+count=0
+newdir="${dir}_${count}"
+while [ -d "$newdir" ]; do
+	count=$((count+1))
+	newdir="${dir}_${count}"
+done
+echo "$newdir"
+mkdir "$newdir"
+
+javac ramyaram/Main.java
+java ramyaram/Main $newdir $1 $2 $3 
+python plots.py $newdir "reward.csv"

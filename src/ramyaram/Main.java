@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Random;
 
+import core.competition.CompetitionParameters;
+
 /**
  * Main method that runs simulations of agents playing various games and analyzes the data
  */
@@ -41,15 +43,7 @@ public class Main {
 	public static HashMap<Integer, Integer> fixedMapping; //fixed mapping if given prior to running the task
 	
 	public static void main(String[] args) {
-		if(args.length <= 0 || args.length > 3){
-			System.out.println("Please run with the following notation:");			
-			System.out.println("To play aliens (level0): java -jar Main.java aliens0");
-			System.out.println("To run transfer from aliens (level0) to sheriff (level0) with a given fixed mapping (ids are 'itypes' of objects in the game): java -jar Main.java aliens5 sheriff0 {9:3,5:4,1:0}");
-			System.out.println("To run transfer from aliens (level0) to sheriff (level0) with the mapping being learned: java -jar Main.java aliens0 sheriff0");
-			System.exit(0);
-		}
-		
-		String gamesPath = "examples/gridphysics/";
+		String gamesPath = "../examples/gridphysics/";
 		String games[] = new String[]
         		{"aliens", "angelsdemons", "assemblyline", "avoidgeorge", "bait", 			  //0-4
                 "blacksmoke", "boloadventures", "bomber", "boulderchase", "boulderdash",      //5-9
@@ -70,45 +64,36 @@ public class Main {
                 "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem", "sheriffTopBottom",
                 "aliens1", "solarfox1", "solarfoxShootGem1", "sheriff1"};
 		
-		sourceGame = getGameLvlIdx(args[0], games);
-		targetGame = args.length > 1? getGameLvlIdx(args[1], games): null;
-		fixedMapping = args.length > 2? parseGivenMapping(args[2]): null;
-		runType = args.length > 1? RunType.RUN : RunType.PLAY;
+		File dir = new File(args[0]);
+		if(!dir.exists()){ //Not running Java program from run.sh (which will create the directory automatically)
+			dir.mkdir();
+			//When running on Eclipse, the following two paths are different than when running with run.sh
+			gamesPath = gamesPath.substring(gamesPath.indexOf('/')+1);
+			CompetitionParameters.IMG_PATH = CompetitionParameters.IMG_PATH.substring(CompetitionParameters.IMG_PATH.indexOf('/')+1);
+		}
 		
+		sourceGame = getGameLvlIdx(args[1], games);
+		targetGame = args.length > 2? getGameLvlIdx(args[2], games): null;
+		fixedMapping = args.length > 3? parseGivenMapping(args[3]): null;
+		runType = args.length > 2? RunType.RUN : RunType.PLAY;
+				
 		if(fixedMapping != null){
 			if(fixedMapping.isEmpty())
 				numEpisodesMapping = 0;
 			else
 				numEpisodesMapping = numEpisodes;
+		} else {
+			numEpisodesMapping = numEpisodes;
 		}
 		
         int seed = new Random().nextInt();
         int numConditions = Condition.values().length;
-
-        String dirStr = "";
-        if(runType == RunType.PLAY)
-        	dirStr += runType.name()+"_";
-        dirStr += args[0];
-        if(targetGame != null)
-        	dirStr += "_"+args[1];
-        if(fixedMapping != null)
-        	dirStr += "_fixed";
-        int count = 2;
-        while(new File(dirStr).exists()){
-        	if(count > 2)
-        		dirStr = dirStr.substring(0, dirStr.length()-1)+count;
-        	else
-        		dirStr += "_"+count;
-        	count++;
-        }
-        File dir = new File(dirStr);	
-        dir.mkdir();
         
         if(runType == RunType.RUN){
 	        avgRewardFile = new File(dir.getPath()+"/reward.csv");
 	        allRewardFile = new File(dir.getPath()+"/allReward.csv");
 	        runInfoFile = new File(dir.getPath()+"/runInfo.txt");
-	        writeInfoToFile(runInfoFile, args);
+	        writeInfoToFile(runInfoFile, args[1], args[2]);
         } else if(runType == RunType.PLAY){
         	humanDataFile = new File(dir.getPath()+"/humanData.txt");
         }
@@ -182,11 +167,11 @@ public class Main {
 		}
 	}
 	
-	public static void writeInfoToFile(File runInfoFile, String[] args){
+	public static void writeInfoToFile(File runInfoFile, String sourceGameStr, String targetGameStr){
 		writeToFile(runInfoFile, "runType="+runType+"\n");
-        writeToFile(runInfoFile, "sourceGame="+args[0]+"\n");
+        writeToFile(runInfoFile, "sourceGame="+sourceGameStr+"\n");
         if(targetGame != null)
-        	writeToFile(runInfoFile, "targetGame="+args[1]+"\n");
+        	writeToFile(runInfoFile, "targetGame="+targetGameStr+"\n");
         if(fixedMapping != null)
         	writeToFile(runInfoFile, "fixedMapping="+fixedMapping.entrySet()+"\n");
         writeToFile(runInfoFile, "epsilon="+epsilon+"\n");

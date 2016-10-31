@@ -17,7 +17,8 @@ import tools.Vector2d;
  * Created by diego on 06/02/14.
  */
 public class HumanAgent extends Agent {	
-	
+	public static int lastWin = -1;
+	public static double lastGameScore = -1;
     /**
      * Public constructor with state observation and time due.
      * @param so state observation of the current game.
@@ -58,8 +59,13 @@ public class HumanAgent extends Agent {
 	        Main.writeToFile(Main.humanDataFile, action.name()+", "+(currScore-lastScore)+"\n");
 	        Main.writeToFile(Main.humanDataFile, stateObsStr(stateObs, gridObjectNextStateMap)+"\n");
         }
-        if(stateObs.isGameOver())
+        if(stateObs.isGameOver()){
         	Main.writeToFile(Main.humanDataFile, "WINNER: "+stateObs.getGameWinner()+", SCORE: "+stateObs.getGameScore()+"\n**********************\n\n");
+        	Main.writeToFile(Main.humanWinsFile, stateObs.getGameWinner()+",");
+        	Main.writeToFile(Main.humanScoresFile, stateObs.getGameScore()+",");
+        	lastWin = stateObs.getGameWinner() == Types.WINNER.PLAYER_WINS ? 1 : 0;
+        	lastGameScore = stateObs.getGameScore();
+        }
         
         lastScore = currScore;
         objectMap.clear();

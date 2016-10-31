@@ -36,6 +36,8 @@ public class Main {
 	public static File allRewardFile;
 	public static File runInfoFile;
 	public static File humanDataFile;
+	public static File humanWinsFile;
+	public static File humanScoresFile;
 	//settings for current run
     public static RunType runType;
 	public static int[] sourceGame; //this array has 2 indices, the first specifies the game index and the second is the level index
@@ -99,6 +101,8 @@ public class Main {
 	        writeInfoToFile(runInfoFile, args[1], args[2]);
         } else if(runType == RunType.PLAY){
         	humanDataFile = new File(dir.getPath()+"/humanData.txt");
+        	humanWinsFile = new File(dir.getPath()+"/humanWins.txt");
+        	humanScoresFile = new File(dir.getPath()+"/humanScores.txt");
         }
 
 		int numDataPoints = numEpisodes/interval;

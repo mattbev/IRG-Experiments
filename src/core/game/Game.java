@@ -26,6 +26,7 @@ import ontology.avatar.MovingAvatar;
 import ontology.effects.Effect;
 import ontology.effects.TimeEffect;
 import ontology.sprites.Resource;
+import ramyaram.HumanAgent;
 import tools.*;
 import tools.pathfinder.Node;
 import tools.pathfinder.PathFinder;
@@ -895,8 +896,16 @@ public abstract class Game
             
             if(firstRun && isHuman){
             	if(CompetitionParameters.dialogBoxOnStartAndEnd){
-            		JOptionPane.showMessageDialog(frame, 
-            				"Click OK to start.");
+            		String str =  "Last game result: ";
+            		if(HumanAgent.lastWin == 1)
+            			str+="Won, ";
+            		else
+            			str+="Lost, ";
+            		str+= "Score: "+HumanAgent.lastGameScore+".\n\nClick OK to continue playing.\nIf you're ready to stop, please let the experimenter know.";
+            		if(HumanAgent.lastWin == -1)
+            			JOptionPane.showMessageDialog(frame, "Click OK to start playing.");           		
+            		else
+            			JOptionPane.showMessageDialog(frame, str);
             	}
             	
             	firstRun = false;
@@ -907,7 +916,7 @@ public abstract class Game
         	if(CompetitionParameters.dialogBoxOnStartAndEnd){
                 if (no_players == 1) {
                     JOptionPane.showMessageDialog(frame,
-                            "GAMEOVER: YOU " + (avatars[humanID].getWinState() == Types.WINNER.PLAYER_WINS ? "WIN." : "LOSE."));
+                            "GAMEOVER: YOU " + (avatars[humanID].getWinState() == Types.WINNER.PLAYER_WINS ? "WIN." : "LOSE.")+"\nSCORE: "+avatars[humanID].getScore());
                 } else {
                     String sb = "";
                     for (int i = 0; i < no_players; i++) {

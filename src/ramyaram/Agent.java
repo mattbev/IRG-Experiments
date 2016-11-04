@@ -103,17 +103,22 @@ public abstract class Agent extends AbstractPlayer {
     	switch(game){
 	    	case "aliens": return Arrays.asList(3,9,6,5);
 	    	case "missilecommand": return Arrays.asList(3,4,7);
-	    	case "sheriff": return Arrays.asList(3,5,12,13,14,15,16);
+	    	case "sheriff": case "H": return Arrays.asList(3,5,12,13,14,15,16);
 	    	case "sheriffTopBottom": return Arrays.asList(3,5,14,15,16);
-	    	case "solarfox": return Arrays.asList(8,9,6,11,12);
+	    	case "solarfox": case "S": return Arrays.asList(8,9,6,11,12);
 	    	case "solarfoxShoot": return Arrays.asList(4,7,9,10,12,13);
 	    	case "solarfoxShootGem": return Arrays.asList(4,7,9,10,12,13);
 	    	case "butterflies": return Arrays.asList(3,5);
-	    	case "firestorms": return Arrays.asList(3,4,5,6);
+	    	case "firestorms": case "F": return Arrays.asList(3,4,5,6);
 	    	case "firecaster": return Arrays.asList(4,5,6,8);
 	    	case "crossfire": return Arrays.asList(3,4,6);
-	    	case "plaqueattack": return Arrays.asList(4,7,11,14,16);
-	    	case "defender": return Arrays.asList(3,5,6,7,12);
+	    	case "plaqueattack": case "P": return Arrays.asList(4,7,11,14,16);
+	    	case "defender": case "D": return Arrays.asList(3,5,6,7,12);
+	    	case "avoidgeorge": return Arrays.asList(6,7,8);
+	    	case "witnessprotection": return Arrays.asList(3,4,9,10,13,15,16,18,19);
+	    	case "jaws": return Arrays.asList(4,5,6,8,10,11,12,13);
+	    	case "waves": return Arrays.asList(3,5,6,7,9,10,11,12);
+	    	case "W": return Arrays.asList(3,5,6,8,9,10);
     	}
     	return null;
     }

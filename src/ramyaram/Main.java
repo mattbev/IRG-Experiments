@@ -64,7 +64,7 @@ public class Main {
                 "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
                 "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
                 "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem", "sheriffTopBottom",
-                "aliens1", "solarfox1", "solarfoxShootGem1", "sheriff1"};
+                "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D"};
 		
 		File dir = new File(args[0]);
 		if(!dir.exists()){ //Not running Java program from run.sh (which will create the directory automatically)

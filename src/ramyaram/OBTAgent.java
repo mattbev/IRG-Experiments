@@ -71,27 +71,37 @@ public class OBTAgent extends OFQAgent {
 			qValuesPhase(conditionNum, k, 1, game, level1, visuals, controller, seed);
 			k+=1;
 		}
-		ArrayList<Integer> bestMapping = new ArrayList<Integer>();
-		for(int i=0; i<mappingQ.size(); i++){
-			double maxValue = Integer.MIN_VALUE;
-			int maxIndex = -1;
-			for(int j=0; j<mappingQ.get(i).length; j++){
-				System.out.print(mappingQ.get(i)[j]+" ");
-				if(mappingQ.get(i)[j]>maxValue){
-					maxValue = mappingQ.get(i)[j];
-					maxIndex = j;
-				}
-			}
-			System.out.println();
-			bestMapping.add(maxIndex);
-			numOfMappings.get(i)[bestMapping.get(i)]++;
-		}
+		ArrayList<Integer> bestMapping = getMapping(mappingQ);
+		updateNumOfMappings(bestMapping);
 		System.out.println("-------");
 		System.out.println("Best Mapping based on mappingQ:");
 		printItypeMapping(bestMapping);
 		System.out.println("Current Mapping:");
 		printItypeMapping(currMapping);
 		return model;
+	}
+	
+	public void updateNumOfMappings(ArrayList<Integer> maxMapping){
+		for(int i=0; i<maxMapping.size(); i++)
+			numOfMappings.get(i)[maxMapping.get(i)]++;
+	}
+	
+	public ArrayList<Integer> getMaxMapping(ArrayList<double[]> similarityMatrix){
+		ArrayList<Integer> maxMapping = new ArrayList<Integer>();
+		for(int i=0; i<similarityMatrix.size(); i++){
+			double maxValue = Integer.MIN_VALUE;
+			int maxIndex = -1;
+			for(int j=0; j<similarityMatrix.get(i).length; j++){
+				System.out.print(similarityMatrix.get(i)[j]+" ");
+				if(similarityMatrix.get(i)[j]>maxValue){
+					maxValue = similarityMatrix.get(i)[j];
+					maxIndex = j;
+				}
+			}
+			System.out.println();
+			maxMapping.add(maxIndex);
+		}
+		return maxMapping;
 	}
 	
 	public void copyMappedValueFunctions(){
@@ -123,6 +133,7 @@ public class OBTAgent extends OFQAgent {
 		}
 //		System.out.println("newWeightedSim");
 //		printList(sim);
+//		printItypeMapping(getMaxMapping(sim));
 		return sim;
 	}
 	

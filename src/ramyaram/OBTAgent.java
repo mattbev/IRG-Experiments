@@ -8,7 +8,6 @@ import core.game.Observation;
 import core.game.StateObservation;
 import ontology.Types;
 import tools.ElapsedCpuTimer;
-import tools.Vector2d;
 
 /**
  * Object-Based Transfer agent
@@ -37,7 +36,7 @@ public class OBTAgent extends OFQAgent {
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
 		}
-		OBTAgent.game = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
+		OBTAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		OBTAgent.priorLearnedModel = priorLearnedModel;
 		
 		currMapping = new ArrayList<Integer>();
@@ -163,18 +162,18 @@ public class OBTAgent extends OFQAgent {
 //					priorLearnedModel.numNonZeroTransReward();
 //					System.out.println("newModel: ");
 //					model.numNonZeroTransReward();
-					int newTransitionCounts = model.getTransitionCounts(obj.getObjClassId(), stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
-		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
-					int previousTransitionCounts = priorLearnedModel.getTransitionCounts(j, stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
-		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
+					int newTransitionCounts = model.getTransitionCounts(obj.getObjClassId(), getAvatarGridPos(stateObs), obj.getGridPos(), action,
+		    				getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
+					int previousTransitionCounts = priorLearnedModel.getTransitionCounts(j, getAvatarGridPos(stateObs), obj.getGridPos(), action,
+							getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
 //					System.out.println("transition "+newTransitionCounts+" "+previousTransitionCounts);
 					if(newTransitionCounts>0 && previousTransitionCounts>0){
 						tempTransSim[obj.getObjClassId()][j]++;
 					}
-					int newRewardCounts = model.getRewardCounts(obj.getObjClassId(), stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
-		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
-					int previousRewardCounts = priorLearnedModel.getRewardCounts(j, stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
-		    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
+					int newRewardCounts = model.getRewardCounts(obj.getObjClassId(), getAvatarGridPos(stateObs), obj.getGridPos(), action,
+							getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
+					int previousRewardCounts = priorLearnedModel.getRewardCounts(j, getAvatarGridPos(stateObs), obj.getGridPos(), action,
+							getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
 //					System.out.println("reward "+newRewardCounts+" "+previousRewardCounts);
 					if(newRewardCounts>0 && previousRewardCounts>0){
 						tempRewardSim[obj.getObjClassId()][j]++;
@@ -200,8 +199,8 @@ public class OBTAgent extends OFQAgent {
 			Object obj = objectMap.get(obs);
 			Object nextObj = objectNextStateMap.get(obs);
 			if(nextObj != null){
-				model.updateModelEstimate(obj.getObjClassId(), stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action,
-    				nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), reward);
+				model.updateModelEstimate(obj.getObjClassId(), getAvatarGridPos(stateObs), obj.getGridPos(), action,
+    				getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
 				updateModelSimilarity(stateObs, action, nextStateObs, reward);
 			}
     	}

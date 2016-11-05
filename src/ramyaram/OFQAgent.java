@@ -22,7 +22,7 @@ public class OFQAgent extends Agent {
 	
 	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel) {
 		model = new Model(game);
-		OFQAgent.game = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
+		OFQAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		updateQValues = true;
 //		runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
 		for(int i=0; i<numEpisodes; i++)
@@ -62,7 +62,7 @@ public class OFQAgent extends Agent {
 		for(Observation obs : objectMap.keySet()){
 			Object obj = objectMap.get(obs);
 			for(Types.ACTIONS action : actions){
-				double value = getValueFunction(obj).getOptimalQValue(stateObs.getAvatarPosition(), new Vector2d(obj.getFeature(0), obj.getFeature(1)), action);
+				double value = getValueFunction(obj).getOptimalQValue(getAvatarGridPos(stateObs), obj.getGridPos(), action);
 				if(Math.abs(value - maxValue) < 0.001 && !possibleActions.contains(action)){ //basically equal
 					possibleActions.add(action);
 					maxValue = Math.max(value, maxValue);
@@ -87,12 +87,12 @@ public class OFQAgent extends Agent {
 	    		Object currObj = objectMap.get(obs);
 	    		Object nextObj = objectNextStateMap.get(obs);
 	    		ValueFunction qValues = getValueFunction(currObj); //qValueFunctions[currObj.objectClassId];
-				double q = qValues.getOptimalQValue(lastAvatarPos, new Vector2d(currObj.getFeature(0), currObj.getFeature(1)), action);
+				double q = qValues.getOptimalQValue(lastAvatarPos, currObj.getGridPos(), action);
 				double maxQ = 0;
 				if(nextObj != null)
-					maxQ = optimalMaxQ(qValues, nextStateObs.getAvatarPosition(), new Vector2d(nextObj.getFeature(0), nextObj.getFeature(1)), actions);	
+					maxQ = optimalMaxQ(qValues, getAvatarGridPos(nextStateObs), nextObj.getGridPos(), actions);	
 		        double qValue = getOneQValueUpdate(q, reward, maxQ);
-		        qValues.setOptimalQValue(lastAvatarPos, new Vector2d(currObj.getFeature(0), currObj.getFeature(1)), action, qValue);
+		        qValues.setOptimalQValue(lastAvatarPos, currObj.getGridPos(), action, qValue);
     		}
     	}
     }

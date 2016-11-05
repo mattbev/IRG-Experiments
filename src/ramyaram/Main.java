@@ -43,30 +43,36 @@ public class Main {
 	public static int[] sourceGame; //this array has 2 indices, the first specifies the game index and the second is the level index
 	public static int[] targetGame; //this array has 2 indices, the first specifies the game index and the second is the level index
 	public static HashMap<Integer, Integer> fixedMapping; //fixed mapping if given prior to running the task
+	//path and names for all games
+	public static String gamesPath = "../examples/gridphysics/";
+	public static String games[] = new String[]
+    		{"aliens", "angelsdemons", "assemblyline", "avoidgeorge", "bait", 			  //0-4
+            "blacksmoke", "boloadventures", "bomber", "boulderchase", "boulderdash",      //5-9
+            "brainman", "butterflies", "cakybaky", "camelRace", "catapults",              //10-14
+            "chainreaction", "chase", "chipschallenge", "clusters", "colourescape",       //15-19
+            "chopper", "cookmepasta", "cops", "crossfire", "defem",                       //20-24
+            "defender", "digdug", "dungeon", "eggomania", "enemycitadel",                 //25-29
+            "escape", "factorymanager", "firecaster",  "fireman", "firestorms",           //30-34
+            "freeway", "frogs", "gymkhana", "hungrybirds", "iceandfire",                  //35-39
+            "infection", "intersection", "islands", "jaws", "labyrinth",                  //40-44
+            "labyrinthdual", "lasers", "lasers2", "lemmings", "missilecommand",           //45-49
+            "modality", "overload", "pacman", "painter", "plants",                        //50-54
+            "plaqueattack", "portals", "racebet", "raceBet2", "realportals",              //55-59
+            "realsokoban", "rivers", "roguelike", "run", "seaquest",                      //60-64
+            "sheriff", "shipwreck", "sokoban", "solarfox" ,"superman",                    //65-69
+            "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
+            "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
+            "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem", "sheriffTopBottom",
+            "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D"};
 	
 	public static void main(String[] args) {
-		String gamesPath = "../examples/gridphysics/";
-		String games[] = new String[]
-        		{"aliens", "angelsdemons", "assemblyline", "avoidgeorge", "bait", 			  //0-4
-                "blacksmoke", "boloadventures", "bomber", "boulderchase", "boulderdash",      //5-9
-                "brainman", "butterflies", "cakybaky", "camelRace", "catapults",              //10-14
-                "chainreaction", "chase", "chipschallenge", "clusters", "colourescape",       //15-19
-                "chopper", "cookmepasta", "cops", "crossfire", "defem",                       //20-24
-                "defender", "digdug", "dungeon", "eggomania", "enemycitadel",                 //25-29
-                "escape", "factorymanager", "firecaster",  "fireman", "firestorms",           //30-34
-                "freeway", "frogs", "gymkhana", "hungrybirds", "iceandfire",                  //35-39
-                "infection", "intersection", "islands", "jaws", "labyrinth",                  //40-44
-                "labyrinthdual", "lasers", "lasers2", "lemmings", "missilecommand",           //45-49
-                "modality", "overload", "pacman", "painter", "plants",                        //50-54
-                "plaqueattack", "portals", "racebet", "raceBet2", "realportals",              //55-59
-                "realsokoban", "rivers", "roguelike", "run", "seaquest",                      //60-64
-                "sheriff", "shipwreck", "sokoban", "solarfox" ,"superman",                    //65-69
-                "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
-                "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
-                "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem", "sheriffTopBottom",
-                "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D"};
-		
 		File dir = new File(args[0]);
+		if(dir.exists()){
+			File[] fileList = dir.listFiles();
+			for(File file : fileList)
+		        file.delete();
+			dir.delete();
+		}
 		if(!dir.exists()){ //Not running Java program from run.sh (which will create the directory automatically)
 			dir.mkdir();
 			//When running on Eclipse, the following two paths are different than when running with run.sh

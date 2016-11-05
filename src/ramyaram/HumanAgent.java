@@ -47,7 +47,7 @@ public class HumanAgent extends Agent {
         
         processStateObs(stateObs, objectMap, gridObjectMap);
     	lastStateObs = stateObs.copy();
-    	lastAvatarPos = stateObs.getAvatarPosition();
+    	lastAvatarPos = getAvatarGridPos(stateObs);
 
         stateObs.advance(action);    
         processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
@@ -78,9 +78,9 @@ public class HumanAgent extends Agent {
     
     public void processStateObs(StateObservation stateObs, Map<Observation, Object> map, Map<Vector2d, Object> gridMap){
     	super.processStateObs(stateObs, map, gridMap);
-    	Vector2d avatarPos = getGridCellFromPixels(stateObs.getAvatarPosition());
-    	Object agent = new Object(-1, -1, new int[]{(int)avatarPos.x, (int)avatarPos.y});
-		gridMap.put(avatarPos, agent);
+    	Vector2d avatarGridPos = getAvatarGridPos(stateObs);
+    	Object agent = new Object(-1, -1, avatarGridPos);
+		gridMap.put(avatarGridPos, agent);
     }
 
     public void result(StateObservation stateObservation, ElapsedCpuTimer elapsedCpuTimer) {
@@ -89,7 +89,7 @@ public class HumanAgent extends Agent {
     
     public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel){
     	model = new Model(game);
-    	HumanAgent.game = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
+    	HumanAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
     	ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
     	return null;
     }
@@ -99,6 +99,5 @@ public class HumanAgent extends Agent {
     }
     
     public void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions){}
-  
 }
 

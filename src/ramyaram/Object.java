@@ -1,5 +1,7 @@
 package ramyaram;
 
+import tools.Vector2d;
+
 /**
  * Representation of an object in the task
  * Each object is part of an object class (objects of the same class are assumed to behave similarly)
@@ -7,12 +9,12 @@ package ramyaram;
 public class Object {
 	private int objClassId;
 	private int itype;
-	private int[] features; //Each object is represented using a set of features (current features are: [x_agent-x_obj, y_agent-y_obj])
+	private Vector2d gridPos;
 	
-	public Object(int objClassId, int itype, int[] features) {
+	public Object(int objClassId, int itype, Vector2d gridPos) {
 		this.objClassId = objClassId;
 		this.itype = itype;
-		this.features = features;
+		this.gridPos = gridPos.copy();
 	}
 
 	public int getItype() {
@@ -23,8 +25,8 @@ public class Object {
 		return objClassId;
 	}
 
-	public int getFeature(int index) {
-		return features[index];
+	public Vector2d getGridPos() {
+		return gridPos;
 	}
 	
 	public int hashCode(){
@@ -33,18 +35,11 @@ public class Object {
 	
 	public boolean equals(java.lang.Object obj_param){
 		Object obj = (Object)obj_param;
-		for(int i=0; i<features.length; i++){
-			if(features[i] != obj.features[i])
-				return false;
-		}
-		return true;
+		return objClassId == obj.objClassId && itype == obj.itype
+				&& gridPos.equals(obj.gridPos);
 	}
 
 	public String toString() {
-		String str = "";
-		for(int i=0; i<features.length; i++){
-			str+=i+"="+features[i]+" ";
-		}
-		return str;
+		return gridPos.toString();
 	}
 }

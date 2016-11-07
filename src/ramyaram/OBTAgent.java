@@ -70,7 +70,7 @@ public class OBTAgent extends OFQAgent {
 			qValuesPhase(conditionNum, k, 1, game, level1, visuals, controller, seed);
 			k+=1;
 		}
-		ArrayList<Integer> bestMapping = getMapping(mappingQ);
+		ArrayList<Integer> bestMapping = getMaxMapping(mappingQ);
 		updateNumOfMappings(bestMapping);
 		System.out.println("-------");
 		System.out.println("Best Mapping based on mappingQ:");
@@ -148,62 +148,62 @@ public class OBTAgent extends OFQAgent {
 		return null;
 	}
 	
-	public void updateModelSimilarity(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward){
-		//update model similarity of object classes
-		double [][] tempTransSim = new double[weightedSim.size()][weightedSim.get(0).length];
-		double [][] tempRewardSim = new double[weightedSim.size()][weightedSim.get(0).length];
-		for(Observation obs : objectMap.keySet()){
-			Object obj = objectMap.get(obs);
-			Object nextObj = objectNextStateMap.get(obs);
-			if(nextObj != null){
-				for(int j=0; j<priorLearnedModel.qValueFunctions.size(); j++){
-//					System.out.println(nextStateObs+" "+nextObj);
-//					System.out.println("priorModel: ");
-//					priorLearnedModel.numNonZeroTransReward();
-//					System.out.println("newModel: ");
-//					model.numNonZeroTransReward();
-					int newTransitionCounts = model.getTransitionCounts(obj.getObjClassId(), getAvatarGridPos(stateObs), obj.getGridPos(), action,
-		    				getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
-					int previousTransitionCounts = priorLearnedModel.getTransitionCounts(j, getAvatarGridPos(stateObs), obj.getGridPos(), action,
-							getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
-//					System.out.println("transition "+newTransitionCounts+" "+previousTransitionCounts);
-					if(newTransitionCounts>0 && previousTransitionCounts>0){
-						tempTransSim[obj.getObjClassId()][j]++;
-					}
-					int newRewardCounts = model.getRewardCounts(obj.getObjClassId(), getAvatarGridPos(stateObs), obj.getGridPos(), action,
-							getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
-					int previousRewardCounts = priorLearnedModel.getRewardCounts(j, getAvatarGridPos(stateObs), obj.getGridPos(), action,
-							getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
-//					System.out.println("reward "+newRewardCounts+" "+previousRewardCounts);
-					if(newRewardCounts>0 && previousRewardCounts>0){
-						tempRewardSim[obj.getObjClassId()][j]++;
-					}
-				}
-			}
-		}
-//		printMatrix(tempTransSim);
-//		printMatrix(tempRewardSim);
-		normalize(tempTransSim);
-		normalize(tempRewardSim);
-		for(int i=0; i<tempTransSim.length; i++){
-			for(int j=0; j<tempTransSim[i].length; j++){
-				objTransitionSim.get(i)[j] = (objTransitionSim.get(i)[j]+tempTransSim[i][j])/2;
-				objRewardSim.get(i)[j] = (objRewardSim.get(i)[j]+tempRewardSim[i][j])/2;
-			}
-		}
-	}
+//	public void updateModelSimilarity(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward){
+//		//update model similarity of object classes
+//		double [][] tempTransSim = new double[weightedSim.size()][weightedSim.get(0).length];
+//		double [][] tempRewardSim = new double[weightedSim.size()][weightedSim.get(0).length];
+//		for(Observation obs : objectMap.keySet()){
+//			Object obj = objectMap.get(obs);
+//			Object nextObj = objectNextStateMap.get(obs);
+//			if(nextObj != null){
+//				for(int j=0; j<priorLearnedModel.qValueFunctions.size(); j++){
+////					System.out.println(nextStateObs+" "+nextObj);
+////					System.out.println("priorModel: ");
+////					priorLearnedModel.numNonZeroTransReward();
+////					System.out.println("newModel: ");
+////					model.numNonZeroTransReward();
+//					int newTransitionCounts = model.getTransitionCounts(obj.getObjClassId(), getAvatarGridPos(stateObs), obj.getGridPos(), action,
+//		    				getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
+//					int previousTransitionCounts = priorLearnedModel.getTransitionCounts(j, getAvatarGridPos(stateObs), obj.getGridPos(), action,
+//							getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
+////					System.out.println("transition "+newTransitionCounts+" "+previousTransitionCounts);
+//					if(newTransitionCounts>0 && previousTransitionCounts>0){
+//						tempTransSim[obj.getObjClassId()][j]++;
+//					}
+//					int newRewardCounts = model.getRewardCounts(obj.getObjClassId(), getAvatarGridPos(stateObs), obj.getGridPos(), action,
+//							getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
+//					int previousRewardCounts = priorLearnedModel.getRewardCounts(j, getAvatarGridPos(stateObs), obj.getGridPos(), action,
+//							getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
+////					System.out.println("reward "+newRewardCounts+" "+previousRewardCounts);
+//					if(newRewardCounts>0 && previousRewardCounts>0){
+//						tempRewardSim[obj.getObjClassId()][j]++;
+//					}
+//				}
+//			}
+//		}
+////		printMatrix(tempTransSim);
+////		printMatrix(tempRewardSim);
+//		normalize(tempTransSim);
+//		normalize(tempRewardSim);
+//		for(int i=0; i<tempTransSim.length; i++){
+//			for(int j=0; j<tempTransSim[i].length; j++){
+//				objTransitionSim.get(i)[j] = (objTransitionSim.get(i)[j]+tempTransSim[i][j])/2;
+//				objRewardSim.get(i)[j] = (objRewardSim.get(i)[j]+tempRewardSim[i][j])/2;
+//			}
+//		}
+//	}
 	
     public void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions) {
     	super.updateEachStep(stateObs, action, nextStateObs, reward, actions);
-    	for(Observation obs : objectMap.keySet()){
-			Object obj = objectMap.get(obs);
-			Object nextObj = objectNextStateMap.get(obs);
-			if(nextObj != null){
-				model.updateModelEstimate(obj.getObjClassId(), getAvatarGridPos(stateObs), obj.getGridPos(), action,
-    				getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
-				updateModelSimilarity(stateObs, action, nextStateObs, reward);
-			}
-    	}
+//    	for(Observation obs : objectMap.keySet()){
+//			Object obj = objectMap.get(obs);
+//			Object nextObj = objectNextStateMap.get(obs);
+//			if(nextObj != null){
+//				model.updateModelEstimate(obj.getObjClassId(), getAvatarGridPos(stateObs), obj.getGridPos(), action,
+//    				getAvatarGridPos(nextStateObs), nextObj.getGridPos(), reward);
+//				updateModelSimilarity(stateObs, action, nextStateObs, reward);
+//			}
+//    	}
     }
 	
 	public double[][] normalize(double[][] matrix){
@@ -237,9 +237,8 @@ public class OBTAgent extends OFQAgent {
     	super.processObs(obs, map);
 		if(model.getItype_to_objClassId().get(obs.itype) >= currMapping.size()){
 			if(Main.fixedMapping != null){
-				int oldIType = Main.fixedMapping.containsKey(obs.itype)? Main.fixedMapping.get(obs.itype) : -1;
-				if(oldIType >= 0)
-					currMapping.add(priorLearnedModel.getItype_to_objClassId().get(oldIType));//rand.nextInt(model.qValueFunctions.size()));
+				if(Main.fixedMapping.containsKey(obs.itype))
+					currMapping.add(priorLearnedModel.getItype_to_objClassId().get(Main.fixedMapping.get(obs.itype)));
 				else
 					currMapping.add(priorLearnedModel.qValueFunctions.size());
 			} else {
@@ -324,16 +323,24 @@ public class OBTAgent extends OFQAgent {
 	 * With probability 1-epsilon, the previous object class (or new class) that has the highest Q-value is chosen as the objClass that aligns best with each new object class
 	 */
 	public ArrayList<Integer> getMapping(ArrayList<double[]> similarityMatrix){
-		if(Main.fixedMapping != null){
-			return getGreedyMapping(similarityMatrix);
+		if(Main.fixedMapping != null){ //Use fixed mapping
+			ArrayList<Integer> mapping = new ArrayList<Integer>();
+			for(int i=0; i<currMapping.size(); i++)
+				mapping.add(-1);
+			for(int new_itype : model.getItype_to_objClassId().keySet()){
+				if(Main.fixedMapping.containsKey(new_itype))
+					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.getItype_to_objClassId().get(Main.fixedMapping.get(new_itype)));
+				else
+					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.qValueFunctions.size());
+			}
+			return mapping;
 		} else {
 			//Epsilon-greedy approach to choosing an mapping
 			if(rand.nextDouble() < Main.mapping_epsilon){
 				//Choose a random mapping
 				ArrayList<Integer> mapping = new ArrayList<Integer>();
-				for(int i=0; i<currMapping.size(); i++){
+				for(int i=0; i<currMapping.size(); i++)
 					mapping.add(rand.nextInt(mappingQ.get(i).length));
-				}
 				return mapping;
 			} else { //Otherwise, chooses the best mapping/the one with the highest Q-value
 				return getGreedyMapping(similarityMatrix);
@@ -343,64 +350,50 @@ public class OBTAgent extends OFQAgent {
 	
 	public ArrayList<Integer> getGreedyMapping(ArrayList<double[]> similarityMatrix){
 		ArrayList<Integer> mapping = new ArrayList<Integer>();
-		if(Main.fixedMapping != null){
-			//Fixed mapping for debugging
-			for(int i=0; i<currMapping.size(); i++)
-				mapping.add(-1);
-			for(int new_itype : model.getItype_to_objClassId().keySet()){
-				int oldIType = Main.fixedMapping.containsKey(new_itype)? Main.fixedMapping.get(new_itype) : -1;
-				if(oldIType >= 0)
-					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.getItype_to_objClassId().get(oldIType));
-				else
-					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.qValueFunctions.size());
-			}
-		} else {
-			for(int i=0; i<currMapping.size(); i++){ //For each new object class
-				ArrayList<Integer> possibleMappings = new ArrayList<Integer>();
-				double maxQ = Integer.MIN_VALUE;
-				for(int j=0; j<similarityMatrix.get(i).length; j++){
-					double q = similarityMatrix.get(i)[j];
-					if(Math.abs(q - maxQ) < 0.0001){ //Basically equal
-						possibleMappings.add(j);
-						maxQ = Math.max(q, maxQ);
-					}
-					else if(q > maxQ){
-						maxQ = q;
-						possibleMappings.clear();
-						possibleMappings.add(j);
-					}
+		for(int i=0; i<currMapping.size(); i++){ //For each new object class
+			ArrayList<Integer> possibleMappings = new ArrayList<Integer>();
+			double maxQ = Integer.MIN_VALUE;
+			for(int j=0; j<similarityMatrix.get(i).length; j++){
+				double q = similarityMatrix.get(i)[j];
+				if(Math.abs(q - maxQ) < 0.0001){ //Basically equal
+					possibleMappings.add(j);
+					maxQ = Math.max(q, maxQ);
 				}
-				mapping.add(possibleMappings.get(rand.nextInt(possibleMappings.size())));
+				else if(q > maxQ){
+					maxQ = q;
+					possibleMappings.clear();
+					possibleMappings.add(j);
+				}
 			}
+			mapping.add(possibleMappings.get(rand.nextInt(possibleMappings.size())));
 		}
 		return mapping;
 	}
 	
 	public void clearEachRun(){
 		super.clearEachRun();
+		priorLearnedModel = null;
 		currMapping = null;
+		numOfMappings = null; //TODO: Don't clear num of mappings across runs?
 		weightedSim = null;
 		mappingQ = null;
 		objTransitionSim = null;
 		objRewardSim = null;
-		numOfMappings = null;
+		weights = null;
 	}
 	
 	public void printList(ArrayList<double[]> list){
 		for(int i=0; i<list.size(); i++){
-			
-			for(int j=0; j<list.get(i).length; j++){
+			for(int j=0; j<list.get(i).length; j++)
 				System.out.print(list.get(i)[j]+" ");
-			}
 			System.out.println();
 		}
 	}
 	
 	public void printMatrix(double[][] matrix){
 		for(int i=0; i<matrix.length; i++){
-			for(int j=0; j<matrix[i].length; j++){
+			for(int j=0; j<matrix[i].length; j++)
 				System.out.print(matrix[i][j]+" ");
-			}
 			System.out.println();
 		}
 	}

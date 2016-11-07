@@ -47,7 +47,6 @@ public class HumanAgent extends Agent {
         
         processStateObs(stateObs, objectMap, gridObjectMap);
     	lastStateObs = stateObs.copy();
-    	lastAvatarPos = getAvatarGridPos(stateObs);
 
         stateObs.advance(action);    
         processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);

@@ -16,19 +16,16 @@ public class Model {
 	private HashMap<Integer, Integer> itype_to_objClassId;
 	private ArrayList<int[][][][][]> transitionEstimates;
 	private ArrayList<int[][][][]> rewardEstimates;
-	private String game;
+	private String gameName;
 	
-	public Model(String game) {
-		this.game = game;
-		this.qValueFunctions = new ArrayList<ValueFunction>();
-		this.itype_to_objClassId = new HashMap<Integer, Integer>();
-		this.transitionEstimates = new ArrayList<int[][][][][]>();
-		this.rewardEstimates = new ArrayList<int[][][][]>();
+	public Model(String gameName) {
+		this(gameName, new ArrayList<ValueFunction>(), new HashMap<Integer, Integer>(), 
+				new ArrayList<int[][][][][]>(), new ArrayList<int[][][][]>());
 	}
 	
-	public Model(String game, ArrayList<ValueFunction> qValueFunctions, HashMap<Integer, Integer> itype_to_objClassId, 
+	public Model(String gameName, ArrayList<ValueFunction> qValueFunctions, HashMap<Integer, Integer> itype_to_objClassId, 
 			ArrayList<int[][][][][]> transitionEstimates, ArrayList<int[][][][]> rewardEstimates){
-		this.game = game;
+		this.gameName = gameName;
 		this.qValueFunctions = qValueFunctions;
 		this.itype_to_objClassId = itype_to_objClassId;
 		this.transitionEstimates = transitionEstimates;
@@ -97,12 +94,8 @@ public class Model {
 		return itype_to_objClassId;
 	}
 	
-	public String getGame() {
-		return game;
-	}
-	
 	public Model clone(){
-		return new Model(game, new ArrayList<ValueFunction>(qValueFunctions), new HashMap<Integer, Integer>(itype_to_objClassId), 
+		return new Model(gameName, new ArrayList<ValueFunction>(qValueFunctions), new HashMap<Integer, Integer>(itype_to_objClassId), 
 				new ArrayList<int[][][][][]>(transitionEstimates), new ArrayList<int[][][][]>(rewardEstimates));
 	}
 	
@@ -111,6 +104,6 @@ public class Model {
 		itype_to_objClassId = null;
 		transitionEstimates = null;
 		rewardEstimates = null;
-		game = "";
+		gameName = "";
 	}
 }

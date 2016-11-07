@@ -35,10 +35,16 @@ public class OFQAgent extends Agent {
 		System.out.println("Episode "+episodeNum);
         double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         if(episodeNum % Main.interval == 0){
+        	//record reward
         	Main.reward[conditionNum][(episodeNum/Main.interval)] += result[1]; //score of the game
-        	if(result[0] == Types.WINNER.PLAYER_WINS.key())
-        		Main.wins[(episodeNum/Main.interval)] = true;
         	Main.writeToFile(Main.allRewardFile, result[1]+", ");
+        	//record game winner
+        	int winIndex = (result[0] == Types.WINNER.PLAYER_WINS.key()) ? 1 : 0;
+    		Main.numWins[conditionNum][(episodeNum/Main.interval)] += winIndex;
+        	Main.writeToFile(Main.allNumWinsFile, winIndex+", ");
+        	//record end game tick
+        	Main.gameTick[conditionNum][(episodeNum/Main.interval)] += result[2]; //game tick at the end of the game
+        	Main.writeToFile(Main.allGameTickFile, result[2]+", ");      	
         }
         return result[1];
 	}
@@ -47,13 +53,10 @@ public class OFQAgent extends Agent {
 	 * Epislon-greedy approach to choosing an action
 	 */
 	public Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
-    	if(rand.nextDouble() < Main.epsilon){ //choose a random action
-    		int index = rand.nextInt(actions.size());
-            Types.ACTIONS action = actions.get(index);
-            return action;
-    	} else { //choose greedy action based on value function
+    	if(rand.nextDouble() < Main.epsilon) //choose a random action
+            return actions.get(rand.nextInt(actions.size()));
+    	else //choose greedy action based on value function
     		return greedy(stateObs, actions);
-    	}
 	}
     
     public Types.ACTIONS greedy(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
@@ -86,13 +89,13 @@ public class OFQAgent extends Agent {
     		if(obs.category != Types.TYPE_AVATAR){
 	    		Object currObj = objectMap.get(obs);
 	    		Object nextObj = objectNextStateMap.get(obs);
-	    		ValueFunction qValues = getValueFunction(currObj); //qValueFunctions[currObj.objectClassId];
-				double q = qValues.getOptimalQValue(lastAvatarPos, currObj.getGridPos(), action);
+	    		ValueFunction qValues = getValueFunction(currObj);
+				double q = qValues.getOptimalQValue(getAvatarGridPos(stateObs), currObj.getGridPos(), action);
 				double maxQ = 0;
 				if(nextObj != null)
 					maxQ = optimalMaxQ(qValues, getAvatarGridPos(nextStateObs), nextObj.getGridPos(), actions);	
 		        double qValue = getOneQValueUpdate(q, reward, maxQ);
-		        qValues.setOptimalQValue(lastAvatarPos, currObj.getGridPos(), action, qValue);
+		        qValues.setOptimalQValue(getAvatarGridPos(stateObs), currObj.getGridPos(), action, qValue);
     		}
     	}
     }

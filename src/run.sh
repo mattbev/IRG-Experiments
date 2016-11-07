@@ -27,4 +27,4 @@ mkdir "$newdir"
 
 javac ramyaram/Main.java
 java ramyaram/Main $newdir $1 $2 $3 $4 $5
-python plots.py $newdir "reward.csv"
+python plots.py $newdir "reward.csv" "gameTick.csv" "numWins.csv"

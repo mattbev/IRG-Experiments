@@ -15,7 +15,8 @@ public class Main {
 	public enum RunType {PLAY, RUN}	
 	//structures to store information from runs
 	public static double[][] reward;
-	public static boolean[] wins;
+	public static double[][] gameTick;
+	public static double[][] numWins;
 	public static Model[] learnedModels;
     //parameters to denote number of episodes
 	public static int numAveraging = 50;
@@ -34,6 +35,10 @@ public class Main {
 	//files for saving results
 	public static File avgRewardFile;
 	public static File allRewardFile;
+	public static File avgGameTickFile;
+	public static File allGameTickFile;
+	public static File avgNumWinsFile;
+	public static File allNumWinsFile;
 	public static File runInfoFile;
 	public static File humanDataFile;
 	public static File humanWinsFile;
@@ -66,14 +71,15 @@ public class Main {
             "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D"};
 	
 	public static void main(String[] args) {
-		File dir = new File(args[0]);
-		if(dir.exists()){
-			File[] fileList = dir.listFiles();
-			for(File file : fileList)
-		        file.delete();
-			dir.delete();
-		}
-		if(!dir.exists()){ //Not running Java program from run.sh (which will create the directory automatically)
+		//Pass in directory name (if code is run using run.sh, this directory will already be created and passed in)
+		File dir = new File(args[0]); 
+//		if(dir.exists()){
+//			File[] fileList = dir.listFiles();
+//			for(File file : fileList)
+//		        file.delete();
+//			dir.delete();
+//		}
+		if(!dir.exists()){ //When not running Java program from run.sh, no directory has been created yet
 			dir.mkdir();
 			//When running on Eclipse, the following two paths are different than when running with run.sh
 			gamesPath = gamesPath.substring(gamesPath.indexOf('/')+1);
@@ -88,10 +94,10 @@ public class Main {
 		numAveraging = args.length > 4? Integer.parseInt(args[4]) : numAveraging;
 		numEpisodes = args.length > 5? Integer.parseInt(args[5]) : numEpisodes;
 				
-		if(fixedMapping != null){
-			if(fixedMapping.isEmpty())
+		if(fixedMapping != null){ //When a fixed mapping is given
+			if(fixedMapping.isEmpty()) //If the given mapping is empty, run only the Q-values phase (equivalent to OF-Q)
 				numEpisodesMapping = 0;
-			else
+			else //Otherwise, run only the mapping phase (no update of Q-values)
 				numEpisodesMapping = numEpisodes;
 		} else {
 			numEpisodesMapping = numEpisodes;
@@ -103,6 +109,10 @@ public class Main {
         if(runType == RunType.RUN){
 	        avgRewardFile = new File(dir.getPath()+"/reward.csv");
 	        allRewardFile = new File(dir.getPath()+"/allReward.csv");
+	        avgGameTickFile = new File(dir.getPath()+"/gameTick.csv");
+	        allGameTickFile = new File(dir.getPath()+"/allGameTick.csv");
+	        avgNumWinsFile = new File(dir.getPath()+"/numWins.csv");
+	        allNumWinsFile = new File(dir.getPath()+"/allNumWins.csv");
 	        runInfoFile = new File(dir.getPath()+"/runInfo.txt");
 	        writeInfoToFile(runInfoFile, args[1], args[2]);
         } else if(runType == RunType.PLAY){
@@ -113,7 +123,8 @@ public class Main {
 
 		int numDataPoints = numEpisodes/interval;
 		reward = new double[Condition.values().length][numDataPoints];
-		wins = new boolean[numDataPoints];
+		numWins = new double[Condition.values().length][numDataPoints];
+		gameTick = new double[Condition.values().length][numDataPoints];
 		
 		switch(runType){
 			case RUN:
@@ -125,7 +136,7 @@ public class Main {
 		        	conditionsStr+=",";
 		        }
 		        conditionsStr+="\n";
-		        writeToFile(allRewardFile, conditionsStr);
+		        writeToAllResultsFiles(conditionsStr);
 		                
 		        for(int num=0; num<numAveraging; num++){
 		        	learnedModels = new Model[Condition.values().length];
@@ -142,25 +153,13 @@ public class Main {
 				        	System.out.println("Averaging "+num);
 				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes, game, level1, false, controller, seed, learnedModels[0]).clone();
 		        		}
-				        writeToFile(allRewardFile, ",");
+		        		writeToAllResultsFiles(",");
 		        	}
-		        	writeToFile(allRewardFile, "\n");
+		        	writeToAllResultsFiles("\n");
 		        } 
-		        
-			    try{
-			    	BufferedWriter writer = new BufferedWriter(new FileWriter(avgRewardFile));
-					for(int i=0; i<reward.length; i++){ //all conditions
-						writer.write(Condition.values()[i].name()+", ");
-						for(int j=0; j<reward[i].length; j++){
-							//divides the total reward by the number of simulation runs and gets the average reward the agent received over time
-							writer.write(""+(reward[i][j]/numAveraging));
-							if(j<reward[i].length-1)
-								writer.write(", ");
-						}
-						writer.write("\n");
-					}
-					writer.close();
-		        } catch(Exception e){ e.printStackTrace(); }
+		        writeResultsToFile(avgRewardFile, reward, numAveraging);
+		        writeResultsToFile(avgNumWinsFile, numWins, numAveraging);
+		        writeResultsToFile(avgGameTickFile, gameTick, numAveraging);
 		        System.exit(0);
 		        
 			case PLAY:
@@ -178,6 +177,12 @@ public class Main {
 		        	}
 		       }
 		}
+	}
+	
+	public static void writeToAllResultsFiles(String str){
+		writeToFile(allRewardFile, str);
+        writeToFile(allNumWinsFile, str);
+        writeToFile(allGameTickFile, str);
 	}
 	
 	public static void writeInfoToFile(File runInfoFile, String sourceGameStr, String targetGameStr){
@@ -243,6 +248,25 @@ public class Main {
 				return "ramyaram.OBTAgent";
 		}
 		return null;
+	}
+	
+	public static void writeResultsToFile(File file, double[][] results, int numAveraging){
+		try{
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+			for(int i=0; i<results.length; i++){ //all conditions
+				writer.write(Condition.values()[i].name()+", ");
+				for(int j=0; j<results[i].length; j++){
+					//divides the total reward by the number of simulation runs and gets the average reward the agent received over time
+					writer.write(""+(results[i][j]/numAveraging));		
+					if(j<results[i].length-1)
+						writer.write(", ");
+				}
+				writer.write("\n");
+			}
+			writer.close();
+		} catch(Exception e){ 
+			e.printStackTrace(); 
+		}
 	}
 	
 	public static void writeToFile(File file, String str){

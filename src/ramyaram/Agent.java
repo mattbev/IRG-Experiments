@@ -24,7 +24,6 @@ public abstract class Agent extends AbstractPlayer {
     protected static int numCols;
     protected static int blockSize;
 	protected static StateObservation lastStateObs;
-	protected static Vector2d lastAvatarPos;
 	protected static double lastScore;
 	protected static boolean updateQValues;
 	protected static String gameName;
@@ -73,6 +72,8 @@ public abstract class Agent extends AbstractPlayer {
 			for (int j = 0; j < observationGrid[i].length; j++) {
 				ArrayList<Observation> obsList = new ArrayList<Observation>();
 				for (Observation obs : observationGrid[i][j]) {
+//					if(obs.category == Types.TYPE_AVATAR)
+//						obsList.add(obs);
 					if(getImportantObjects(gameName) != null){
 						if(getImportantObjects(gameName).contains(obs.itype))
 							obsList.add(obs);
@@ -134,7 +135,6 @@ public abstract class Agent extends AbstractPlayer {
      */
     public void clearEachRun(){
     	lastStateObs = null;
-    	lastAvatarPos = null;
     	lastScore = 0;
     	if(model != null)
     		model.clear();
@@ -146,7 +146,6 @@ public abstract class Agent extends AbstractPlayer {
     public Types.ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer){
     	processStateObs(stateObs, objectMap, gridObjectMap);
     	lastStateObs = stateObs.copy();
-    	lastAvatarPos = getAvatarGridPos(stateObs);
     	
         //Get the available actions in this game and choose one
         ArrayList<Types.ACTIONS> actions = stateObs.getAvailableActions();

@@ -25,6 +25,5 @@ done
 echo "$newdir"
 mkdir "$newdir"
 
-javac ramyaram/Main.java
-java ramyaram/Main $newdir $1 $2 $3 $4 $5 $6
+java -jar fixedMappings.jar $newdir $1 $2 $3 $4 $5 $6
 python plots.py $newdir "reward.csv" "gameTick.csv" "numWins.csv"

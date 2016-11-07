@@ -21,8 +21,8 @@ public class Main {
     //parameters to denote number of episodes
 	public static int numAveraging = 50;
 	public static int numEpisodes = 1000;
+	public static int interval = 1;
 	public static int numEpisodesMapping = -1;
-	public static int interval = 1;	
 	//parameters for standard Q-learning
 	public static double epsilon = 0.1;
 	public static double alpha = 0.1;
@@ -93,6 +93,7 @@ public class Main {
 		
 		numAveraging = args.length > 4? Integer.parseInt(args[4]) : numAveraging;
 		numEpisodes = args.length > 5? Integer.parseInt(args[5]) : numEpisodes;
+		interval = args.length > 6? Integer.parseInt(args[6]) : interval;
 				
 		if(fixedMapping != null){ //When a fixed mapping is given
 			if(fixedMapping.isEmpty()) //If the given mapping is empty, run only the Q-values phase (equivalent to OF-Q)
@@ -265,6 +266,9 @@ public class Main {
 			}
 			writer.close();
 		} catch(Exception e){ 
+			System.out.println(file);
+			System.out.println(file.getAbsolutePath());
+			System.out.println(results);
 			e.printStackTrace(); 
 		}
 	}

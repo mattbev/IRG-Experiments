@@ -1,8 +1,8 @@
 BasicGame square_size=42
     SpriteSet
         floor   > Immovable img=oryx/backGrey hidden=True
-        fire    > RandomMissile color=ORANGE speed=0.25 img=newset/pastaplate
-        seed    > SpawnPoint color=RED prob=0.25 img=newset/butter shrinkfactor=0.3 stype=fire portal=True
+        fire    > RandomMissile color=ORANGE speed=0.1 img=newset/pastaplate
+        seed    > SpawnPoint color=RED prob=0.1 img=newset/butter shrinkfactor=0.3 stype=fire portal=True
         water   > Resource color=BLUE limit=10 value=2 img=oryx/trapChest1
         escape  > Door color=GREEN img=oryx/vampire1
         avatar  > MovingAvatar healthPoints=1 img=newset/bossthug

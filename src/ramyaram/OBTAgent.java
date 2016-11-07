@@ -91,13 +91,11 @@ public class OBTAgent extends OFQAgent {
 			double maxValue = Integer.MIN_VALUE;
 			int maxIndex = -1;
 			for(int j=0; j<similarityMatrix.get(i).length; j++){
-				System.out.print(similarityMatrix.get(i)[j]+" ");
 				if(similarityMatrix.get(i)[j]>maxValue){
 					maxValue = similarityMatrix.get(i)[j];
 					maxIndex = j;
 				}
 			}
-			System.out.println();
 			maxMapping.add(maxIndex);
 		}
 		return maxMapping;
@@ -115,12 +113,6 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	public ArrayList<double[]> newWeightedSim(){
-//		System.out.println("mappingQ");
-//		printList(mappingQ);
-//		System.out.println("objTransitionSim");
-//		printList(objTransitionSim);
-//		System.out.println("objRewardSim");
-//		printList(objRewardSim);
 		ArrayList<double[]> sim = new ArrayList<double[]>();
 		for(int i=0; i<weightedSim.size(); i++){
 			sim.add(new double[weightedSim.get(i).length]);
@@ -130,9 +122,18 @@ public class OBTAgent extends OFQAgent {
 				}
 			}
 		}
+//		System.out.println("mappingQ");
+//		printList(mappingQ);
+//		System.out.println("objTransitionSim");
+//		printList(objTransitionSim);
+//		System.out.println("objRewardSim");
+//		printList(objRewardSim);
 //		System.out.println("newWeightedSim");
 //		printList(sim);
+//		System.out.println("Max Mapping");
 //		printItypeMapping(getMaxMapping(sim));
+//		System.out.println("Curr Mapping");
+//		printItypeMapping(currMapping);
 		return sim;
 	}
 	

@@ -10,17 +10,17 @@ from scipy import interpolate
 
 plt.gcf().subplots_adjust(bottom=0.15)
 
-subplot_nums = [311,312,313]
+subplot_nums = [111]
 colors = ['b','r','g']
-titles = ['Reward','Final Game Tick','Number of Wins']
+titles = ['Reward']
 
 for num in range(len(subplot_nums)):
     cnt=0
     f = file(sys.argv[1]+'/'+sys.argv[num+2]).read().strip().split('\n')
     for line in f:
-        if cnt == 0: #skip source task learning
-            cnt+=1
-            continue
+#        if cnt == 0: #skip source task learning
+#            cnt+=1
+#            continue
         label = line.split(',')[0]
         y = line.split(',')[1:]
         x = [i for i in range(len(y))]

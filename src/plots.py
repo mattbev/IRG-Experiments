@@ -10,35 +10,41 @@ from scipy import interpolate
 
 plt.gcf().subplots_adjust(bottom=0.15)
 
-subplot_nums = [111]
+num_figs = 2
+subplot_nums = [211,212]
 colors = ['b','r','g']
-titles = ['Reward']
+titles = ['All Reward','Avg Reward']
 
-for num in range(len(subplot_nums)):
-    cnt=0
-    f = file(sys.argv[1]+'/'+sys.argv[num+2]).read().strip().split('\n')
-    for line in f:
-#        if cnt == 0: #skip source task learning
-#            cnt+=1
-#            continue
-        label = line.split(',')[0]
-        y = line.split(',')[1:]
-        x = [i for i in range(len(y))]
-        x_int = np.linspace(x[0], x[-1], 100)
-        tck = interpolate.splrep(x, y, k = 3, s = 1)
-        y_int = interpolate.splev(x_int, tck, der = 0)
+cnt=0
+f = file(sys.argv[1]+'/'+sys.argv[2]).read().strip().split('\n')
+for line in f:
+    label = line.split(',')[0]
+    y = line.split(',')[1:]
+    x = [i for i in range(len(y))]
+    x_int = np.linspace(x[0], x[-1], 100)
+    tck = interpolate.splrep(x, y, k = 3, s = 1)
+    y_int = interpolate.splev(x_int, tck, der = 0)
+    if cnt == 0: #source task learning
+        plt.figure(0)
+    else: #target task learning
+        plt.figure(1)
+    plt.subplot(subplot_nums[0])
+    plt.plot(x, y, label = label, linestyle = '-', linewidth = 0.75, color=colors[cnt])
+    plt.subplot(subplot_nums[1])
+    plt.plot(x_int, y_int, label = label, linestyle = '-', linewidth = 0.75, color=colors[cnt])
+    cnt+=1
+
+for fig in range(0,num_figs):
+    for num in range(len(subplot_nums)):
+        plt.figure(fig)
         plt.subplot(subplot_nums[num])
-        plt.plot(x, y, label = label, linestyle = '-', linewidth = 0.75, color=colors[cnt])
-#       plt.subplot(212)
-#       plt.plot(x_int, y_int, label = label, linestyle = '-', linewidth = 0.75, color=colors[cnt])
-        cnt+=1
+        plt.subplots_adjust(hspace=1)
+        plt.title(titles[num])
+        plt.legend(loc=4, fontsize = 'x-small')
+        plt.ylabel('Average Accumulated\n'+titles[num])
+        plt.xlabel('Number of Episodes')
 
-for num in range(len(subplot_nums)):
-    plt.subplot(subplot_nums[num])
-    plt.subplots_adjust(hspace=1)
-    plt.title(titles[num])
-    plt.legend(loc=4, fontsize = 'x-small')
-    plt.ylabel('Average Accumulated\n'+titles[num])
-    plt.xlabel('Number of Episodes')
-
-plt.savefig(sys.argv[1]+'/plots.pdf')
+plt.figure(0)
+plt.savefig(sys.argv[1]+'/source_task.pdf')
+plt.figure(1)
+plt.savefig(sys.argv[1]+'/target_task.pdf')

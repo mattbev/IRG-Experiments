@@ -32,7 +32,7 @@ public class OBTAgent extends OFQAgent {
 	
 	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel) {
 		model = new Model(game);
-		if(Main.numEpisodesMapping > Main.numEpisodes){
+		if(Main.numEpisodesMapping > Main.numTargetEpisodes){
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
 		}

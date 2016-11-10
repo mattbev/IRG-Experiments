@@ -20,7 +20,8 @@ public class Main {
 	public static Model[] learnedModels;
     //parameters to denote number of episodes
 	public static int numAveraging = 50;
-	public static int numEpisodes = 1000;
+	public static int numSourceEpisodes = 5000;
+	public static int numTargetEpisodes = 1000;
 	public static int interval = 1;
 	public static int numEpisodesMapping = -1;
 	//parameters for standard Q-learning
@@ -92,16 +93,17 @@ public class Main {
 		runType = args.length > 2? RunType.RUN : RunType.PLAY;
 		
 		numAveraging = args.length > 4? Integer.parseInt(args[4]) : numAveraging;
-		numEpisodes = args.length > 5? Integer.parseInt(args[5]) : numEpisodes;
-		interval = args.length > 6? Integer.parseInt(args[6]) : interval;
+		numSourceEpisodes = args.length > 5? Integer.parseInt(args[5]) : numSourceEpisodes;
+		numTargetEpisodes = args.length > 6? Integer.parseInt(args[6]) : numTargetEpisodes;
+		interval = args.length > 7? Integer.parseInt(args[7]) : interval;
 				
 		if(fixedMapping != null){ //When a fixed mapping is given
 			if(fixedMapping.isEmpty()) //If the given mapping is empty, run only the Q-values phase (equivalent to OF-Q)
 				numEpisodesMapping = 0;
 			else //Otherwise, run only the mapping phase (no update of Q-values)
-				numEpisodesMapping = numEpisodes;
+				numEpisodesMapping = numTargetEpisodes;
 		} else {
-			numEpisodesMapping = numEpisodes;
+			numEpisodesMapping = numTargetEpisodes;
 		}
 		
         int seed = new Random().nextInt();
@@ -122,14 +124,15 @@ public class Main {
         	humanScoresFile = new File(dir.getPath()+"/humanScores.txt");
         }
 
-		int numDataPoints = numEpisodes/interval;
-		reward = new double[Condition.values().length][numDataPoints];
-		numWins = new double[Condition.values().length][numDataPoints];
-		gameTick = new double[Condition.values().length][numDataPoints];
+		int maxDataPoints = Math.max(numSourceEpisodes,numTargetEpisodes)/interval;
+		reward = new double[Condition.values().length][maxDataPoints];
+		numWins = new double[Condition.values().length][maxDataPoints];
+		gameTick = new double[Condition.values().length][maxDataPoints];
 		
 		switch(runType){
 			case RUN:
 		        String conditionsStr = "";
+		        int numDataPoints = (numSourceEpisodes+numTargetEpisodes*2)/interval;
 		        for(Condition c : Condition.values()){
 		        	conditionsStr+=c.name();
 		        	for(int i=0; i<numDataPoints; i++)
@@ -138,7 +141,12 @@ public class Main {
 		        }
 		        conditionsStr+="\n";
 		        writeToAllResultsFiles(conditionsStr);
-		                
+		              
+		        int[] numEpisodes = new int[Condition.values().length];
+		        numEpisodes[0] = numSourceEpisodes;
+				for(int i=1; i<numEpisodes.length; i++)
+					numEpisodes[i] = numTargetEpisodes;
+				
 		        for(int num=0; num<numAveraging; num++){
 		        	learnedModels = new Model[Condition.values().length];
 		        	for(int c=0; c<numConditions; c++){
@@ -152,15 +160,15 @@ public class Main {
 		        			System.out.println("Running condition "+Condition.values()[c]);
 		        			Agent.INSTANCE.clearEachRun();
 				        	System.out.println("Averaging "+num);
-				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes, game, level1, false, controller, seed, learnedModels[0]).clone();
+				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes[c], game, level1, false, controller, seed, learnedModels[0]).clone();
 		        		}
 		        		writeToAllResultsFiles(",");
 		        	}
 		        	writeToAllResultsFiles("\n");
 		        } 
-		        writeResultsToFile(avgRewardFile, reward, numAveraging);
-		        writeResultsToFile(avgNumWinsFile, numWins, numAveraging);
-		        writeResultsToFile(avgGameTickFile, gameTick, numAveraging);
+		        writeResultsToFile(avgRewardFile, reward, numAveraging, numEpisodes);
+		        writeResultsToFile(avgNumWinsFile, numWins, numAveraging, numEpisodes);
+		        writeResultsToFile(avgGameTickFile, gameTick, numAveraging, numEpisodes);
 		        System.exit(0);
 		        
 			case PLAY:
@@ -201,9 +209,10 @@ public class Main {
         writeToFile(runInfoFile, "mapping_epsilon_end="+mapping_epsilon_end+"\n");
         writeToFile(runInfoFile, "mapping_epsilon_delta="+mapping_epsilon_delta+"\n");  	
         writeToFile(runInfoFile, "numAveraging="+numAveraging+"\n");
-        writeToFile(runInfoFile, "numEpisodes="+numEpisodes+"\n");
+        writeToFile(runInfoFile, "numSourceEpisodes="+numSourceEpisodes+"\n");
+        writeToFile(runInfoFile, "numTargetEpisodes="+numTargetEpisodes+"\n");
         writeToFile(runInfoFile, "numEpisodesMapping="+numEpisodesMapping+"\n");
-        writeToFile(runInfoFile, "numEpisodesQValues="+(numEpisodes-numEpisodesMapping)+"\n");
+        writeToFile(runInfoFile, "numEpisodesQValues="+(numTargetEpisodes-numEpisodesMapping)+"\n");
         writeToFile(runInfoFile, "interval="+interval+"\n");
 	}
 	
@@ -251,16 +260,18 @@ public class Main {
 		return null;
 	}
 	
-	public static void writeResultsToFile(File file, double[][] results, int numAveraging){
+	public static void writeResultsToFile(File file, double[][] results, int numAveraging, int[] numEpisodes){
 		try{
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 			for(int i=0; i<results.length; i++){ //all conditions
 				writer.write(Condition.values()[i].name()+", ");
 				for(int j=0; j<results[i].length; j++){
-					//divides the total reward by the number of simulation runs and gets the average reward the agent received over time
-					writer.write(""+(results[i][j]/numAveraging));		
-					if(j<results[i].length-1)
-						writer.write(", ");
+					if(j < numEpisodes[i]){
+						//divides the total reward by the number of simulation runs and gets the average reward the agent received over time
+						writer.write(""+(results[i][j]/numAveraging));		
+						if(j < numEpisodes[i]-1)
+							writer.write(", ");
+					}
 				}
 				writer.write("\n");
 			}

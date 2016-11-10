@@ -20,6 +20,9 @@ public class OFQAgent extends Agent {
 		super(so, elapsedTimer);
 	}
 	
+	/**
+	 * Runs the Object-Focused Q-learning algorithm with the given parameters
+	 */
 	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel) {
 		model = new Model(game);
 		OFQAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
@@ -39,6 +42,10 @@ public class OFQAgent extends Agent {
 		return model;
 	}
 	
+	/**
+	 * Runs one episode of the task (start state to goal state)
+	 * Records stats from the game
+	 */
 	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller, int seed){
 		System.out.println("Episode "+episodeNum);
         double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
@@ -58,16 +65,19 @@ public class OFQAgent extends Agent {
 	}
 	
 	/**
-	 * Epislon-greedy approach to choosing an action
+	 * Epsilon-greedy approach to choosing an action
 	 */
 	public Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
     	if(rand.nextDouble() < Main.epsilon) //choose a random action
             return actions.get(rand.nextInt(actions.size()));
     	else //choose greedy action based on value function
-    		return greedy(stateObs, actions);
+    		return getGreedyAction(stateObs, actions);
 	}
     
-    public Types.ACTIONS greedy(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
+	/**
+	 * Chooses the action with the maximum Q-value over all objects and all actions 
+	 */
+    public Types.ACTIONS getGreedyAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
     	double maxValue = Integer.MIN_VALUE;
 		List<Types.ACTIONS> possibleActions = new ArrayList<Types.ACTIONS>();
 		for(Observation obs : objectMap.keySet()){
@@ -90,7 +100,7 @@ public class OFQAgent extends Agent {
     }
     
     /**
-	 * Updates the current Q-values for this particular state, action, and next state
+	 * Updates each object class's Q-value function for the given state, action, and next state
 	 */
     public void updateQValues(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions){		
     	for(Observation obs : objectMap.keySet()) {
@@ -108,18 +118,24 @@ public class OFQAgent extends Agent {
     	}
     }
     
+    /**
+     * Adds an object class to the model when it's first seen in this task
+     */
     public void processObs(Observation obs, Map<Observation, Object> map){
     	super.processObs(obs, map);
     	if(model.getItype_to_objClassId().get(obs.itype) >= model.qValueFunctions.size())
-			model.addObjToModel();
+			model.addObjClassToModel();
     }
     
+    /**
+     * Gets the appropriate object class value function for the given object
+     */
     public ValueFunction getValueFunction(Object obj){
 		return model.qValueFunctions.get(obj.getObjClassId());
 	}
     
     /**
-	 * Computes the maximum Q-value over the optimal value function for this state
+	 * Computes the maximum Q-value for this state
 	 */
 	public double optimalMaxQ(ValueFunction qValues, Vector2d agent, Vector2d obj, ArrayList<Types.ACTIONS> actions) {
 		double maxValue = Integer.MIN_VALUE;
@@ -131,6 +147,9 @@ public class OFQAgent extends Agent {
 		return maxValue;
 	}
     
+	/**
+	 * Update Q-value functions if updateQValues variable is set to true (in Object-Focused Q-learning, this is always set to true)
+	 */
     public void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions) {
         if(updateQValues)
         	updateQValues(stateObs, action, nextStateObs, reward, actions);

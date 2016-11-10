@@ -7,6 +7,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 
+/**
+ * Given the allReward.csv file from running Main.java, this class will run an analysis and print out a summary of the results (e.g., reward curve averaged over runs)
+ * This can be used even if the full code has not yet executed (will not include partially-completed runs)
+ */
 public class AllRewardAnalysis {
 	public static String line = null;
 	public static int count = 0;
@@ -27,8 +31,8 @@ public class AllRewardAnalysis {
 							labels.add(tokens[i]); //get all labels
 					}
 					numDataPoints = new int[labels.size()]; //number of data points per condition
-					int numSourceEpisodes = parseData(args[0]+"/runInfo.txt", "numSourceEpisodes");
-					int numTargetEpisodes = parseData(args[0]+"/runInfo.txt", "numTargetEpisodes");
+					int numSourceEpisodes = getVariableValueFromFile(args[0]+"/runInfo.txt", "numSourceEpisodes");
+					int numTargetEpisodes = getVariableValueFromFile(args[0]+"/runInfo.txt", "numTargetEpisodes");
 					int maxEpisodes = Math.max(numSourceEpisodes, numTargetEpisodes);
 					numDataPoints[0] = numSourceEpisodes;
 					for(int i=1; i<numDataPoints.length; i++)
@@ -82,7 +86,10 @@ public class AllRewardAnalysis {
 		}
 	}
 	
-	public static int parseData(String fileName, String variableName){
+	/**
+	 * Parses the given file for the value of the specified variable
+	 */
+	public static int getVariableValueFromFile(String fileName, String variableName){
 		int value = -1;
 		try{
 			BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));

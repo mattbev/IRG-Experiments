@@ -14,7 +14,7 @@ import tools.Utils;
 import tools.Vector2d;
 
 /**
- * Created by diego on 06/02/14.
+ * Records data as a participant plays a game
  */
 public class HumanAgent extends Agent {	
 	public static int lastWin = -1;
@@ -39,7 +39,7 @@ public class HumanAgent extends Agent {
         Direction move = Utils.processMovementActionKeys(Game.ki.getMask(), Types.DEFAULT_SINGLE_PLAYER_KEYIDX);
         boolean useOn = Utils.processUseKey(Game.ki.getMask(), Types.DEFAULT_SINGLE_PLAYER_KEYIDX);
 
-        //In the keycontroller, move has preference.
+        //in the keycontroller, move has preference.
         Types.ACTIONS action = Types.ACTIONS.fromVector(move);
 
         if(action == Types.ACTIONS.ACTION_NIL && useOn)
@@ -52,13 +52,13 @@ public class HumanAgent extends Agent {
         processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore();
         
-        if(action != Types.ACTIONS.ACTION_NIL){
+        if(action != Types.ACTIONS.ACTION_NIL){ //only save "important" actions and record the tick at which the action happened (skips recording nil actions)
         	Main.writeToFile(Main.humanDataFile, "TICK: "+stateObs.getGameTick()+"\n");
 	        Main.writeToFile(Main.humanDataFile, stateObsStr(lastStateObs, gridObjectMap));
 	        Main.writeToFile(Main.humanDataFile, action.name()+", "+(currScore-lastScore)+"\n");
 	        Main.writeToFile(Main.humanDataFile, stateObsStr(stateObs, gridObjectNextStateMap)+"\n");
         }
-        if(stateObs.isGameOver()){
+        if(stateObs.isGameOver()){ //save end-of-game stats
         	Main.writeToFile(Main.humanDataFile, "WINNER: "+stateObs.getGameWinner()+", SCORE: "+stateObs.getGameScore()+"\n**********************\n\n");
         	Main.writeToFile(Main.humanWinsFile, stateObs.getGameWinner()+",");
         	Main.writeToFile(Main.humanScoresFile, stateObs.getGameScore()+",");
@@ -78,7 +78,7 @@ public class HumanAgent extends Agent {
     public void processStateObs(StateObservation stateObs, Map<Observation, Object> map, Map<Vector2d, Object> gridMap){
     	super.processStateObs(stateObs, map, gridMap);
     	Vector2d avatarGridPos = getAvatarGridPos(stateObs);
-    	Object agent = new Object(-1, -1, avatarGridPos);
+    	Object agent = new Object(-1, -1, avatarGridPos); //add the agent so that when the states are printed to a file, you can also see the avatar position
 		gridMap.put(avatarGridPos, agent);
     }
 
@@ -94,7 +94,7 @@ public class HumanAgent extends Agent {
     }
    
     public Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
-    	return null;
+    	return null; //no agent controller here as the person is playing the game
     }
     
     public void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions){}

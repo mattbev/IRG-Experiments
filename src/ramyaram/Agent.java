@@ -72,7 +72,7 @@ public abstract class Agent extends AbstractPlayer {
 			for (int j = 0; j < observationGrid[i].length; j++) {
 				ArrayList<Observation> obsList = new ArrayList<Observation>();
 				for (Observation obs : observationGrid[i][j]) {
-//					if(obs.category == Types.TYPE_AVATAR)
+//					if(obs.category == Types.TYPE_AVATAR) //uncomment if you want to see the avatar in the console, along with the important objects
 //						obsList.add(obs);
 					if(getImportantObjects(gameName) != null){
 						if(getImportantObjects(gameName).contains(obs.itype))
@@ -94,7 +94,7 @@ public abstract class Agent extends AbstractPlayer {
      * Temporarily, hand-specify "important" objects in each game so that the agent can focus its learning on those objects
      * (Don't include background, wall, floor, etc)
      */
-    //TODO: Remove hard-coding
+    //TODO: remove hard-coding
     public List<Integer> getImportantObjects(String game){
     	switch(game){
 	    	case "aliens": return Arrays.asList(3,9,6,5);
@@ -147,7 +147,7 @@ public abstract class Agent extends AbstractPlayer {
     	processStateObs(stateObs, objectMap, gridObjectMap);
     	lastStateObs = stateObs.copy();
     	
-        //Get the available actions in this game and choose one
+        //get the available actions in this game and choose one
         ArrayList<Types.ACTIONS> actions = stateObs.getAvailableActions();
         Types.ACTIONS action = chooseAction(stateObs, actions);
 
@@ -182,7 +182,11 @@ public abstract class Agent extends AbstractPlayer {
     public double getOneQValueUpdate(double q, double reward, double maxQ){
     	return (1 - Main.alpha) * q + Main.alpha * (reward + Main.gamma * maxQ);
     }
-	
+    
+	/**
+	 * Print the given state observation using object itypes 
+	 * Only prints one object at each grid coordinate for easy visualization but there might be multiple objects at each
+	 */
 	public String stateObsStr(StateObservation stateObs, Map<Vector2d, Object> gridMap){
     	String str = " ";
     	ArrayList<Observation>[][] observationGrid = stateObs.getObservationGrid();
@@ -215,14 +219,23 @@ public abstract class Agent extends AbstractPlayer {
 		return new Vector2d(x, y);
 	}
     
+    /**
+     * Gets avatar grid position from the given state observation
+     */
     public static Vector2d getAvatarGridPos(StateObservation stateObs){
     	return getGridCellFromPixels(stateObs.getAvatarPosition());
     }
     
+    /**
+     * Gets X distance between agent and object
+     */
     public static int getXDist(Vector2d agent, Vector2d obj){
 		return (int)agent.x - (int)obj.x;
 	}
 	
+    /**
+     * Gets Y distance between agent and object
+     */
 	public static int getYDist(Vector2d agent, Vector2d obj){
 		return (int)agent.y - (int)obj.y;
 	}

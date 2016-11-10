@@ -29,10 +29,10 @@ public class Main {
 	public static double alpha = 0.1;
 	public static double gamma = 0.9;	
 	//parameters for object-based transfer
-	public static double mapping_alpha = 0.1; //The learning rate for the mapping phase
-	public static double mapping_epsilon = 0.1; //The amount an agent explores (as opposed to exploit) mappings of different object classes
-	public static double mapping_epsilon_end = 0.001; //The ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
-	public static double mapping_epsilon_delta = 0.01; //Exploration over mappings decreases by this delta value over time	
+	public static double mapping_alpha = 0.1; //the learning rate for the mapping phase
+	public static double mapping_epsilon = 0.1; //the amount an agent explores (as opposed to exploit) mappings of different object classes
+	public static double mapping_epsilon_end = 0.001; //the ending mapping exploration rate (after decreasing to this value, the parameter stays constant)
+	public static double mapping_epsilon_delta = 0.01; //exploration over mappings decreases by this delta value over time	
 	//files for saving results
 	public static File avgRewardFile;
 	public static File allRewardFile;
@@ -72,7 +72,7 @@ public class Main {
             "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D"};
 	
 	public static void main(String[] args) {
-		//Pass in directory name (if code is run using run.sh, this directory will already be created and passed in)
+		//pass in directory name (if code is run using run.sh, this directory will already be created and passed in)
 		File dir = new File(args[0]); 
 //		if(dir.exists()){
 //			File[] fileList = dir.listFiles();
@@ -80,27 +80,27 @@ public class Main {
 //		        file.delete();
 //			dir.delete();
 //		}
-		if(!dir.exists()){ //When not running Java program from run.sh, no directory has been created yet
+		if(!dir.exists()){ //when not running Java program from run.sh, no directory has been created yet
 			dir.mkdir();
-			//When running on Eclipse, the following two paths are different than when running with run.sh
+			//when running on Eclipse, the following two paths are different than when running with run.sh
 			gamesPath = gamesPath.substring(gamesPath.indexOf('/')+1);
 			CompetitionParameters.IMG_PATH = CompetitionParameters.IMG_PATH.substring(CompetitionParameters.IMG_PATH.indexOf('/')+1);
 		}
 		
+		//read in arguments
 		sourceGame = getGameLvlIdx(args[1], games);
 		targetGame = args.length > 2? getGameLvlIdx(args[2], games): null;
 		fixedMapping = args.length > 3? parseGivenMapping(args[3]): null;
 		runType = args.length > 2? RunType.RUN : RunType.PLAY;
-		
 		numAveraging = args.length > 4? Integer.parseInt(args[4]) : numAveraging;
 		numSourceEpisodes = args.length > 5? Integer.parseInt(args[5]) : numSourceEpisodes;
 		numTargetEpisodes = args.length > 6? Integer.parseInt(args[6]) : numTargetEpisodes;
 		interval = args.length > 7? Integer.parseInt(args[7]) : interval;
 				
-		if(fixedMapping != null){ //When a fixed mapping is given
-			if(fixedMapping.isEmpty()) //If the given mapping is empty, run only the Q-values phase (equivalent to OF-Q)
+		if(fixedMapping != null){ //when a fixed mapping is given
+			if(fixedMapping.isEmpty()) //if the given mapping is empty, run only the Q-values phase (equivalent to OF-Q)
 				numEpisodesMapping = 0;
-			else //Otherwise, run only the mapping phase (no update of Q-values)
+			else //otherwise, run only the mapping phase (no update of Q-values)
 				numEpisodesMapping = numTargetEpisodes;
 		} else {
 			numEpisodesMapping = numTargetEpisodes;
@@ -132,7 +132,7 @@ public class Main {
 		switch(runType){
 			case RUN:
 		        String conditionsStr = "";
-		        int numDataPoints = (numSourceEpisodes+numTargetEpisodes*2)/interval;
+		        int numDataPoints = (numSourceEpisodes+numTargetEpisodes*2)/interval; //TODO: Change if the number of conditions change (currently, one condition runs on source task and two on target)
 		        for(Condition c : Condition.values()){
 		        	conditionsStr+=c.name();
 		        	for(int i=0; i<numDataPoints; i++)
@@ -140,8 +140,9 @@ public class Main {
 		        	conditionsStr+=",";
 		        }
 		        conditionsStr+="\n";
-		        writeToAllResultsFiles(conditionsStr);
-		              
+		        writeToAllFiles(conditionsStr);
+		        
+		        //number of episodes for each condition (currently, first condition is using numSourceEpisodes and second two conditions are using numTargetEpisodes)
 		        int[] numEpisodes = new int[Condition.values().length];
 		        numEpisodes[0] = numSourceEpisodes;
 				for(int i=1; i<numEpisodes.length; i++)
@@ -158,17 +159,19 @@ public class Main {
 		        		String controller = initController(Condition.values()[c]);
 		        		if(Agent.INSTANCE != null){
 		        			System.out.println("Running condition "+Condition.values()[c]);
-		        			Agent.INSTANCE.clearEachRun();
+		        			Agent.INSTANCE.clearEachRun(); //clear learned data before each condition
 				        	System.out.println("Averaging "+num);
+				        	//run the condition for a full run and save learned model
+				        	//currently, only the OBT_TARGET condition uses the source task model (learnedModels[0]) to learn in the target task, but it is passed to all conditions
 				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes[c], game, level1, false, controller, seed, learnedModels[0]).clone();
 		        		}
-		        		writeToAllResultsFiles(",");
+		        		writeToAllFiles(",");
 		        	}
-		        	writeToAllResultsFiles("\n");
+		        	writeToAllFiles("\n");
 		        } 
-		        writeResultsToFile(avgRewardFile, reward, numAveraging, numEpisodes);
-		        writeResultsToFile(avgNumWinsFile, numWins, numAveraging, numEpisodes);
-		        writeResultsToFile(avgGameTickFile, gameTick, numAveraging, numEpisodes);
+		        writeFinalResultsToFile(avgRewardFile, reward, numAveraging, numEpisodes);
+		        writeFinalResultsToFile(avgNumWinsFile, numWins, numAveraging, numEpisodes);
+		        writeFinalResultsToFile(avgGameTickFile, gameTick, numAveraging, numEpisodes);
 		        System.exit(0);
 		        
 			case PLAY:
@@ -179,7 +182,7 @@ public class Main {
 		        	new HumanAgent(null,null);
 		        	String controller = "ramyaram.HumanAgent";
 		        	int num = 0;
-		        	while(true){
+		        	while(true){ //human can keep playing the game
 		        		writeToFile(humanDataFile, "PLAY #"+num+"\n");
 	        			Agent.INSTANCE.run(-1, -1, game, level1, true, controller, seed, null);
 		        		num++;
@@ -188,10 +191,67 @@ public class Main {
 		}
 	}
 	
-	public static void writeToAllResultsFiles(String str){
-		writeToFile(allRewardFile, str);
-        writeToFile(allNumWinsFile, str);
-        writeToFile(allGameTickFile, str);
+	/**
+	 * Initialize controller for the given condition
+	 */
+	public static String initController(Condition condition){
+		switch(condition){
+			case OF_Q_SOURCE:
+			case OF_Q_TARGET:
+				new OFQAgent(null,null);
+				return "ramyaram.OFQAgent";
+			case OBT_TARGET:
+				new OBTAgent(null,null);
+				return "ramyaram.OBTAgent";
+		}
+		return null;
+	}
+	
+	/**
+	 * Convert a mapping in the form of a string to a HashMap
+	 */
+	public static HashMap<Integer, Integer> parseGivenMapping(String mappingStr){
+		mappingStr = mappingStr.substring(1, mappingStr.length()-1); //removes brackets
+		HashMap<Integer, Integer> mapping = new HashMap<Integer, Integer>();
+		while(mappingStr.length() > 0){
+			int key = Integer.parseInt(mappingStr.substring(0, mappingStr.indexOf(':', 0)));
+			int valueEndIndex = mappingStr.indexOf(',', 0);
+			if(valueEndIndex == -1)
+				valueEndIndex = mappingStr.length();
+			int value = Integer.parseInt(""+mappingStr.substring(mappingStr.indexOf(':', 0)+1, valueEndIndex));
+			mapping.put(key, value);
+			if(mappingStr.contains(","))
+				mappingStr = mappingStr.substring(valueEndIndex+1);
+			else
+				break;
+		}
+		return mapping;
+	}
+	
+	/**
+	 * Given the set of all games and a string in the form of game+level (e.g., aliens0), get the game index and level index
+	 */
+	public static int[] getGameLvlIdx(String game_lvl, String[] allGames){
+		int[] gameLvlIdx = new int[2];
+		for(int i=0; i<gameLvlIdx.length; i++)
+			gameLvlIdx[i] = -1;
+		String gameStr = game_lvl.substring(0, game_lvl.length()-1);
+		for(int i=0; i<allGames.length; i++){
+			if(gameStr.equalsIgnoreCase(allGames[i]))
+				gameLvlIdx[0] = i;
+		}		
+		gameLvlIdx[1] = Integer.parseInt(game_lvl.substring(game_lvl.length()-1));
+		return gameLvlIdx;
+	}
+	
+	public static void writeToFile(File file, String str){
+		try{
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+	     	writer.write(str);
+	     	writer.close();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	public static void writeInfoToFile(File runInfoFile, String sourceGameStr, String targetGameStr){
@@ -216,51 +276,13 @@ public class Main {
         writeToFile(runInfoFile, "interval="+interval+"\n");
 	}
 	
-	public static HashMap<Integer, Integer> parseGivenMapping(String mappingStr){
-		mappingStr = mappingStr.substring(1, mappingStr.length()-1); //removes brackets
-		HashMap<Integer, Integer> mapping = new HashMap<Integer, Integer>();
-		while(mappingStr.length() > 0){
-			int key = Integer.parseInt(mappingStr.substring(0, mappingStr.indexOf(':', 0)));
-			int valueEndIndex = mappingStr.indexOf(',', 0);
-			if(valueEndIndex == -1)
-				valueEndIndex = mappingStr.length();
-			int value = Integer.parseInt(""+mappingStr.substring(mappingStr.indexOf(':', 0)+1, valueEndIndex));
-			mapping.put(key, value);
-			if(mappingStr.contains(","))
-				mappingStr = mappingStr.substring(valueEndIndex+1);
-			else
-				break;
-		}
-		return mapping;
+	public static void writeToAllFiles(String str){
+		writeToFile(allRewardFile, str);
+        writeToFile(allNumWinsFile, str);
+        writeToFile(allGameTickFile, str);
 	}
 	
-	public static int[] getGameLvlIdx(String game_lvl, String[] allGames){
-		int[] gameLvlIdx = new int[2];
-		for(int i=0; i<gameLvlIdx.length; i++)
-			gameLvlIdx[i] = -1;
-		String gameStr = game_lvl.substring(0, game_lvl.length()-1);
-		for(int i=0; i<allGames.length; i++){
-			if(gameStr.equalsIgnoreCase(allGames[i]))
-				gameLvlIdx[0] = i;
-		}		
-		gameLvlIdx[1] = Integer.parseInt(game_lvl.substring(game_lvl.length()-1));
-		return gameLvlIdx;
-	}
-	
-	public static String initController(Condition condition){
-		switch(condition){
-			case OF_Q_SOURCE:
-			case OF_Q_TARGET:
-				new OFQAgent(null,null);
-				return "ramyaram.OFQAgent";
-			case OBT_TARGET:
-				new OBTAgent(null,null);
-				return "ramyaram.OBTAgent";
-		}
-		return null;
-	}
-	
-	public static void writeResultsToFile(File file, double[][] results, int numAveraging, int[] numEpisodes){
+	public static void writeFinalResultsToFile(File file, double[][] results, int numAveraging, int[] numEpisodes){
 		try{
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 			for(int i=0; i<results.length; i++){ //all conditions
@@ -276,21 +298,8 @@ public class Main {
 				writer.write("\n");
 			}
 			writer.close();
-		} catch(Exception e){ 
-			System.out.println(file);
-			System.out.println(file.getAbsolutePath());
-			System.out.println(results);
-			e.printStackTrace(); 
-		}
-	}
-	
-	public static void writeToFile(File file, String str){
-		try{
-			BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-	     	writer.write(str);
-	     	writer.close();
 		} catch(Exception e){
-			e.printStackTrace();
+			e.printStackTrace(); 
 		}
 	}
 }

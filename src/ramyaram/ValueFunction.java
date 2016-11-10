@@ -11,6 +11,7 @@ public class ValueFunction {
 	
 	public ValueFunction(double[][][] optimalQValues){
 		this.optimalQValues = new double[Agent.numCols*2+1][Agent.numRows*2+1][Types.ACTIONS.values().length];
+		//if a value function is passed in, make a copy of it
 		if(optimalQValues != null){
 			for(int i=0; i<this.optimalQValues.length; i++){
 				for(int j=0; j<this.optimalQValues[i].length; j++){
@@ -34,6 +35,9 @@ public class ValueFunction {
 		return optimalQValues;
 	}
 	
+	/**
+	 * Gets the number of non-zero elements in the value function
+	 */
 	public int getNumNonZero(){
 		int num = 0;
 		for(int i=0; i<optimalQValues.length; i++){

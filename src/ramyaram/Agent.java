@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 
 import core.game.Observation;
 import core.game.StateObservation;
@@ -20,6 +21,7 @@ import tools.Vector2d;
 public abstract class Agent extends AbstractPlayer {
 	public static Agent INSTANCE;
     protected static Random rand;
+    protected static Scanner scan;
     protected static int numRows;
     protected static int numCols;
     protected static int blockSize;
@@ -27,6 +29,8 @@ public abstract class Agent extends AbstractPlayer {
 	protected static double lastScore;
 	protected static boolean updateQValues;
 	protected static String gameName;
+	protected static boolean currVisuals;
+	protected static boolean verbose = false;
 	
 	protected static Map<Observation, Object> objectMap = new HashMap<Observation, Object>();
 	protected static Map<Vector2d, Object> gridObjectMap = new HashMap<Vector2d, Object>();
@@ -39,6 +43,7 @@ public abstract class Agent extends AbstractPlayer {
      */
     public Agent(StateObservation so, ElapsedCpuTimer elapsedTimer) {
         rand = new Random();
+        scan = new Scanner(System.in);
         INSTANCE = this;
         if(so != null){
         	ArrayList<Observation>[][] observationGrid = so.getObservationGrid();

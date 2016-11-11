@@ -35,8 +35,8 @@ public class Model {
 	/**
 	 * Add a newly seen object class into the model (new value function, new transition estimate, new reward estimate)
 	 */
-	public void addObjClassToModel(){
-		qValueFunctions.add(new ValueFunction(null));
+	public void addObjClassToModel(int objClassItype){
+		qValueFunctions.add(new ValueFunction(null, objClassItype, -1)); //no previous object class
 		transitionEstimates.add(new int[Agent.numCols*2][Agent.numRows*2][Types.ACTIONS.values().length][Agent.numCols*2][Agent.numRows*2]);
 		rewardEstimates.add(new int[Agent.numCols*2][Agent.numRows*2][Types.ACTIONS.values().length][3]);
 	}

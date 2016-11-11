@@ -8,9 +8,14 @@ import tools.Vector2d;
  */
 public class ValueFunction {
 	public double[][][] optimalQValues;
+	public int objClassItype; //object class itype associated with this value function
+	public int previousObjClassItype; //previous object class itype if copied from a previous object class
 	
-	public ValueFunction(double[][][] optimalQValues){
+	public ValueFunction(double[][][] optimalQValues, int objClassItype, int previousObjClassItype){
 		this.optimalQValues = new double[Agent.numCols*2+1][Agent.numRows*2+1][Types.ACTIONS.values().length];
+		this.objClassItype = objClassItype;
+		this.previousObjClassItype = previousObjClassItype;
+		
 		//if a value function is passed in, make a copy of it
 		if(optimalQValues != null){
 			for(int i=0; i<this.optimalQValues.length; i++){

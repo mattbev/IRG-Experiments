@@ -124,7 +124,7 @@ public class OFQAgent extends Agent {
     public void processObs(Observation obs, Map<Observation, Object> map){
     	super.processObs(obs, map);
     	if(model.getItype_to_objClassId().get(obs.itype) >= model.qValueFunctions.size())
-			model.addObjClassToModel();
+			model.addObjClassToModel(obs.itype);
     }
     
     /**

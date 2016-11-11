@@ -1,6 +1,7 @@
 package ramyaram;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -111,10 +112,15 @@ public class OBTAgent extends OFQAgent {
 	public void copyMappedValueFunctions(){
 //		System.out.println(currMapping.size());
 		for(int i=0; i<currMapping.size(); i++){
+			int objClassItype = getItypeFromObjClassId(i, model.getItype_to_objClassId());
 			if(currMapping.get(i) >= priorLearnedModel.qValueFunctions.size())
-				model.qValueFunctions.set(i, new ValueFunction(null));
-			else
-				model.qValueFunctions.set(i, new ValueFunction(priorLearnedModel.qValueFunctions.get(currMapping.get(i)).getOptimalQValues()));
+				model.qValueFunctions.set(i, new ValueFunction(null, objClassItype, -1)); //no previous object class
+			else{
+				int previousObjClassItype = getItypeFromObjClassId(currMapping.get(i), priorLearnedModel.getItype_to_objClassId());
+				model.qValueFunctions.set(i, new ValueFunction(priorLearnedModel.qValueFunctions.get(currMapping.get(i)).getOptimalQValues(), objClassItype, previousObjClassItype));
+//				System.out.println(currMapping.get(i));
+			}
+//			System.out.println(model.qValueFunctions.get(i).objClassItype+" "+model.qValueFunctions.get(i).previousObjClassItype);
 		}
 //		System.out.println(model.qValueFunctions.size());
 	}
@@ -155,12 +161,12 @@ public class OBTAgent extends OFQAgent {
 	 * It can be either a previously learned value function (during the mapping phase) or the new value function for that object class (during the Q-values phase)
 	 */
 	public ValueFunction getValueFunction(Object obj){
-		if(updateQValues)
+		if(updateQValues) //in qvalues phase and value functions are already copied into model.qValueFunctions
 			return model.qValueFunctions.get(obj.getObjClassId());
-		else{
+		else{ //in mapping phase
 //			printItypeMapping(currMapping);
 			if(currMapping.get(obj.getObjClassId()) >= priorLearnedModel.qValueFunctions.size())
-				return new ValueFunction(null);
+				return new ValueFunction(null, obj.getItype(), -1);
 			else
 				return priorLearnedModel.qValueFunctions.get(currMapping.get(obj.getObjClassId()));
 		}
@@ -189,7 +195,7 @@ public class OBTAgent extends OFQAgent {
 				//choose a random mapping
 				ArrayList<Integer> mapping = new ArrayList<Integer>();
 				for(int i=0; i<currMapping.size(); i++)
-					mapping.add(rand.nextInt(weightedSim.get(i).length));
+					mapping.add(rand.nextInt(similarityMatrix.get(i).length));
 				return mapping;
 			} else { //otherwise, chooses the best mapping/the one with the highest Q-value
 				return getGreedyMapping(similarityMatrix);
@@ -280,14 +286,21 @@ public class OBTAgent extends OFQAgent {
 		System.out.println("MAPPING");
 		for(int new_itype : model.getItype_to_objClassId().keySet()){
 			int newObjClassId = model.getItype_to_objClassId().get(new_itype);
-			int oldObjClassId = mapping.get(newObjClassId);
-			int oldIType = -1;
-			for(Entry<Integer, Integer> entry : priorLearnedModel.getItype_to_objClassId().entrySet()){
-				if(entry.getValue() == oldObjClassId)
-					oldIType = entry.getKey();
-			}
-			System.out.println(new_itype+" --> "+oldIType);
+			int previousObjClassId = mapping.get(newObjClassId);
+			int previousItype = getItypeFromObjClassId(previousObjClassId, priorLearnedModel.getItype_to_objClassId());
+			System.out.println(new_itype+" --> "+previousItype);
 		}
+	}
+	
+	/**
+	 * Gets the itype id for an object class given its internal object class id
+	 */
+	public int getItypeFromObjClassId(int objClassId, HashMap<Integer, Integer> itype_to_objClassId){
+		for(Entry<Integer, Integer> entry : itype_to_objClassId.entrySet()){
+			if(entry.getValue() == objClassId)
+				return entry.getKey();
+		}
+		return -1;
 	}
 	
 	public void clearEachRun(){

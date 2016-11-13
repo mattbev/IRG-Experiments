@@ -38,7 +38,6 @@ public class RandomAgent extends Agent {
 	 * Epsilon-greedy approach to choosing an action
 	 */
 	public Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
-		System.out.println("random action");
 		return actions.get(rand.nextInt(actions.size()));
 	}
 

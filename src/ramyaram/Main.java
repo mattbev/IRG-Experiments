@@ -23,15 +23,15 @@ public class Main {
 	public static boolean readModelFromFile = false;
 	public static int visuals = 0;
     //parameters to denote number of episodes
-	public static int numAveraging = 50;
-	public static int numSourceEpisodes = 5000;
-	public static int numTargetEpisodes = 1000;
+	public static int numAveraging = 0;
+	public static int numSourceEpisodes = 0;
+	public static int numTargetEpisodes = 0;
 	public static int interval = 1;
 	public static int numEpisodesMapping = -1;
 	//parameters for standard Q-learning
 	public static double epsilon = 0.1;
 	public static double alpha = 0.1;
-	public static double gamma = 0.9;	
+	public static double gamma = 0.95;	
 	//parameters for object-based transfer
 	public static double mapping_alpha = 0.1; //the learning rate for the mapping phase
 	public static double mapping_epsilon = 0.1; //the amount an agent explores (as opposed to exploit) mappings of different object classes
@@ -86,6 +86,7 @@ public class Main {
 		//"-t": target task flag, usage: <game><index> (e.g., "-t W5" which means run target task: game W level 5)
 		//"-ns": number of episodes to run the source task, usage: <number of episodes to run the task for> (e.g., "-ns 5000" which means run source task for 5000 episodes)
 		//"-nt": number of episodes to run the target task, usage: <number of episodes to run the task for> (e.g., "-nt 5000" which means run target task for 5000 episodes)
+		//"-c": which conditions to run, usage: <condition1>,<condition2>... (e.g., "-c qs,qt,tt,rt,rs" which means you run all conditions: of-q on source (qs), of-q on target (qt), obt on target (tt), random on target (rt), random on source (rs))
 		//"-m": mapping between two tasks, usage: {<target obj itype>:<source obj itype>,<target obj itype>:<source obj itype>} (e.g., "-m {3:4,5:16}" which means target obj class itype 3 is mapped to 4 from earlier task and similarly 5 is mapped to 16)
 		//"-a": number of runs to average over flag, usage: <number of runs> (e.g., "-a 50" which means run 50 runs and average over them)
 		//"-i": interval for recording, usage: <interval> (e.g., "-i 10" which means record reward every 10 episodes)
@@ -116,16 +117,24 @@ public class Main {
 			switch(flag){
 				case "-s": 
 					sourceGame = getGameLvlIdx(argument, games);
-					conditions.put("OF_Q_SOURCE", conditions.size());
 					writeModelToFile = true; break;
 				case "-t":
-					targetGame = getGameLvlIdx(argument, games);
-					conditions.put("OF_Q_TARGET", conditions.size());
-					conditions.put("OBT_TARGET", conditions.size()); break;
+					targetGame = getGameLvlIdx(argument, games); break;
 				case "-ns":
 					numSourceEpisodes = Integer.parseInt(argument); break;
 				case "-nt":
 					numTargetEpisodes = Integer.parseInt(argument); break;
+				case "-c":
+					String[] conditions_args = argument.split(",");
+					for(String c : conditions_args){
+						switch(c){
+							case "qs": conditions.put("OF_Q_SOURCE", conditions.size()); break;
+							case "qt": conditions.put("OF_Q_TARGET", conditions.size()); break;
+							case "tt": conditions.put("OBT_TARGET", conditions.size()); break;
+							case "rt": conditions.put("RANDOM_TARGET", conditions.size()); break;
+							case "rs": conditions.put("RANDOM_SOURCE", conditions.size()); break;
+						}
+					} break;
 				case "-a":
 					numAveraging = Integer.parseInt(argument); break;
 				case "-i":
@@ -247,6 +256,9 @@ public class Main {
 		} else if(condition.contains("OBT")){
 			new OBTAgent(null,null);
 			return "ramyaram.OBTAgent";
+		} else if(condition.contains("RANDOM")){
+			new RandomAgent(null, null);
+			return "ramyaram.RandomAgent";
 		}
 		return null;
 	}

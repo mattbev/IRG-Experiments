@@ -15,20 +15,17 @@ exit 1
 fi
 
 args="$@"
-dir=""
+dir="$1" # first part of directory name is 'run' or 'play'
 
 shift  # shift the 'run/play' argument.
 while : ; do
 case "$1" in
 -s)
-dir+="$2";
+dir+="_s_$2"; # add source game, if exists, to directory name
 shift 2 ;;
 -t)
-dir+="_$2";
+dir+="_t_$2"; # add target game, if exists, to directory name
 shift 2 ;;
-#-j)
-#jar="$2"
-#shift 2 ;;
 *)
 break ;;
 esac

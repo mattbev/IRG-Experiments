@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 
+import core.ArcadeMachine;
 import core.game.Observation;
 import core.game.StateObservation;
 import core.player.*;
@@ -66,6 +67,33 @@ public abstract class Agent extends AbstractPlayer {
      */
     public abstract void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions);
 	
+	/**
+	 * Runs one episode of the task (start state to goal state)
+	 * Records stats from the game
+	 */
+	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller, int seed){
+		System.out.println("Episode "+episodeNum);
+		lastScore = 0;
+		lastStateObs = null;
+        double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
+        while(result[0] == Types.WINNER.PLAYER_DISQ.key()) //don't count any episodes in which the controller was disqualified for time
+//        	System.out.println("DQ!");
+        	result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
+        if(episodeNum % Main.interval == 0){
+        	//record reward
+        	Main.reward[conditionNum][(episodeNum/Main.interval)] += result[1]; //score of the game
+        	Main.writeToFile(Main.allRewardFile, result[1]+", ");
+        	//record game winner
+        	int winIndex = (result[0] == Types.WINNER.PLAYER_WINS.key()) ? 1 : 0;
+    		Main.numWins[conditionNum][(episodeNum/Main.interval)] += winIndex;
+        	Main.writeToFile(Main.allNumWinsFile, winIndex+", ");
+        	//record end game tick
+        	Main.gameTick[conditionNum][(episodeNum/Main.interval)] += result[2]; //game tick at the end of the game
+        	Main.writeToFile(Main.allGameTickFile, result[2]+", ");      	
+        }
+        return result[1];
+	}
+    
     /**
      * Converts the given state observation into a map to keep track of objects in the current state
      */

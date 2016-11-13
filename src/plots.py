@@ -20,6 +20,7 @@ f = file(sys.argv[1]+'/'+sys.argv[2]).read().strip().split('\n')
 for line in f:
     label = line.split(',')[0]
     y = line.split(',')[1:]
+    y = [e for e in y if e] #use non-null elements
     x = [i for i in range(len(y))]
 #    x_int = np.linspace(x[0], x[-1], 100)
 #    tck = interpolate.splrep(x, y, k = 3, s = 1)

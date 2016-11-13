@@ -24,23 +24,24 @@ public class OFQAgent extends Agent {
 	 * Runs the Object-Focused Q-learning algorithm with the given parameters
 	 */
 	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel) {
-		model = new Model(game);
+		model = new Model();
 		OFQAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
-//		runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
-//		runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
-//		runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
-		for(int i=0; i<numEpisodes; i++){
-//			if(i % 1000 == 0 && i != 0){
-//				runOneEpisode(conditionNum, i, game, level1, true, controller, seed);
-//				runOneEpisode(conditionNum, i, game, level1, true, controller, seed);
-//				runOneEpisode(conditionNum, i, game, level1, true, controller, seed);
-//			}
-//			else
-				runOneEpisode(conditionNum, i, game, level1, visuals, controller, seed);
+		updateQValues = true;
+		//show agent play the game before learning
+		for(int i=0; i<Main.visuals; i++) 
+			runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
+		//run OF-Q
+		for(int i=0; i<numEpisodes; i++)
+			runOneEpisode(conditionNum, i, game, level1, visuals, controller, seed);
+		//show agent play the game after learning
+		for(int i=0; i<Main.visuals; i++)
+			runOneEpisode(conditionNum, numEpisodes-1, game, level1, true, controller, seed);
+		if(Main.writeModelToFile){
+			//save learned model to a file
+			for(ValueFunction q : model.qValueFunctions)
+				System.out.println(q.getNumNonZero());
+			model.writeToFile(Main.writeModelFile);	
 		}
-//		runOneEpisode(conditionNum, numEpisodes-1, game, level1, true, controller, seed);
-//		runOneEpisode(conditionNum, numEpisodes-1, game, level1, true, controller, seed);
-//		runOneEpisode(conditionNum, numEpisodes-1, game, level1, true, controller, seed);
 		return model;
 	}
 	
@@ -49,7 +50,6 @@ public class OFQAgent extends Agent {
 	 * Records stats from the game
 	 */
 	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller, int seed){
-		currVisuals = visuals;
 		System.out.println("Episode "+episodeNum);
         double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         if(episodeNum % Main.interval == 0){
@@ -99,10 +99,6 @@ public class OFQAgent extends Agent {
 				}
     		}
 		}
-//		if(currVisuals && verbose){
-//			System.out.println(possibleActions);
-//			scan.nextLine();
-//		}
 		return possibleActions.get(rand.nextInt(possibleActions.size()));
     }
     

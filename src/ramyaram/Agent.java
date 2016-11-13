@@ -29,8 +29,6 @@ public abstract class Agent extends AbstractPlayer {
 	protected static double lastScore;
 	protected static boolean updateQValues;
 	protected static String gameName;
-	protected static boolean currVisuals;
-	protected static boolean verbose = false;
 	
 	protected static Map<Observation, Object> objectMap = new HashMap<Observation, Object>();
 	protected static Map<Vector2d, Object> gridObjectMap = new HashMap<Vector2d, Object>();

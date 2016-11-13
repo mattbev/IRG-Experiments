@@ -1,5 +1,10 @@
 package ramyaram;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -16,16 +21,13 @@ public class Model {
 	private HashMap<Integer, Integer> itype_to_objClassId;
 	private ArrayList<int[][][][][]> transitionEstimates;
 	private ArrayList<int[][][][]> rewardEstimates;
-	private String gameName;
 	
-	public Model(String gameName) {
-		this(gameName, new ArrayList<ValueFunction>(), new HashMap<Integer, Integer>(), 
-				new ArrayList<int[][][][][]>(), new ArrayList<int[][][][]>());
+	public Model(){
+		this(new ArrayList<ValueFunction>(), new HashMap<Integer, Integer>(), new ArrayList<int[][][][][]>(), new ArrayList<int[][][][]>());
 	}
 	
-	public Model(String gameName, ArrayList<ValueFunction> qValueFunctions, HashMap<Integer, Integer> itype_to_objClassId, 
+	public Model(ArrayList<ValueFunction> qValueFunctions, HashMap<Integer, Integer> itype_to_objClassId, 
 			ArrayList<int[][][][][]> transitionEstimates, ArrayList<int[][][][]> rewardEstimates){
-		this.gameName = gameName;
 		this.qValueFunctions = qValueFunctions;
 		this.itype_to_objClassId = itype_to_objClassId;
 		this.transitionEstimates = transitionEstimates;
@@ -80,12 +82,69 @@ public class Model {
 			return 2;
 	}
 	
+	public void writeToFile(File dir){
+		try{
+			String dirPath = dir.getPath();
+			File infoFile = new File(dirPath+"/modelInfo.txt");
+			Main.writeToFile(infoFile, "numRows="+Agent.numRows+"\n");
+			Main.writeToFile(infoFile, "numCols="+Agent.numCols+"\n");
+			for(ValueFunction q : qValueFunctions){
+				File qFile = new File(dirPath+"/"+q.objClassItype+".csv");
+				BufferedWriter writer = new BufferedWriter(new FileWriter(qFile));
+				for(int i=0; i<q.optimalQValues.length; i++){
+					for(int j=0; j<q.optimalQValues[i].length; j++){
+						for(int k=0; k<q.optimalQValues[i][j].length; k++){
+							writer.write(q.optimalQValues[i][j][k]+",");
+						}
+					}
+				}
+				writer.close();
+			}
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void readFile(File dir){
+		try{
+			dir = new File(dir.getPath()+"/learnedQ");
+			System.out.println(dir.getAbsolutePath());
+			for(File file : dir.listFiles()){ //for each object value function
+				if(file.getPath().contains("modelInfo"))
+					continue;
+				int itype = Integer.parseInt(file.getPath().substring(file.getPath().lastIndexOf('/')+1, file.getPath().lastIndexOf('.')));
+				itype_to_objClassId.put(itype, itype_to_objClassId.size());
+				
+				BufferedReader reader = new BufferedReader(new FileReader(file));
+				String[] tokens = reader.readLine().split(",");
+				int count = 0;
+				ValueFunction q = new ValueFunction(null, itype, -1, DataAnalysis.getVariableValueFromFile(dir.getPath()+"/modelInfo.txt", "numRows"), 
+						DataAnalysis.getVariableValueFromFile(dir.getPath()+"/modelInfo.txt", "numCols"));
+				for(int i=0; i<q.optimalQValues.length; i++){
+					for(int j=0; j<q.optimalQValues[i].length; j++){
+						for(int k=0; k<q.optimalQValues[i][j].length; k++){
+							q.optimalQValues[i][j][k] = Double.parseDouble(tokens[count]);
+							count++;
+						}
+					}
+				}
+				qValueFunctions.add(q);
+				reader.close();
+			}
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+		for(ValueFunction q : qValueFunctions){
+			System.out.println(q.getNumNonZero());
+		}
+	}
+	
 	public HashMap<Integer, Integer> getItype_to_objClassId(){
 		return itype_to_objClassId;
 	}
 	
 	public Model clone(){
-		return new Model(gameName, new ArrayList<ValueFunction>(qValueFunctions), new HashMap<Integer, Integer>(itype_to_objClassId), 
+		return new Model(new ArrayList<ValueFunction>(qValueFunctions), new HashMap<Integer, Integer>(itype_to_objClassId), 
 				new ArrayList<int[][][][][]>(transitionEstimates), new ArrayList<int[][][][]>(rewardEstimates));
 	}
 	
@@ -94,7 +153,6 @@ public class Model {
 		itype_to_objClassId = null;
 		transitionEstimates = null;
 		rewardEstimates = null;
-		gameName = "";
 	}
 	
 	/**

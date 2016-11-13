@@ -40,10 +40,20 @@ public class OBTAgent extends OFQAgent {
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
 		}
-		model = new Model(game);
+		model = new Model();
 		OBTAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
-		OBTAgent.priorLearnedModel = priorLearnedModel;
 		
+		if(Main.readModelFromFile){
+			try{
+				OBTAgent.priorLearnedModel = new Model();
+				OBTAgent.priorLearnedModel.readFile(Main.readModelFile);
+			} catch(Exception e){
+				e.printStackTrace();
+			}
+		} else if(priorLearnedModel != null){
+			OBTAgent.priorLearnedModel = priorLearnedModel;
+		}
+	
 		currMapping = new ArrayList<Integer>();
 		numOfMappings = new ArrayList<int[]>();	
 		weightedSim = new ArrayList<double[]>();
@@ -55,6 +65,13 @@ public class OBTAgent extends OFQAgent {
 		weights[PERFORMANCE] = 1;
 //		for(int i=0; i<weights.length; i++)
 //			weights[i] = 1/(double)weights.length;
+		
+		//show agent play the game before learning
+		for(int i=0; i<Main.visuals; i++){
+			currMapping = getMapping(weightedSim);
+//			printItypeMapping(currMapping);
+			runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
+		}
 		
 		int k=0;
 		//learn mappings between objects without making any changes to the value functions
@@ -68,6 +85,12 @@ public class OBTAgent extends OFQAgent {
 			//update Q-values in newly copied value functions
 			qValuesPhase(conditionNum, k, 1, game, level1, visuals, controller, seed);
 			k+=1;
+		}
+		//show agent play the game after learning
+		for(int i=0; i<Main.visuals; i++){
+			currMapping = getMapping(weightedSim);
+//			printItypeMapping(currMapping);
+			runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
 		}
 		ArrayList<Integer> bestMapping = getMaxMapping(performanceSim);
 		//update number of times this mapping has been chosen at the end of a run
@@ -90,10 +113,8 @@ public class OBTAgent extends OFQAgent {
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++){
 			weightedSim = calculateWeightedSim();
 			currMapping = getMapping(weightedSim);
-//			printItypeMapping(currMapping);
 			double episodeReward = runOneEpisode(conditionNum, k, game, level1, visuals, controller, seed);
 			for(int i=0; i<currMapping.size(); i++){
-//				System.out.println(currMapping.size()+" "+mappingQ.size()+" "+i);
 				double q = performanceSim.get(i)[currMapping.get(i)]; //update mappingQ based on reward received
 		        double qValue = (1 - Main.mapping_alpha) * q + Main.mapping_alpha * episodeReward;
 		        performanceSim.get(i)[currMapping.get(i)] = qValue;
@@ -101,8 +122,6 @@ public class OBTAgent extends OFQAgent {
 			Main.mapping_epsilon -= Main.mapping_epsilon_delta;
 			if(Main.mapping_epsilon < Main.mapping_epsilon_end)
 				Main.mapping_epsilon = Main.mapping_epsilon_end;
-//			printList(mappingQ);
-//			System.out.print("");
 		}
 	}
 	
@@ -110,7 +129,6 @@ public class OBTAgent extends OFQAgent {
 	 * Based on the current mapping, copy the most similar value functions to use as a prior for the Q-values phase
 	 */
 	public void copyMappedValueFunctions(){
-//		System.out.println(currMapping.size());
 		for(int i=0; i<currMapping.size(); i++){
 			int objClassItype = getItypeFromObjClassId(i, model.getItype_to_objClassId());
 			if(currMapping.get(i) >= priorLearnedModel.qValueFunctions.size())
@@ -118,11 +136,8 @@ public class OBTAgent extends OFQAgent {
 			else{
 				int previousObjClassItype = getItypeFromObjClassId(currMapping.get(i), priorLearnedModel.getItype_to_objClassId());
 				model.qValueFunctions.set(i, new ValueFunction(priorLearnedModel.qValueFunctions.get(currMapping.get(i)).getOptimalQValues(), objClassItype, previousObjClassItype));
-//				System.out.println(currMapping.get(i));
 			}
-//			System.out.println(model.qValueFunctions.get(i).objClassItype+" "+model.qValueFunctions.get(i).previousObjClassItype);
 		}
-//		System.out.println(model.qValueFunctions.size());
 	}
 	
 	/**
@@ -164,7 +179,6 @@ public class OBTAgent extends OFQAgent {
 		if(updateQValues) //in qvalues phase and value functions are already copied into model.qValueFunctions
 			return model.qValueFunctions.get(obj.getObjClassId());
 		else{ //in mapping phase
-//			printItypeMapping(currMapping);
 			if(currMapping.get(obj.getObjClassId()) >= priorLearnedModel.qValueFunctions.size())
 				return new ValueFunction(null, obj.getItype(), -1);
 			else

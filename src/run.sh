@@ -1,22 +1,39 @@
 #!/bin/bash
 
-maxnum_args=8
-if [ $# -le 0 ] || [ $# -gt $maxnum_args ]; then
+if [ $# -le 0 ]; then
 echo 'Please run with the following notation:'	
-echo './run.sh <first game> <(optional) second game> <(optional) mapping between object itypes in the two games> <(optional) number of runs to average over> <(optional) number of total episodes per run for the source task> <(optional) number of total episodes per run for the target task> <(optional) interval for recording (e.g., 10 means record every 10 episodes)> <(optional) jar file>'
-echo 'To play a game (e.g., aliens level 0): ./run.sh aliens0'
-echo 'To run transfer between two games (e.g., aliens level0 to sheriff level 0) with a given fixed mapping (ids are itypes of objects in the game): ./run.sh aliens5 sheriff0 {9:3,5:4,1:0}'
-echo 'To run transfer between two games (e.g., aliens level 0 to sheriff level 0) where the agent learns a mapping: ./run.sh aliens0 sheriff0'
+echo "args[1] - play or run"
+echo "args[2] and on - can include any of these flags:"
+echo "\"-s\": source task flag, usage: <game><index>-<number of episodes to run it for> (e.g., \"-s W5-5000\" which means run source task: game W level 5 for 5000 episodes)"
+echo "\"-t\": target task flag, usage: <game><index>-<number of episodes to run it for> (e.g., \"-t W5-5000\" which means run target task: game W level 5 for 5000 episodes)"
+echo "\"-m\": mapping between two tasks, usage: {<target obj itype>:<source obj itype>,<target obj itype>:<source obj itype>} (e.g., \"-m {3:4,5:16}\" which means target obj class itype 3 is mapped to 4 from earlier task and similarly 5 is mapped to 16)"
+echo "\"-a\": number of runs to average over flag, usage: <number of runs> (e.g., \"-a 50\" which means run 50 runs and average over them)"
+echo "\"-i\": interval for recording, usage: <interval> (e.g., \"-i 10\" which means record reward every 10 episodes)"
+echo "\"-f\": file with saved model to read from, usage: <interval> (e.g., \"-f src/F5\" which means read from directory src/F5)"
+echo "\"-v\": watch the agent play the game a certain number of times, usage: <number of times you see agent play the game> (e.g., \"-v 5\" which means you see the agent play 5 times before continuing learning)"
 exit 1
 fi
 
-dir=$1
-if [ $# -ge 2 ]; then
-	dir+="_$2"
-fi
-if [ $# -ge 3 ]; then
-	dir+="_fixed"
-fi
+args="$@"
+dir=""
+
+shift  # shift the 'run/play' argument.
+while : ; do
+case "$1" in
+-s)
+dir+="$2";
+shift 2 ;;
+-t)
+dir+="_$2";
+shift 2 ;;
+#-j)
+#jar="$2"
+#shift 2 ;;
+*)
+break ;;
+esac
+done
+
 count=0
 newdir="${dir}_${count}"
 while [ -d "$newdir" ]; do
@@ -26,10 +43,10 @@ done
 echo "$newdir"
 mkdir "$newdir"
 
-if [ $# -ge $maxnum_args ]; then
-    java -jar $maxnum_args $newdir $1 $2 $3 $4 $5 $6 $7
-else
-    javac ramyaram/Main.java
-    java ramyaram/Main $newdir $1 $2 $3 $4 $5 $6 $7
-fi
+#if [ "$jar" != "" ]; then
+#    java -jar "$jar" $newdir "$args"
+#else
+javac ramyaram/Main.java
+java ramyaram/Main $newdir "$args"
+#fi
 python plots.py $newdir "reward.csv"

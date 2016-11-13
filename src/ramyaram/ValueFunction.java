@@ -12,7 +12,11 @@ public class ValueFunction {
 	public int previousObjClassItype; //previous object class itype if copied from a previous object class
 	
 	public ValueFunction(double[][][] optimalQValues, int objClassItype, int previousObjClassItype){
-		this.optimalQValues = new double[Agent.numCols*2+1][Agent.numRows*2+1][Types.ACTIONS.values().length];
+		this(optimalQValues, objClassItype, previousObjClassItype, Agent.numRows, Agent.numCols);
+	}
+	
+	public ValueFunction(double[][][] optimalQValues, int objClassItype, int previousObjClassItype, int numRows, int numCols){
+		this.optimalQValues = new double[numCols*2+1][numRows*2+1][Types.ACTIONS.values().length];
 		this.objClassItype = objClassItype;
 		this.previousObjClassItype = previousObjClassItype;
 		

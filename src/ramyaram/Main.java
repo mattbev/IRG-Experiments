@@ -13,11 +13,15 @@ import core.competition.CompetitionParameters;
  */
 public class Main {
 	public enum RunType {PLAY, RUN}	
+	public static HashMap<String, Integer> conditions = new HashMap<String,Integer>();
 	//structures to store information from runs
 	public static double[][] reward;
 	public static double[][] gameTick;
 	public static double[][] numWins;
 	public static Model[] learnedModels;
+	public static boolean writeModelToFile = false;
+	public static boolean readModelFromFile = false;
+	public static int visuals = 0;
     //parameters to denote number of episodes
 	public static int numAveraging = 50;
 	public static int numSourceEpisodes = 5000;
@@ -44,10 +48,12 @@ public class Main {
 	public static File humanDataFile;
 	public static File humanWinsFile;
 	public static File humanScoresFile;
+	public static File writeModelFile;
+	public static File readModelFile;
 	//settings for current run
     public static RunType runType;
-	public static int[] sourceGame; //this array has 2 indices, the first specifies the game index and the second is the level index
-	public static int[] targetGame; //this array has 2 indices, the first specifies the game index and the second is the level index
+	public static int[] sourceGame = new int[]{-1,-1}; //this array has 2 indices, the first specifies the game index and the second is the level index
+	public static int[] targetGame = new int[]{-1,-1}; //this array has 2 indices, the first specifies the game index and the second is the level index
 	public static HashMap<Integer, Integer> fixedMapping; //fixed mapping if given prior to running the task
 	//path and names for all games
 	public static String gamesPath = "../examples/gridphysics/";
@@ -72,31 +78,69 @@ public class Main {
             "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D"};
 	
 	public static void main(String[] args) {
+		//argument list
+		//args[0] - directory name
+		//args[1] - play or run
+		//args[2] and on - can include any of these flags:
+		//"-s": source task flag, usage: <game><index> (e.g., "-s W5" which means run source task: game W level 5)
+		//"-t": target task flag, usage: <game><index> (e.g., "-t W5" which means run target task: game W level 5)
+		//"-ns": number of episodes to run the source task, usage: <number of episodes to run the task for> (e.g., "-ns 5000" which means run source task for 5000 episodes)
+		//"-nt": number of episodes to run the target task, usage: <number of episodes to run the task for> (e.g., "-nt 5000" which means run target task for 5000 episodes)
+		//"-m": mapping between two tasks, usage: {<target obj itype>:<source obj itype>,<target obj itype>:<source obj itype>} (e.g., "-m {3:4,5:16}" which means target obj class itype 3 is mapped to 4 from earlier task and similarly 5 is mapped to 16)
+		//"-a": number of runs to average over flag, usage: <number of runs> (e.g., "-a 50" which means run 50 runs and average over them)
+		//"-i": interval for recording, usage: <interval> (e.g., "-i 10" which means record reward every 10 episodes)
+		//"-f": file with saved model to read from, usage: <interval> (e.g., "-f src/F5" which means read from directory src/F5)
+		//"-v": watch the agent play the game a certain number of times, usage: <number of times you see agent play the game> (e.g., "-v 5" which means you see the agent play 5 times before continuing learning)
+
 		//pass in directory name (if code is run using run.sh, this directory will already be created and passed in)
-		File dir = new File(args[0]); 
-//		if(dir.exists()){
-//			File[] fileList = dir.listFiles();
-//			for(File file : fileList)
-//		        file.delete();
-//			dir.delete();
-//		}
+		File dir = new File(args[0]);
 		if(!dir.exists()){ //when not running Java program from run.sh, no directory has been created yet
 			dir.mkdir();
 			//when running on Eclipse, the following two paths are different than when running with run.sh
 			gamesPath = gamesPath.substring(gamesPath.indexOf('/')+1);
 			CompetitionParameters.IMG_PATH = CompetitionParameters.IMG_PATH.substring(CompetitionParameters.IMG_PATH.indexOf('/')+1);
 		}
-		
+
 		//read in arguments
-		sourceGame = getGameLvlIdx(args[1], games);
-		targetGame = args.length > 2? getGameLvlIdx(args[2], games): null;
-		fixedMapping = args.length > 3? parseGivenMapping(args[3]): null;
-		runType = args.length > 2? RunType.RUN : RunType.PLAY;
-		numAveraging = args.length > 4? Integer.parseInt(args[4]) : numAveraging;
-		numSourceEpisodes = args.length > 5? Integer.parseInt(args[5]) : numSourceEpisodes;
-		numTargetEpisodes = args.length > 6? Integer.parseInt(args[6]) : numTargetEpisodes;
-		interval = args.length > 7? Integer.parseInt(args[7]) : interval;
-				
+		String[] tokens = args[1].split(" ");
+		for(String token : tokens)
+			System.out.print(token+",");
+		System.out.println();
+		switch(tokens[0]){
+			case "play": runType = RunType.PLAY; break;
+			case "run": runType = RunType.RUN; break;
+		}
+		for(int i=1; i<tokens.length; i++){
+			String flag = tokens[i];
+			String argument = tokens[i+1];
+			switch(flag){
+				case "-s": 
+					sourceGame = getGameLvlIdx(argument, games);
+					conditions.put("OF_Q_SOURCE", conditions.size());
+					writeModelToFile = true; break;
+				case "-t":
+					targetGame = getGameLvlIdx(argument, games);
+					conditions.put("OF_Q_TARGET", conditions.size());
+					conditions.put("OBT_TARGET", conditions.size()); break;
+				case "-ns":
+					numSourceEpisodes = Integer.parseInt(argument); break;
+				case "-nt":
+					numTargetEpisodes = Integer.parseInt(argument); break;
+				case "-a":
+					numAveraging = Integer.parseInt(argument); break;
+				case "-i":
+					interval = Integer.parseInt(argument); break;
+				case "-m":
+					fixedMapping = parseGivenMapping(argument); break;
+				case "-f":
+					readModelFromFile = true;
+					readModelFile = new File(argument); break;
+				case "-v":
+					visuals = Integer.parseInt(argument); break;
+			}
+			i++;
+		}
+
 		if(fixedMapping != null){ //when a fixed mapping is given
 			if(fixedMapping.isEmpty()) //if the given mapping is empty, run only the Q-values phase (equivalent to OF-Q)
 				numEpisodesMapping = 0;
@@ -106,9 +150,6 @@ public class Main {
 			numEpisodesMapping = numTargetEpisodes;
 		}
 		
-        int seed = new Random().nextInt();
-        int numConditions = Condition.values().length;
-        
         if(runType == RunType.RUN){
 	        avgRewardFile = new File(dir.getPath()+"/reward.csv");
 	        allRewardFile = new File(dir.getPath()+"/allReward.csv");
@@ -117,24 +158,30 @@ public class Main {
 	        avgNumWinsFile = new File(dir.getPath()+"/numWins.csv");
 	        allNumWinsFile = new File(dir.getPath()+"/allNumWins.csv");
 	        runInfoFile = new File(dir.getPath()+"/runInfo.txt");
-	        writeInfoToFile(runInfoFile, args[1], args[2]);
+	        writeInfoToFile(runInfoFile, getGameStrFromIndices(sourceGame), getGameStrFromIndices(targetGame));
+	        writeModelFile = new File(dir.getPath()+"/learnedQ");
+	        writeModelFile.mkdir();
         } else if(runType == RunType.PLAY){
         	humanDataFile = new File(dir.getPath()+"/humanData.txt");
         	humanWinsFile = new File(dir.getPath()+"/humanWins.txt");
         	humanScoresFile = new File(dir.getPath()+"/humanScores.txt");
         }
 
+        int seed = new Random().nextInt();
 		int maxDataPoints = Math.max(numSourceEpisodes,numTargetEpisodes)/interval;
-		reward = new double[Condition.values().length][maxDataPoints];
-		numWins = new double[Condition.values().length][maxDataPoints];
-		gameTick = new double[Condition.values().length][maxDataPoints];
+		reward = new double[conditions.size()][maxDataPoints];
+		numWins = new double[conditions.size()][maxDataPoints];
+		gameTick = new double[conditions.size()][maxDataPoints];
 		
 		switch(runType){
 			case RUN:
 		        String conditionsStr = "";
-		        int numDataPoints = (numSourceEpisodes+numTargetEpisodes*2)/interval; //TODO: Change if the number of conditions change (currently, one condition runs on source task and two on target)
-		        for(Condition c : Condition.values()){
-		        	conditionsStr+=c.name();
+		        int numDataPoints = 0;
+		        for(String condition : conditions.keySet())
+		        	numDataPoints += condition.contains("SOURCE") ? numSourceEpisodes : numTargetEpisodes; 
+		        numDataPoints = numDataPoints/interval;
+		        for(String condition : conditions.keySet()){
+		        	conditionsStr+=condition;
 		        	for(int i=0; i<numDataPoints; i++)
 		        		conditionsStr+=", ";
 		        	conditionsStr+=",";
@@ -143,24 +190,23 @@ public class Main {
 		        writeToAllFiles(conditionsStr);
 		        
 		        //number of episodes for each condition (currently, first condition is using numSourceEpisodes and second two conditions are using numTargetEpisodes)
-		        int[] numEpisodes = new int[Condition.values().length];
-		        numEpisodes[0] = numSourceEpisodes;
-				for(int i=1; i<numEpisodes.length; i++)
-					numEpisodes[i] = numTargetEpisodes;
-				
+		        int[] numEpisodes = new int[conditions.size()];
+				for(String condition : conditions.keySet())
+					numEpisodes[conditions.get(condition)] = condition.contains("SOURCE") ? numSourceEpisodes : numTargetEpisodes;
 		        for(int num=0; num<numAveraging; num++){
-		        	learnedModels = new Model[Condition.values().length];
-		        	for(int c=0; c<numConditions; c++){
-		        		int gameIdx = (c == 0)? sourceGame[0] : targetGame[0];
-		        		int levelIdx = (c == 0)? sourceGame[1] : targetGame[1];
+		        	learnedModels = new Model[conditions.size()];
+		        	for(String condition : conditions.keySet()){
+		        		int gameIdx = condition.contains("SOURCE") ? sourceGame[0] : targetGame[0];
+		        		int levelIdx = condition.contains("SOURCE") ? sourceGame[1] : targetGame[1];
 		        		String game = gamesPath + games[gameIdx] + ".txt";
 		        		String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
 		                System.out.println("PLAYING "+games[gameIdx]+" level "+levelIdx);
-		        		String controller = initController(Condition.values()[c]);
+		        		String controller = initController(condition);
 		        		if(Agent.INSTANCE != null){
-		        			System.out.println("Running condition "+Condition.values()[c]);
+		        			System.out.println("Running condition "+condition);
 		        			Agent.INSTANCE.clearEachRun(); //clear learned data before each condition
 				        	System.out.println("Averaging "+num);
+				        	int c = conditions.get(condition);
 				        	//run the condition for a full run and save learned model
 				        	//currently, only the OBT_TARGET condition uses the source task model (learnedModels[0]) to learn in the target task, but it is passed to all conditions
 				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes[c], game, level1, false, controller, seed, learnedModels[0]).clone();
@@ -194,15 +240,13 @@ public class Main {
 	/**
 	 * Initialize controller for the given condition
 	 */
-	public static String initController(Condition condition){
-		switch(condition){
-			case OF_Q_SOURCE:
-			case OF_Q_TARGET:
-				new OFQAgent(null,null);
-				return "ramyaram.OFQAgent";
-			case OBT_TARGET:
-				new OBTAgent(null,null);
-				return "ramyaram.OBTAgent";
+	public static String initController(String condition){
+		if(condition.contains("OF_Q")){
+			new OFQAgent(null,null);
+			return "ramyaram.OFQAgent";
+		} else if(condition.contains("OBT")){
+			new OBTAgent(null,null);
+			return "ramyaram.OBTAgent";
 		}
 		return null;
 	}
@@ -226,6 +270,12 @@ public class Main {
 				break;
 		}
 		return mapping;
+	}
+	
+	public static String getGameStrFromIndices(int[] game){
+		if(game[0] >= 0 && game[1] >= 0)
+			return games[game[0]]+game[1];
+		return "";
 	}
 	
 	/**
@@ -256,6 +306,7 @@ public class Main {
 	
 	public static void writeInfoToFile(File runInfoFile, String sourceGameStr, String targetGameStr){
 		writeToFile(runInfoFile, "runType="+runType+"\n");
+		writeToFile(runInfoFile, "conditions="+conditions.entrySet()+"\n");
         writeToFile(runInfoFile, "sourceGame="+sourceGameStr+"\n");
         if(targetGame != null)
         	writeToFile(runInfoFile, "targetGame="+targetGameStr+"\n");
@@ -274,6 +325,13 @@ public class Main {
         writeToFile(runInfoFile, "numEpisodesMapping="+numEpisodesMapping+"\n");
         writeToFile(runInfoFile, "numEpisodesQValues="+(numTargetEpisodes-numEpisodesMapping)+"\n");
         writeToFile(runInfoFile, "interval="+interval+"\n");
+        writeToFile(runInfoFile, "writeModelToFile="+writeModelToFile+"\n");
+        if(writeModelFile != null)
+        	writeToFile(runInfoFile, "writeModelFile="+writeModelFile.getPath()+"\n");
+        writeToFile(runInfoFile, "readModelFromFile="+readModelFromFile+"\n");
+        if(readModelFile != null)
+        	writeToFile(runInfoFile, "readModelFile="+readModelFile.getPath()+"\n");
+        writeToFile(runInfoFile, "visuals="+visuals+"\n");
 	}
 	
 	public static void writeToAllFiles(String str){
@@ -285,13 +343,14 @@ public class Main {
 	public static void writeFinalResultsToFile(File file, double[][] results, int numAveraging, int[] numEpisodes){
 		try{
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-			for(int i=0; i<results.length; i++){ //all conditions
-				writer.write(Condition.values()[i].name()+", ");
-				for(int j=0; j<results[i].length; j++){
-					if(j < numEpisodes[i]){
+			for(String condition : conditions.keySet()){ //all conditions
+				int c = conditions.get(condition);
+				writer.write(condition+", ");
+				for(int j=0; j<results[c].length; j++){
+					if(j < numEpisodes[c]){
 						//divides the total reward by the number of simulation runs and gets the average reward the agent received over time
-						writer.write(""+(results[i][j]/numAveraging));		
-						if(j < numEpisodes[i]-1)
+						writer.write(""+(results[c][j]/numAveraging));		
+						if(j < numEpisodes[c]-1)
 							writer.write(", ");
 					}
 				}
@@ -301,5 +360,14 @@ public class Main {
 		} catch(Exception e){
 			e.printStackTrace(); 
 		}
+	}
+	
+	public static void delete(File f) {
+		if (f.isDirectory()) {
+			for (File c : f.listFiles())
+				delete(c);
+		}
+		if (!f.delete())
+		    System.out.println("Failed to delete file: " + f);
 	}
 }

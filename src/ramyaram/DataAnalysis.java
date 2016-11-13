@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * Given the allReward.csv file from running Main.java, this class will run an analysis and print out a summary of the results (e.g., reward curve averaged over runs)
  * This can be used even if the full code has not yet executed (will not include partially-completed runs)
  */
-public class AllRewardAnalysis {
+public class DataAnalysis {
 	public static String line = null;
 	public static int count = 0;
 	public static int numAveraging = 0;
@@ -19,10 +19,12 @@ public class AllRewardAnalysis {
 	public static int[] numDataPoints;
 	public static double[][] reward = null;
 	public static int lineLength = -1;
+	public static String readFileName = "allReward.csv";
+	public static String writeFileName = "dataAnalysis_reward.csv";
 	public static void main(String[] args){
 		try{
-			String fileName = args[0]+"/allReward.csv";
-			BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));
+			
+			BufferedReader reader = new BufferedReader(new FileReader(new File(args[0]+"/"+readFileName)));
 			while ((line = reader.readLine()) != null) {
 				String[] tokens = line.split(",");
 				if(count == 0){	//line with condition labels	
@@ -34,9 +36,12 @@ public class AllRewardAnalysis {
 					int numSourceEpisodes = getVariableValueFromFile(args[0]+"/runInfo.txt", "numSourceEpisodes");
 					int numTargetEpisodes = getVariableValueFromFile(args[0]+"/runInfo.txt", "numTargetEpisodes");
 					int maxEpisodes = Math.max(numSourceEpisodes, numTargetEpisodes);
-					numDataPoints[0] = numSourceEpisodes;
-					for(int i=1; i<numDataPoints.length; i++)
-						numDataPoints[i] = numTargetEpisodes;
+					for(int i=0; i<numDataPoints.length; i++){
+						if(labels.get(i).contains("SOURCE"))
+							numDataPoints[i] = numSourceEpisodes;
+						else
+							numDataPoints[i] = numTargetEpisodes;
+					}
 					reward = new double[labels.size()][maxEpisodes];
 				} else {
 					if(count == 1)
@@ -67,7 +72,7 @@ public class AllRewardAnalysis {
 			}
 			reader.close();
 			
-			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(args[0]+"/postanalysis_reward.csv")));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(args[0]+"/"+writeFileName)));
 			for(int i=0; i<reward.length; i++){ //all conditions
 				writer.write(labels.get(i)+", ");
 				for(int j=0; j<reward[i].length; j++){

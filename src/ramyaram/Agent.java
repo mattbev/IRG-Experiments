@@ -49,6 +49,7 @@ public abstract class Agent extends AbstractPlayer {
         	ArrayList<Observation>[][] observationGrid = so.getObservationGrid();
     		numCols = observationGrid.length;
     		numRows = observationGrid[0].length;
+//    		System.out.println(gameName+" "+numCols+" "+numRows);
         	blockSize = so.getBlockSize();	
         }
     }
@@ -143,7 +144,7 @@ public abstract class Agent extends AbstractPlayer {
 	    	case "crossfire": return Arrays.asList(3,4,6);
 	    	case "plaqueattack": case "P": return Arrays.asList(4,7,11,14,16);
 	    	case "defender": case "D": return Arrays.asList(3,5,6,7,12);
-	    	case "avoidgeorge": return Arrays.asList(6,7,8);
+	    	case "avoidgeorge": return Arrays.asList(4,6,7,8);
 	    	case "witnessprotection": return Arrays.asList(3,4,9,10,13,15,16,18,19);
 	    	case "jaws": return Arrays.asList(4,5,6,8,10,11,12,13);
 	    	case "waves": return Arrays.asList(3,5,6,7,9,10,11,12);
@@ -197,8 +198,9 @@ public abstract class Agent extends AbstractPlayer {
 //		System.out.print(stateObsStr(stateObs, gridObjectNextStateMap));
 ////		for(Observation obs : objectNextStateMap.keySet())
 ////        	System.out.println(objectNextStateMap.get(obs).getGridPos()+" "+objectNextStateMap.get(obs).getItype());
-//		System.out.println("Current Game Score: "+currScore+", Score Change: "+(currScore-lastScore)+"\n");
-        
+//		System.out.println("Current Game Score: "+currScore+", Score Change: "+(currScore-lastScore)+"\n");    
+//		scan.nextLine();
+		
         updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore), actions);
         lastScore = currScore;
         

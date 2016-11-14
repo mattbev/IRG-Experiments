@@ -33,14 +33,16 @@ public class DataAnalysis {
 							labels.add(tokens[i]); //get all labels
 					}
 					numDataPoints = new int[labels.size()]; //number of data points per condition
-					int numSourceEpisodes = getVariableValueFromFile(args[0]+"/runInfo.txt", "numSourceEpisodes");
-					int numTargetEpisodes = getVariableValueFromFile(args[0]+"/runInfo.txt", "numTargetEpisodes");
-					int maxEpisodes = Math.max(numSourceEpisodes, numTargetEpisodes);
+					int numSourceEpisodesAll = getVariableValueFromFile(args[0]+"/runInfo.txt", "numSourceEpisodes");
+					int numTargetEpisodesAll = getVariableValueFromFile(args[0]+"/runInfo.txt", "numTargetEpisodes");
+					int numSourceDataPoints = numSourceEpisodesAll/getVariableValueFromFile(args[0]+"/runInfo.txt", "interval");
+					int numTargetDataPoints = numTargetEpisodesAll/getVariableValueFromFile(args[0]+"/runInfo.txt", "interval");
+					int maxEpisodes = Math.max(numSourceDataPoints, numTargetDataPoints);
 					for(int i=0; i<numDataPoints.length; i++){
 						if(labels.get(i).contains("SOURCE"))
-							numDataPoints[i] = numSourceEpisodes;
+							numDataPoints[i] = numSourceDataPoints;
 						else
-							numDataPoints[i] = numTargetEpisodes;
+							numDataPoints[i] = numTargetDataPoints;
 					}
 					reward = new double[labels.size()][maxEpisodes];
 				} else {

@@ -62,6 +62,7 @@ public class HumanAgent extends Agent {
         	Main.writeToFile(Main.humanDataFile, "WINNER: "+stateObs.getGameWinner()+", SCORE: "+stateObs.getGameScore()+"\n**********************\n\n");
         	Main.writeToFile(Main.humanWinsFile, stateObs.getGameWinner()+",");
         	Main.writeToFile(Main.humanScoresFile, stateObs.getGameScore()+",");
+        	Main.writeToFile(Main.humanTicksFile, stateObs.getGameTick()+",");
         	lastWin = stateObs.getGameWinner() == Types.WINNER.PLAYER_WINS ? 1 : 0;
         	lastGameScore = stateObs.getGameScore();
         }

@@ -48,6 +48,7 @@ public class Main {
 	public static File humanDataFile;
 	public static File humanWinsFile;
 	public static File humanScoresFile;
+	public static File humanTicksFile;
 	public static File writeModelFile;
 	public static File readModelFile;
 	//settings for current run
@@ -172,8 +173,9 @@ public class Main {
 	        writeModelFile.mkdir();
         } else if(runType == RunType.PLAY){
         	humanDataFile = new File(dir.getPath()+"/humanData.txt");
-        	humanWinsFile = new File(dir.getPath()+"/humanWins.txt");
-        	humanScoresFile = new File(dir.getPath()+"/humanScores.txt");
+        	humanWinsFile = new File(dir.getPath()+"/humanWins.csv");
+        	humanScoresFile = new File(dir.getPath()+"/humanScores.csv");
+        	humanTicksFile = new File(dir.getPath()+"/humanTicks.csv");
         }
 
         int seed = new Random().nextInt();

@@ -149,8 +149,8 @@ public class Types {
 
     public static final int SCORE_DISQ = -1000;
     public static final int SCORE_WIN = 0;
-    public static final int SCORE_LOSE = -100;
-    public static final double SCORE_TICK = -0.01;
+    public static final int SCORE_LOSE = 0;
+    public static final double SCORE_TICK = 0;
 
     public static final Color GREEN = new Color(0, 200, 0);
     public static final Color BLUE = new Color(0, 0, 200);

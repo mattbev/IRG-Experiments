@@ -86,6 +86,8 @@ public class Model {
 		try{
 			String dirPath = dir.getPath();
 			File infoFile = new File(dirPath+"/modelInfo.txt");
+			if(infoFile.exists()) //already wrote model to file in a previous run -- no need to rewrite
+				return;
 			Main.writeToFile(infoFile, "numRows="+Agent.numRows+"\n");
 			Main.writeToFile(infoFile, "numCols="+Agent.numCols+"\n");
 			for(ValueFunction q : qValueFunctions){

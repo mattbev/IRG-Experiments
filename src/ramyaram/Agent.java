@@ -21,6 +21,7 @@ import tools.Vector2d;
  */
 public abstract class Agent extends AbstractPlayer {
 	public static Agent INSTANCE;
+	public static boolean endedGame;
     protected static Random rand;
     protected static Scanner scan;
     protected static int numRows;
@@ -75,6 +76,7 @@ public abstract class Agent extends AbstractPlayer {
 		System.out.println("Episode "+episodeNum);
 		lastScore = 0;
 		lastStateObs = null;
+		endedGame = false;
         double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         while(result[0] == Types.WINNER.PLAYER_DISQ.key()) //don't count any episodes in which the controller was disqualified for time
 //        	System.out.println("DQ!");
@@ -167,6 +169,7 @@ public abstract class Agent extends AbstractPlayer {
     public void clearEachRun(){
     	lastStateObs = null;
     	lastScore = 0;
+    	endedGame = false;
     	if(model != null)
     		model.clear();
     }

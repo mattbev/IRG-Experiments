@@ -43,7 +43,10 @@ mkdir "$newdir"
 #if [ "$jar" != "" ]; then
 #    java -jar "$jar" $newdir "$args"
 #else
+cd ..
+ant
+cd src/
 javac ramyaram/Main.java
-java ramyaram/Main $newdir "$args"
+java -cp ../bin/ ramyaram/Main $newdir "$args"
 #fi
 python plots.py $newdir "reward.csv"

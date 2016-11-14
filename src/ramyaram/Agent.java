@@ -49,7 +49,7 @@ public abstract class Agent extends AbstractPlayer {
         	ArrayList<Observation>[][] observationGrid = so.getObservationGrid();
     		numCols = observationGrid.length;
     		numRows = observationGrid[0].length;
-        	blockSize = so.getBlockSize();
+        	blockSize = so.getBlockSize();	
         }
     }
     

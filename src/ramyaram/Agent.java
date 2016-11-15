@@ -149,6 +149,7 @@ public abstract class Agent extends AbstractPlayer {
 	    	case "jaws": return Arrays.asList(4,5,6,8,10,11,12,13);
 	    	case "waves": return Arrays.asList(3,5,6,7,9,10,11,12);
 	    	case "W": return Arrays.asList(3,5,6,8,9,10);
+	    	case "eggomania": return Arrays.asList(3,8,11);
     	}
     	return null;
     }
@@ -190,16 +191,16 @@ public abstract class Agent extends AbstractPlayer {
         processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore(); 
         
-//		System.out.println("QValueFunctions size "+model.qValueFunctions.size());
-//		System.out.print(stateObsStr(lastStateObs, gridObjectMap));
-////		for(Observation obs : objectMap.keySet())
-////        	System.out.println(objectMap.get(obs).getGridPos()+" "+objectMap.get(obs).getItype());
-//		System.out.println(action);
-//		System.out.print(stateObsStr(stateObs, gridObjectNextStateMap));
-////		for(Observation obs : objectNextStateMap.keySet())
-////        	System.out.println(objectNextStateMap.get(obs).getGridPos()+" "+objectNextStateMap.get(obs).getItype());
-//		System.out.println("Current Game Score: "+currScore+", Score Change: "+(currScore-lastScore)+"\n");    
-//		scan.nextLine();
+		System.out.println("QValueFunctions size "+model.qValueFunctions.size());
+		System.out.print(stateObsStr(lastStateObs, gridObjectMap));
+//		for(Observation obs : objectMap.keySet())
+//        	System.out.println(objectMap.get(obs).getGridPos()+" "+objectMap.get(obs).getItype());
+		System.out.println(action);
+		System.out.print(stateObsStr(stateObs, gridObjectNextStateMap));
+//		for(Observation obs : objectNextStateMap.keySet())
+//        	System.out.println(objectNextStateMap.get(obs).getGridPos()+" "+objectNextStateMap.get(obs).getItype());
+		System.out.println("Current Game Score: "+currScore+", Score Change: "+(currScore-lastScore)+"\n");    
+		scan.nextLine();
 		
         updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore), actions);
         lastScore = currScore;

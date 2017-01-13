@@ -1,0 +1,33 @@
+BasicGame square_size=53
+    SpriteSet
+
+        floor > Immovable img=newset/floor6 hidden=True
+        human >
+            annoyed > RandomNPC speed=0.25 img=oryx/feather1 cons=2
+            citizen >
+                quiet > RandomNPC speed=0.25 img=oryx/freak1 cons=1
+                avatar > ShootAvatar stype=cigarette img=oryx/necklace1 rotateInPlace=False
+
+        george > Chaser img=newset/boilingwater stype=citizen speed=0.25 frameRate=8 
+        cigarette > Flicker limit=5 singleton=True img=oryx/pants1
+        wall > Immovable img=oryx/wall6
+
+
+    TerminationSet
+        SpriteCounter stype=avatar  win=False
+        SpriteCounter stype=quiet   win=False
+        Timeout limit=1000 win=True
+
+    InteractionSet
+
+        quiet george > transformTo stype=annoyed
+        avatar george > killSprite scoreChange=-20
+        annoyed cigarette > transformTo stype=quiet scoreChange=5
+        human wall wall > stepBack
+
+
+    LevelMapping
+        g > floor george
+        c > floor quiet
+        A > floor avatar
+        . > floor

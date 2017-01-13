@@ -46,7 +46,8 @@ BasicGame square_size=40
     InteractionSet
         avatar surround base wall > stepBack
 
-        base missile bullet > killBoth
+        base missile > killBoth
+        base bullet > killBoth scoreChange=-1
         EOS missile bullet > killSprite
 
         bleft turndown > transformTo stype=bdown
@@ -54,7 +55,7 @@ BasicGame square_size=40
         bdown turnright > transformTo stype=bright
         bup turnleft > transformTo stype=bleft
 
-        bandit bullet > killBoth scoreChange=1
-        avatar missile > killBoth scoreChange=-1
+        bandit bullet > killBoth scoreChange=5
+        avatar missile > killBoth scoreChange=-5
 
         bullet wall > killSprite

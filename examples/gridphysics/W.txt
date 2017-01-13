@@ -31,19 +31,20 @@ BasicGame square_size=40
         alien   EOS  > killSprite
         missile EOS  > killSprite
 
-        alien sam > killBoth scoreChange=2
+        alien sam > killBoth scoreChange=5
 
         sam laser > transformTo stype=shield killSecond=True
 
         avatar shield > changeResource resource=shield value=1 killResource=True
 
-        avatar alien > killIfHasLess resource=shield limit=0
+        avatar alien > killIfHasLess resource=shield limit=0 scoreChange=-5
         avatar alien > changeResource resource=shield value=-1 killResource=True
 
-        avatar laser > killIfHasLess resource=shield limit=0
+        avatar laser > killIfHasLess resource=shield limit=0 scoreChange=-5
         avatar laser > changeResource resource=shield value=-1 killResource=True
 
-        asteroid sam laser > killSprite
+        asteroid laser > killSprite
+        asteroid sam > killSprite scoreChange=-1
         alien asteroid > killSprite
         laser asteroid > killSprite
         avatar asteroid > stepBack

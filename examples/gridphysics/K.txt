@@ -1,0 +1,28 @@
+BasicGame square_size=40
+    SpriteSet
+        wall > Immovable color=LIGHTGRAY img=oryx/backOBrown
+        entrance > SpawnPoint portal=True
+            badhole > stype=bad color=WHITE prob=0.01 img=newset/hole1
+            goodhole  > stype=good color=GRAY prob=0.01 img=newset/hole5
+        moving >
+            cat > RandomNPC color=RED img=newset/cat cons=2 shrinkfactor=0.5
+            avatar  > MovingAvatar img=newset/submarine
+        mole > Flicker shrinkfactor=0.7
+            good > color=BLUE limit=30 img=newset/hydrant
+            bad  > color=GREEN  limit=30 img=newset/tree2
+
+    LevelMapping
+        0 > wall badhole
+        1 > wall goodhole
+        2 > wall cat
+        A > wall avatar
+
+    TerminationSet
+        Timeout limit=500 win=True
+        SpriteCounter  stype=avatar  limit=0 win=False
+
+    InteractionSet
+        moving  EOS  > stepBack
+        good avatar > killSprite scoreChange=5
+        bad avatar > killSprite scoreChange=-5
+        avatar cat > killSprite scoreChange=-10

@@ -1,4 +1,4 @@
-BasicGame square_size=45
+BasicGame square_size=53
   SpriteSet
     floor > Immovable img=oryx/backBlack
     explosion > Flicker limit=5 img=newset/sugar shrinkfactor=0.5
@@ -21,8 +21,8 @@ BasicGame square_size=45
 
   InteractionSet
     movable wall  > stepBack
-    incoming city > killBoth scoreChange=-1
-    incoming explosion > killSprite scoreChange=2
+    incoming city > killBoth scoreChange=-5
+    incoming explosion > killSprite scoreChange=5
 
   TerminationSet
     SpriteCounter stype=city   win=False

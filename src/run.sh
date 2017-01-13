@@ -44,6 +44,6 @@ mkdir "$newdir"
 #    java -jar "$jar" $newdir "$args"
 #else
 javac ramyaram/Main.java
-java -cp ../bin/ ramyaram/Main $newdir "$args"
+java ramyaram/Main $newdir "$args"
 #fi
 python plots.py $newdir "reward.csv"

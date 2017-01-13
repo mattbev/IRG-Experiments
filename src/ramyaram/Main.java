@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.HashMap;
-import java.util.Random;
 
 import core.competition.CompetitionParameters;
 
@@ -92,7 +91,7 @@ public class Main {
 		//"-m": mapping between two tasks, usage: {<target obj itype>:<source obj itype>,<target obj itype>:<source obj itype>} (e.g., "-m {3:4,5:16}" which means target obj class itype 3 is mapped to 4 from earlier task and similarly 5 is mapped to 16)
 		//"-a": number of runs to average over flag, usage: <number of runs> (e.g., "-a 50" which means run 50 runs and average over them)
 		//"-i": interval for recording, usage: <interval> (e.g., "-i 10" which means record reward every 10 episodes)
-		//"-f": file with saved model to read from, usage: <interval> (e.g., "-f src/F5" which means read from directory src/F5)
+		//"-f": file with saved model to read from, usage: <file directory> (e.g., "-f src/F5" which means read from directory src/F5)
 		//"-v": watch the agent play the game a certain number of times, usage: <number of times you see agent play the game> (e.g., "-v 5" which means you see the agent play 5 times before continuing learning)
 
 		//pass in directory name (if code is run using run.sh, this directory will already be created and passed in)

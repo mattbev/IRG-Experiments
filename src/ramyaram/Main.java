@@ -22,6 +22,7 @@ public class Main {
 	public static boolean writeModelToFile = false;
 	public static boolean readModelFromFile = false;
 	public static int visuals = 0;
+	public static int GAME_PLAY_NUM = 1;
     //parameters to denote number of episodes
 	public static int numAveraging = 0;
 	public static int numSourceEpisodes = 0;
@@ -76,7 +77,7 @@ public class Main {
             "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
             "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
             "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem", "sheriffTopBottom",
-            "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D"};
+            "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D","E","K","A"};
 	
 	public static void main(String[] args) {
 		//argument list
@@ -178,7 +179,6 @@ public class Main {
         	humanTicksFile = new File(dir.getPath()+"/humanTicks.csv");
         }
 
-        int seed = new Random().nextInt();
 		int maxDataPoints = Math.max(numSourceEpisodes,numTargetEpisodes)/interval;
 		reward = new double[conditions.size()][maxDataPoints];
 		numWins = new double[conditions.size()][maxDataPoints];
@@ -220,7 +220,7 @@ public class Main {
 				        	int c = conditions.get(condition);
 				        	//run the condition for a full run and save learned model
 				        	//currently, only the OBT_TARGET condition uses the source task model (learnedModels[0]) to learn in the target task, but it is passed to all conditions
-				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes[c], game, level1, false, controller, seed, learnedModels[0]).clone();
+				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes[c], game, level1, false, controller, learnedModels[0]).clone();
 		        		}
 		        		writeToAllFiles(",");
 		        	}
@@ -238,11 +238,10 @@ public class Main {
 		        	String level1 = gamesPath + games[sourceGame[0]] + "_lvl" + sourceGame[1] +".txt";
 		        	new HumanAgent(null,null);
 		        	String controller = "ramyaram.HumanAgent";
-		        	int num = 0;
-		        	while(true){ //human can keep playing the game
-		        		writeToFile(humanDataFile, "PLAY #"+num+"\n");
-	        			Agent.INSTANCE.run(-1, -1, game, level1, true, controller, seed, null);
-		        		num++;
+		        	while(GAME_PLAY_NUM <= 10){ //human can keep playing the game until the max number of episodes
+		        		writeToFile(humanDataFile, "PLAY #"+GAME_PLAY_NUM+"\n");
+	        			Agent.INSTANCE.run(-1, -1, game, level1, true, controller, null);
+	        			GAME_PLAY_NUM++;
 		        	}
 		       }
 		}

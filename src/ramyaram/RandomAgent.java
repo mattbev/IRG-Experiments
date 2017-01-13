@@ -19,18 +19,18 @@ public class RandomAgent extends Agent {
 	/**
 	 * Runs a random agent
 	 */
-	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel) {
+	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel) {
 		model = new Model();
 		RandomAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		//show agent play the game before learning
 		for(int i=0; i<Main.visuals; i++) 
-			runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
+			runOneEpisode(conditionNum, 0, game, level1, true, controller);
 		//run Random agent
 		for(int i=0; i<numEpisodes; i++)
-			runOneEpisode(conditionNum, i, game, level1, visuals, controller, seed);
+			runOneEpisode(conditionNum, i, game, level1, visuals, controller);
 		//show agent play the game after learning
 		for(int i=0; i<Main.visuals; i++)
-			runOneEpisode(conditionNum, numEpisodes-1, game, level1, true, controller, seed);
+			runOneEpisode(conditionNum, numEpisodes-1, game, level1, true, controller);
 		return model;
 	}
 	

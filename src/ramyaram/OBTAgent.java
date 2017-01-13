@@ -35,7 +35,7 @@ public class OBTAgent extends OFQAgent {
 	/**
 	 * Runs the Object-Based Transfer algorithm with the given parameters
 	 */
-	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel) {
+	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel) {
 		if(Main.numEpisodesMapping > Main.numTargetEpisodes){ //sanity check - cannot have more episodes in the mapping phase than total episodes in the full run
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
@@ -53,13 +53,15 @@ public class OBTAgent extends OFQAgent {
 		} else if(priorLearnedModel != null){
 			OBTAgent.priorLearnedModel = priorLearnedModel;
 		}
-	
+
 		currMapping = new ArrayList<Integer>();
 		numOfMappings = new ArrayList<int[]>();	
 		weightedSim = new ArrayList<double[]>();
 		performanceSim = new ArrayList<double[]>();
 		objTransitionSim = new ArrayList<double[]>();
 		objRewardSim = new ArrayList<double[]>();
+		
+		System.out.println("CURR MAPPING "+currMapping);
 		
 		weights = new double[numWeights];
 		weights[PERFORMANCE] = 1;
@@ -70,12 +72,12 @@ public class OBTAgent extends OFQAgent {
 		for(int i=0; i<Main.visuals; i++){
 			currMapping = getMapping(weightedSim);
 //			printItypeMapping(currMapping);
-			runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
+			runOneEpisode(conditionNum, 0, game, level1, true, controller);
 		}
 		
 		int k=0;
 		//learn mappings between objects without making any changes to the value functions
-		mappingPhase(conditionNum, k, Main.numEpisodesMapping, game, level1, visuals, controller, seed);
+		mappingPhase(conditionNum, k, Main.numEpisodesMapping, game, level1, visuals, controller);
 		k+=Main.numEpisodesMapping;
 		//copy value functions from previously learned task for new objects based on current mapping
 		copyMappedValueFunctions();
@@ -83,14 +85,14 @@ public class OBTAgent extends OFQAgent {
 //			weightedSim = newWeightedSim();
 //			currMapping = getGreedyMapping(weightedSim);
 			//update Q-values in newly copied value functions
-			qValuesPhase(conditionNum, k, 1, game, level1, visuals, controller, seed);
+			qValuesPhase(conditionNum, k, 1, game, level1, visuals, controller);
 			k+=1;
 		}
 		//show agent play the game after learning
 		for(int i=0; i<Main.visuals; i++){
 			currMapping = getMapping(weightedSim);
 //			printItypeMapping(currMapping);
-			runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
+			runOneEpisode(conditionNum, 0, game, level1, true, controller);
 		}
 		ArrayList<Integer> bestMapping = getMaxMapping(performanceSim);
 		//update number of times this mapping has been chosen at the end of a run
@@ -108,12 +110,12 @@ public class OBTAgent extends OFQAgent {
 	 * Update mappings between object classes of the source and target task
 	 * Q-values of the previously learned object classes in the source task do not change
 	 */
-	public void mappingPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed){
+	public void mappingPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, boolean visuals, String controller){
 		updateQValues = false;
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++){
 			weightedSim = calculateWeightedSim();
 			currMapping = getMapping(weightedSim);
-			double episodeReward = runOneEpisode(conditionNum, k, game, level1, visuals, controller, seed);
+			double episodeReward = runOneEpisode(conditionNum, k, game, level1, visuals, controller);
 			for(int i=0; i<currMapping.size(); i++){
 				double q = performanceSim.get(i)[currMapping.get(i)]; //update mappingQ based on reward received
 		        double qValue = (1 - Main.mapping_alpha) * q + Main.mapping_alpha * episodeReward;
@@ -143,10 +145,10 @@ public class OBTAgent extends OFQAgent {
 	/**
 	 * Update Q-values of new value functions
 	 */
-	public void qValuesPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed){
+	public void qValuesPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, boolean visuals, String controller){
 		updateQValues = true;
 		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++)
-			runOneEpisode(conditionNum, k, game, level1, visuals, controller, seed);
+			runOneEpisode(conditionNum, k, game, level1, visuals, controller);
 	}
 	
 	/**
@@ -179,6 +181,9 @@ public class OBTAgent extends OFQAgent {
 		if(updateQValues) //in qvalues phase and value functions are already copied into model.qValueFunctions
 			return model.qValueFunctions.get(obj.getObjClassId());
 		else{ //in mapping phase
+//			System.out.println(currMapping);
+//			System.out.println(priorLearnedModel);
+//			System.out.println(priorLearnedModel.qValueFunctions);
 			if(currMapping.get(obj.getObjClassId()) >= priorLearnedModel.qValueFunctions.size())
 				return new ValueFunction(null, obj.getItype(), -1);
 			else

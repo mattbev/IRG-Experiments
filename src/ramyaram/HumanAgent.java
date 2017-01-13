@@ -87,10 +87,10 @@ public class HumanAgent extends Agent {
         //System.out.println("Thanks for playing! " + stateObservation.isAvatarAlive());
     }
     
-    public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel){
+    public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel){
     	model = new Model();
     	HumanAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
-    	ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
+    	ArcadeMachine.runOneGame(game, level1, visuals, controller, null, 1, 0);
     	return null;
     }
    

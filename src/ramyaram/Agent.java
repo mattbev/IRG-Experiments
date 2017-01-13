@@ -57,7 +57,7 @@ public abstract class Agent extends AbstractPlayer {
     /**
      * Runs multiple episodes of the specified game and level using the given controller
      */
-    public abstract Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel);
+    public abstract Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel);
     
     /**
      * Selects the next action to take given the current state and all possible actions
@@ -73,11 +73,12 @@ public abstract class Agent extends AbstractPlayer {
 	 * Runs one episode of the task (start state to goal state)
 	 * Records stats from the game
 	 */
-	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller, int seed){
+	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller){
 		System.out.println("Episode "+episodeNum);
 		lastScore = 0;
 		lastStateObs = null;
 		endedGame = false;
+		int seed = rand.nextInt();
         double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         while(result[0] == Types.WINNER.PLAYER_DISQ.key()) //don't count any episodes in which the controller was disqualified for time
 //        	System.out.println("DQ!");
@@ -133,6 +134,7 @@ public abstract class Agent extends AbstractPlayer {
     	switch(game){
 	    	case "aliens": return Arrays.asList(3,9,6,5);
 	    	case "missilecommand": return Arrays.asList(3,4,7);
+	    	case "M": return Arrays.asList(3,6,8);
 	    	case "sheriff": case "H": return Arrays.asList(3,5,12,13,14,15,16);
 	    	case "sheriffTopBottom": return Arrays.asList(3,5,14,15,16);
 	    	case "solarfox": case "S": return Arrays.asList(8,9,6,11,12);
@@ -144,12 +146,15 @@ public abstract class Agent extends AbstractPlayer {
 	    	case "crossfire": return Arrays.asList(3,4,6);
 	    	case "plaqueattack": case "P": return Arrays.asList(4,7,11,14,16);
 	    	case "defender": case "D": return Arrays.asList(3,5,6,7,12);
-	    	case "avoidgeorge": return Arrays.asList(4,6,7,8);
+	    	case "avoidgeorge": case "A": return Arrays.asList(4,6,7,8);
 	    	case "witnessprotection": return Arrays.asList(3,4,9,10,13,15,16,18,19);
 	    	case "jaws": return Arrays.asList(4,5,6,8,10,11,12,13);
 	    	case "waves": return Arrays.asList(3,5,6,7,9,10,11,12);
 	    	case "W": return Arrays.asList(3,5,6,8,9,10);
+	    	case "whackamole": return Arrays.asList(3,4,6,8,9);
 	    	case "eggomania": return Arrays.asList(3,8,11);
+	    	case "E": return Arrays.asList(3,7,8,11,12);
+	    	case "K": return Arrays.asList(3,4,6,8,9);
     	}
     	return null;
     }
@@ -191,16 +196,16 @@ public abstract class Agent extends AbstractPlayer {
         processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore(); 
         
-		System.out.println("QValueFunctions size "+model.qValueFunctions.size());
-		System.out.print(stateObsStr(lastStateObs, gridObjectMap));
-//		for(Observation obs : objectMap.keySet())
-//        	System.out.println(objectMap.get(obs).getGridPos()+" "+objectMap.get(obs).getItype());
-		System.out.println(action);
-		System.out.print(stateObsStr(stateObs, gridObjectNextStateMap));
-//		for(Observation obs : objectNextStateMap.keySet())
-//        	System.out.println(objectNextStateMap.get(obs).getGridPos()+" "+objectNextStateMap.get(obs).getItype());
-		System.out.println("Current Game Score: "+currScore+", Score Change: "+(currScore-lastScore)+"\n");    
-		scan.nextLine();
+//		System.out.println("QValueFunctions size "+model.qValueFunctions.size());
+//		System.out.print(stateObsStr(lastStateObs, gridObjectMap));
+////		for(Observation obs : objectMap.keySet())
+////        	System.out.println(objectMap.get(obs).getGridPos()+" "+objectMap.get(obs).getItype());
+//		System.out.println(action);
+//		System.out.print(stateObsStr(stateObs, gridObjectNextStateMap));
+////		for(Observation obs : objectNextStateMap.keySet())
+////        	System.out.println(objectNextStateMap.get(obs).getGridPos()+" "+objectNextStateMap.get(obs).getItype());
+//		System.out.println("Current Game Score: "+currScore+", Score Change: "+(currScore-lastScore)+"\n");    
+//		scan.nextLine();
 		
         updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore), actions);
         lastScore = currScore;

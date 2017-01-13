@@ -28,6 +28,7 @@ import ontology.effects.TimeEffect;
 import ontology.sprites.Resource;
 import ramyaram.Agent;
 import ramyaram.HumanAgent;
+import ramyaram.Main;
 import tools.*;
 import tools.pathfinder.Node;
 import tools.pathfinder.PathFinder;
@@ -903,7 +904,7 @@ public abstract class Game
 //            		else
 //            			str+="Lost, ";
 //            		str+= "Score: "+HumanAgent.lastGameScore+".\n\nClick OK to continue playing.\nIf you're ready to stop, please let the experimenter know.";       		
-            		String str = "LAST GAME SCORE: "+HumanAgent.lastGameScore+".\n\nClick OK to continue playing.\nIf you're ready to stop, please let the experimenter know.";
+            		String str = "LAST GAME (#"+(Main.GAME_PLAY_NUM-1)+") SCORE: "+HumanAgent.lastGameScore+".\n\nClick OK to continue playing.\nIf you're ready to stop, please let the experimenter know.";
             		
             		if(HumanAgent.lastWin == -1)
             			JOptionPane.showMessageDialog(frame, "Click OK to start playing.");           		
@@ -919,7 +920,7 @@ public abstract class Game
         	if(CompetitionParameters.dialogBoxOnStartAndEnd){
                 if (no_players == 1) {
                     JOptionPane.showMessageDialog(frame,
-                            "GAME SCORE: "+avatars[humanID].getScore());
+                            "GAME #"+Main.GAME_PLAY_NUM+" SCORE: "+avatars[humanID].getScore());
 //                            "GAMEOVER: YOU " + (avatars[humanID].getWinState() == Types.WINNER.PLAYER_WINS ? "WIN." : "LOSE.")+"\nSCORE: "+avatars[humanID].getScore());
                 } else {
                     String sb = "";

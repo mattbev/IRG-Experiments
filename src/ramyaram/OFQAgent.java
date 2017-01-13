@@ -22,19 +22,19 @@ public class OFQAgent extends Agent {
 	/**
 	 * Runs the Object-Focused Q-learning algorithm with the given parameters
 	 */
-	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, int seed, Model priorLearnedModel) {
+	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel) {
 		model = new Model();
 		OFQAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		updateQValues = true;
 		//show agent play the game before learning
 		for(int i=0; i<Main.visuals; i++) 
-			runOneEpisode(conditionNum, 0, game, level1, true, controller, seed);
+			runOneEpisode(conditionNum, 0, game, level1, true, controller);
 		//run OF-Q
 		for(int i=0; i<numEpisodes; i++)
-			runOneEpisode(conditionNum, i, game, level1, visuals, controller, seed);
+			runOneEpisode(conditionNum, i, game, level1, visuals, controller);
 		//show agent play the game after learning
 		for(int i=0; i<Main.visuals; i++)
-			runOneEpisode(conditionNum, numEpisodes-1, game, level1, true, controller, seed);
+			runOneEpisode(conditionNum, numEpisodes-1, game, level1, true, controller);
 		if(Main.writeModelToFile){
 			//save learned model to a file
 			for(ValueFunction q : model.qValueFunctions)

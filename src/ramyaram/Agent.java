@@ -84,16 +84,16 @@ public abstract class Agent extends AbstractPlayer {
 //        	System.out.println("DQ!");
         	result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         
-        if(episodeNum % Main.interval == 0){
+        if(episodeNum % Constants.interval == 0){
         	//record reward
-        	Main.reward[conditionNum][(episodeNum/Main.interval)] += result[1]; //score of the game
+        	Main.reward[conditionNum][(episodeNum/Constants.interval)] += result[1]; //score of the game
         	Main.writeToFile(Main.allRewardFile, result[1]+", ");
         	//record game winner
         	int winIndex = (result[0] == Types.WINNER.PLAYER_WINS.key()) ? 1 : 0;
-    		Main.numWins[conditionNum][(episodeNum/Main.interval)] += winIndex;
+    		Main.numWins[conditionNum][(episodeNum/Constants.interval)] += winIndex;
         	Main.writeToFile(Main.allNumWinsFile, winIndex+", ");
         	//record end game tick
-        	Main.gameTick[conditionNum][(episodeNum/Main.interval)] += result[2]; //game tick at the end of the game
+        	Main.gameTick[conditionNum][(episodeNum/Constants.interval)] += result[2]; //game tick at the end of the game
         	Main.writeToFile(Main.allGameTickFile, result[2]+", ");      	
         }
         return result[1];
@@ -223,7 +223,7 @@ public abstract class Agent extends AbstractPlayer {
      * Calculates the updated Q-value with the given quantities
      */
     public double getOneQValueUpdate(double q, double reward, double maxQ){
-    	return (1 - Main.alpha) * q + Main.alpha * (reward + Main.gamma * maxQ);
+    	return (1 - Constants.alpha) * q + Constants.alpha * (reward + Constants.gamma * maxQ);
     }
     
 	/**

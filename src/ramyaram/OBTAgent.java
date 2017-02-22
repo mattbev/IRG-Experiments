@@ -36,14 +36,14 @@ public class OBTAgent extends OFQAgent {
 	 * Runs the Object-Based Transfer algorithm with the given parameters
 	 */
 	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel) {
-		if(Main.numEpisodesMapping > Main.numTargetEpisodes){ //sanity check - cannot have more episodes in the mapping phase than total episodes in the full run
+		if(Constants.numEpisodesMapping > Constants.numTargetEpisodes){ //sanity check - cannot have more episodes in the mapping phase than total episodes in the full run
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
 		}
 		model = new Model();
 		OBTAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		
-		if(Main.readModelFromFile){
+		if(Constants.readModelFromFile){
 			try{
 				OBTAgent.priorLearnedModel = new Model();
 				OBTAgent.priorLearnedModel.readFile(Main.readModelFile);
@@ -70,8 +70,8 @@ public class OBTAgent extends OFQAgent {
 
 		int k=0;
 		//learn mappings between objects without making any changes to the value functions
-		mappingPhase(conditionNum, k, Main.numEpisodesMapping, game, level1, visuals, controller);
-		k+=Main.numEpisodesMapping;
+		mappingPhase(conditionNum, k, Constants.numEpisodesMapping, game, level1, visuals, controller);
+		k+=Constants.numEpisodesMapping;
 		//copy value functions from previously learned task for new objects based on current mapping
 		copyMappedValueFunctions();
 		while(k < numEpisodes){
@@ -105,12 +105,12 @@ public class OBTAgent extends OFQAgent {
 			double episodeReward = runOneEpisode(conditionNum, k, game, level1, visuals, controller);
 			for(int i=0; i<currMapping.size(); i++){
 				double q = performanceSim.get(i)[currMapping.get(i)]; //update mappingQ based on reward received
-		        double qValue = (1 - Main.mapping_alpha) * q + Main.mapping_alpha * episodeReward;
+		        double qValue = (1 - Constants.mapping_alpha) * q + Constants.mapping_alpha * episodeReward;
 		        performanceSim.get(i)[currMapping.get(i)] = qValue;
 			}
-			Main.mapping_epsilon -= Main.mapping_epsilon_delta;
-			if(Main.mapping_epsilon < Main.mapping_epsilon_end)
-				Main.mapping_epsilon = Main.mapping_epsilon_end;
+			Constants.mapping_epsilon -= Constants.mapping_epsilon_delta;
+			if(Constants.mapping_epsilon < Constants.mapping_epsilon_end)
+				Constants.mapping_epsilon = Constants.mapping_epsilon_end;
 		}
 	}
 	
@@ -144,9 +144,9 @@ public class OBTAgent extends OFQAgent {
 	public void processObs(Observation obs, Map<Observation, Object> map){
     	super.processObs(obs, map);
 		if(model.getItype_to_objClassId().get(obs.itype) >= currMapping.size()){
-			if(Main.fixedMapping != null){
-				if(Main.fixedMapping.containsKey(obs.itype))
-					currMapping.add(priorLearnedModel.getItype_to_objClassId().get(Main.fixedMapping.get(obs.itype)));
+			if(Constants.fixedMapping != null){
+				if(Constants.fixedMapping.containsKey(obs.itype))
+					currMapping.add(priorLearnedModel.getItype_to_objClassId().get(Constants.fixedMapping.get(obs.itype)));
 				else
 					currMapping.add(priorLearnedModel.qValueFunctions.size());
 			} else {
@@ -184,20 +184,20 @@ public class OBTAgent extends OFQAgent {
 	 * With probability 1-epsilon, the previous object class (or a new class) that has the highest Q-value is chosen as the mapping  
 	 */
 	public ArrayList<Integer> getMapping(ArrayList<double[]> similarityMatrix){
-		if(Main.fixedMapping != null){ //use fixed mapping
+		if(Constants.fixedMapping != null){ //use fixed mapping
 			ArrayList<Integer> mapping = new ArrayList<Integer>();
 			for(int i=0; i<currMapping.size(); i++)
 				mapping.add(-1);
 			for(int new_itype : model.getItype_to_objClassId().keySet()){
-				if(Main.fixedMapping.containsKey(new_itype)) //choose the mapped object class from the given fixed mapping, if it exists
-					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.getItype_to_objClassId().get(Main.fixedMapping.get(new_itype)));
+				if(Constants.fixedMapping.containsKey(new_itype)) //choose the mapped object class from the given fixed mapping, if it exists
+					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.getItype_to_objClassId().get(Constants.fixedMapping.get(new_itype)));
 				else //otherwise map to a new object class (does not map to any previously seen object class)
 					mapping.set(model.getItype_to_objClassId().get(new_itype), priorLearnedModel.qValueFunctions.size());
 			}
 			return mapping;
 		} else {
 			//epsilon-greedy approach to choosing an mapping
-			if(rand.nextDouble() < Main.mapping_epsilon){
+			if(rand.nextDouble() < Constants.mapping_epsilon){
 				//choose a random mapping
 				ArrayList<Integer> mapping = new ArrayList<Integer>();
 				for(int i=0; i<currMapping.size(); i++)

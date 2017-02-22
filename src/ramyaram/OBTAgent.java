@@ -67,14 +67,7 @@ public class OBTAgent extends OFQAgent {
 		weights[PERFORMANCE] = 1;
 //		for(int i=0; i<weights.length; i++)
 //			weights[i] = 1/(double)weights.length;
-		
-		//show agent play the game before learning
-		for(int i=0; i<Main.visuals; i++){
-			currMapping = getMapping(weightedSim);
-//			printItypeMapping(currMapping);
-			runOneEpisode(conditionNum, 0, game, level1, true, controller);
-		}
-		
+
 		int k=0;
 		//learn mappings between objects without making any changes to the value functions
 		mappingPhase(conditionNum, k, Main.numEpisodesMapping, game, level1, visuals, controller);
@@ -87,12 +80,6 @@ public class OBTAgent extends OFQAgent {
 			//update Q-values in newly copied value functions
 			qValuesPhase(conditionNum, k, 1, game, level1, visuals, controller);
 			k+=1;
-		}
-		//show agent play the game after learning
-		for(int i=0; i<Main.visuals; i++){
-			currMapping = getMapping(weightedSim);
-//			printItypeMapping(currMapping);
-			runOneEpisode(conditionNum, 0, game, level1, true, controller);
 		}
 		ArrayList<Integer> bestMapping = getMaxMapping(performanceSim);
 		//update number of times this mapping has been chosen at the end of a run

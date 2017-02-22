@@ -20,9 +20,9 @@ public class Main {
 	public static Model[] learnedModels;
 	public static boolean writeModelToFile = false;
 	public static boolean readModelFromFile = false;
-	public static int visuals = 0;
+	public static boolean visuals = false;
 	public static int GAME_PLAY_NUM = 1;
-    //parameters to denote number of episodes
+	//parameters to denote number of episodes
 	public static int numAveraging = 0;
 	public static int numSourceEpisodes = 0;
 	public static int numTargetEpisodes = 0;
@@ -92,7 +92,7 @@ public class Main {
 		//"-a": number of runs to average over flag, usage: <number of runs> (e.g., "-a 50" which means run 50 runs and average over them)
 		//"-i": interval for recording, usage: <interval> (e.g., "-i 10" which means record reward every 10 episodes)
 		//"-f": file with saved model to read from, usage: <file directory> (e.g., "-f src/F5" which means read from directory src/F5)
-		//"-v": watch the agent play the game a certain number of times, usage: <number of times you see agent play the game> (e.g., "-v 5" which means you see the agent play 5 times before continuing learning)
+		//"-v": watch the agent play the game, usage: <true or false> (e.g., "-v true" which means visuals is turned on, default is no visuals)
 
 		//pass in directory name (if code is run using run.sh, this directory will already be created and passed in)
 		File dir = new File(args[0]);
@@ -146,7 +146,7 @@ public class Main {
 					readModelFromFile = true;
 					readModelFile = new File(argument); break;
 				case "-v":
-					visuals = Integer.parseInt(argument); break;
+					visuals = argument.equalsIgnoreCase("true")? true : false; break;
 			}
 			i++;
 		}
@@ -226,7 +226,7 @@ public class Main {
 				        	int c = conditions.get(condition);
 				        	//run the condition for a full run and save learned model
 				        	//currently, only the OBT_TARGET condition uses the source task model (learnedModels[0]) to learn in the target task, but it is passed to all conditions
-				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes[c], game, level1, false, controller, learnedModels[0]).clone();
+				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes[c], game, level1, visuals, controller, learnedModels[0]).clone();
 		        		}
 		        		writeToAllFiles(",");
 		        	}

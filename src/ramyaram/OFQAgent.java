@@ -29,7 +29,7 @@ public class OFQAgent extends Agent {
 		//run OF-Q
 		for(int i=0; i<numEpisodes; i++)
 			runOneEpisode(conditionNum, i, game, level1, visuals, controller);
-		if(Main.writeModelToFile){
+		if(Constants.writeModelToFile){
 			//save learned model to a file
 			for(ValueFunction q : model.qValueFunctions)
 				System.out.println(q.objClassItype+": "+q.getNumNonZero());
@@ -42,7 +42,7 @@ public class OFQAgent extends Agent {
 	 * Epsilon-greedy approach to choosing an action
 	 */
 	public Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
-    	if(rand.nextDouble() < Main.epsilon) //choose a random action
+    	if(rand.nextDouble() < Constants.epsilon) //choose a random action
             return actions.get(rand.nextInt(actions.size()));
     	else //choose greedy action based on value function
     		return getGreedyAction(stateObs, actions);

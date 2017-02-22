@@ -86,12 +86,15 @@ public class Model {
 		try{
 			String dirPath = dir.getPath();
 			File infoFile = new File(dirPath+"/modelInfo.txt");
-			if(infoFile.exists()) //already wrote model to file in a previous run -- no need to rewrite
-				return;
-			Main.writeToFile(infoFile, "numRows="+Agent.numRows+"\n");
-			Main.writeToFile(infoFile, "numCols="+Agent.numCols+"\n");
+			if(!infoFile.exists()){ //write info to file if not rewritten in previous run
+//				return;
+				Main.writeToFile(infoFile, "numRows="+Agent.numRows+"\n");
+				Main.writeToFile(infoFile, "numCols="+Agent.numCols+"\n");
+			}
 			for(ValueFunction q : qValueFunctions){
 				File qFile = new File(dirPath+"/"+q.objClassItype+".csv");
+				if(qFile.exists())
+					qFile.delete();
 				BufferedWriter writer = new BufferedWriter(new FileWriter(qFile));
 				for(int i=0; i<q.optimalQValues.length; i++){
 					for(int j=0; j<q.optimalQValues[i].length; j++){
@@ -105,6 +108,26 @@ public class Model {
 		} catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	
+	public static String getSourceGame(File dir){
+		String sourceGame = "";
+		try{
+			dir = new File(dir.getPath()+"/runInfo.txt");
+			BufferedReader reader = new BufferedReader(new FileReader(dir));
+			String line = reader.readLine();
+			while(line != null){
+				if(line.contains("sourceGame")){
+					sourceGame = line.substring(line.indexOf('=')+1);
+					sourceGame = sourceGame.substring(0,sourceGame.length()-1);
+				}
+				line = reader.readLine();
+			}
+			reader.close();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+		return sourceGame;
 	}
 	
 	public void readFile(File dir){

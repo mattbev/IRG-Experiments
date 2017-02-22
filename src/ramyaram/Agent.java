@@ -83,6 +83,7 @@ public abstract class Agent extends AbstractPlayer {
         while(result[0] == Types.WINNER.PLAYER_DISQ.key()) //don't count any episodes in which the controller was disqualified for time
 //        	System.out.println("DQ!");
         	result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
+        
         if(episodeNum % Main.interval == 0){
         	//record reward
         	Main.reward[conditionNum][(episodeNum/Main.interval)] += result[1]; //score of the game
@@ -130,7 +131,7 @@ public abstract class Agent extends AbstractPlayer {
      * (Don't include background, wall, floor, etc)
      */
     //TODO: remove hard-coding
-    public List<Integer> getImportantObjects(String game){
+    public static List<Integer> getImportantObjects(String game){
     	switch(game){
 	    	case "aliens": return Arrays.asList(3,9,6,5);
 	    	case "missilecommand": return Arrays.asList(3,4,7);

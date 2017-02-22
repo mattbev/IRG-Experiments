@@ -76,7 +76,7 @@ public class Main {
             "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
             "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
             "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem", "sheriffTopBottom",
-            "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D", "E", "K", "A"};
+            "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D", "E", "K", "A", "K2"};
 	
 	public static void main(String[] args) {
 		//argument list
@@ -150,15 +150,17 @@ public class Main {
 			}
 			i++;
 		}
+		
+		numEpisodesMapping = 0;
 
-		if(fixedMapping != null){ //when a fixed mapping is given
-			if(fixedMapping.isEmpty()) //if the given mapping is empty, run only the Q-values phase (equivalent to OF-Q)
-				numEpisodesMapping = 0;
-			else //otherwise, run only the mapping phase (no update of Q-values)
-				numEpisodesMapping = numTargetEpisodes;
-		} else {
-			numEpisodesMapping = numTargetEpisodes;
-		}
+//		if(fixedMapping != null){ //when a fixed mapping is given
+//			if(fixedMapping.isEmpty()) //if the given mapping is empty, run only the Q-values phase (equivalent to OF-Q)
+//				numEpisodesMapping = 0;
+//			else //otherwise, run only the mapping phase (no update of Q-values)
+//				numEpisodesMapping = numTargetEpisodes;
+//		} else {
+//			numEpisodesMapping = numTargetEpisodes;
+//		}
 		
         if(runType == RunType.RUN){
 	        avgRewardFile = new File(dir.getPath()+"/reward.csv");
@@ -208,6 +210,11 @@ public class Main {
 		        	for(String condition : conditions.keySet()){
 		        		int gameIdx = condition.contains("SOURCE") ? sourceGame[0] : targetGame[0];
 		        		int levelIdx = condition.contains("SOURCE") ? sourceGame[1] : targetGame[1];
+		        		if(fixedMapping == null && readModelFromFile && Model.getSourceGame(readModelFile).equals(games[gameIdx])){
+		        			fixedMapping = new HashMap<Integer, Integer>();
+		        			for(int itype : Agent.getImportantObjects(games[gameIdx]))
+		        				fixedMapping.put(itype, itype); //if a file is given but no mapping, assume that object itypes are mapped to themselves
+		        		}
 		        		String game = gamesPath + games[gameIdx] + ".txt";
 		        		String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
 		                System.out.println("PLAYING "+games[gameIdx]+" level "+levelIdx);

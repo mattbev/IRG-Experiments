@@ -38,7 +38,7 @@ public class OFQAgent extends Agent {
 		if(Main.writeModelToFile){
 			//save learned model to a file
 			for(ValueFunction q : model.qValueFunctions)
-				System.out.println(q.getNumNonZero());
+				System.out.println(q.objClassItype+": "+q.getNumNonZero());
 			model.writeToFile(Main.writeModelFile);	
 		}
 		return model;

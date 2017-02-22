@@ -84,21 +84,42 @@ public abstract class Agent extends AbstractPlayer {
 //        	System.out.println("DQ!");
         	result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         
-        if(episodeNum % Constants.interval == 0){
-        	//record reward
-        	Main.reward[conditionNum][(episodeNum/Constants.interval)] += result[1]; //score of the game
-        	Main.writeToFile(Main.allRewardFile, result[1]+", ");
-        	//record game winner
-        	int winIndex = (result[0] == Types.WINNER.PLAYER_WINS.key()) ? 1 : 0;
-    		Main.numWins[conditionNum][(episodeNum/Constants.interval)] += winIndex;
-        	Main.writeToFile(Main.allNumWinsFile, winIndex+", ");
-        	//record end game tick
-        	Main.gameTick[conditionNum][(episodeNum/Constants.interval)] += result[2]; //game tick at the end of the game
-        	Main.writeToFile(Main.allGameTickFile, result[2]+", ");      	
-        }
-        return result[1];
+        if(episodeNum % Constants.numEpisodesLearn == 0){
+    		double[] eval = evaluate(Constants.numEpisodesEval, conditionNum, game, level1, visuals, controller, seed);
+	    	double evalWins = eval[0];
+	    	double evalReward = eval[1];
+	    	double evalTicks = eval[2];
+	    	//record game winner
+	    	Main.numWins[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalWins;
+	    	Main.writeToFile(Main.allNumWinsFile, evalWins+", ");
+	    	//record reward
+	    	Main.reward[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalReward; //score of the game
+	    	Main.writeToFile(Main.allRewardFile, evalReward+", ");
+//	    	//record end game tick
+	    	Main.gameTick[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalTicks; //game tick at the end of the game
+	    	Main.writeToFile(Main.allGameTickFile, evalTicks+", ");      	
+	    }
+	    return result[1];
 	}
     
+	/**
+	* Runs N episodes for evaluation of the current model
+	* Returns [average number of wins, average reward in an episode, average number of ticks per episode]
+	*/
+	public double[] evaluate(int numEpisodes, int conditionNum, String game, String level1, boolean visuals, String controller, int seed){
+		double[] eval = new double[]{0,0,0};
+		Agent.updateQValues = false;
+		for(int i=0; i<numEpisodes; i++){
+			double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
+			for(int j=0; j<eval.length; j++)
+				eval[j] += result[j];
+		}
+		for(int j=0; j<eval.length; j++)
+			eval[j] = eval[j] / numEpisodes;
+		Agent.updateQValues = true;
+		return eval;
+	}
+	
     /**
      * Converts the given state observation into a map to keep track of objects in the current state
      */

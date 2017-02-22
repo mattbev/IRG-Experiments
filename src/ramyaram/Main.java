@@ -118,8 +118,10 @@ public class Main {
 					} break;
 				case "-a":
 					Constants.numAveraging = Integer.parseInt(argument); break;
-				case "-i":
-					Constants.interval = Integer.parseInt(argument); break;
+				case "-nl":
+					Constants.numEpisodesLearn = Integer.parseInt(argument); break;
+				case "-ne":
+					Constants.numEpisodesEval = Integer.parseInt(argument); break;
 				case "-m":
 					Constants.fixedMapping = parseGivenMapping(argument); break;
 				case "-f":
@@ -160,7 +162,7 @@ public class Main {
         	humanTicksFile = new File(dir.getPath()+"/humanTicks.csv");
         }
 
-		int maxDataPoints = Math.max(Constants.numSourceEpisodes,Constants.numTargetEpisodes)/Constants.interval;
+		int maxDataPoints = Math.max(Constants.numSourceEpisodes,Constants.numTargetEpisodes)/Constants.numEpisodesLearn;
 		reward = new double[Constants.conditions.size()][maxDataPoints];
 		numWins = new double[Constants.conditions.size()][maxDataPoints];
 		gameTick = new double[Constants.conditions.size()][maxDataPoints];
@@ -171,7 +173,7 @@ public class Main {
 		        int numDataPoints = 0;
 		        for(String condition : Constants.conditions.keySet())
 		        	numDataPoints += condition.contains("SOURCE") ? Constants.numSourceEpisodes : Constants.numTargetEpisodes; 
-		        numDataPoints = numDataPoints/Constants.interval;
+		        numDataPoints = numDataPoints/Constants.numEpisodesLearn;
 		        for(String condition : Constants.conditions.keySet()){
 		        	conditionsStr+=condition;
 		        	for(int i=0; i<numDataPoints; i++)

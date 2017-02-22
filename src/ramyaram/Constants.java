@@ -30,8 +30,7 @@ public class Constants {
 	public static int numAveraging = 0;
 	public static int numSourceEpisodes = 0;
 	public static int numTargetEpisodes = 0;
-	public static int numEpisodesTrain = 100;
-	public static int numEpisodesEval = 50;
-	public static int interval = 1;
+	public static int numEpisodesLearn = 0;
+	public static int numEpisodesEval = 0;
 	public static int numEpisodesMapping = -1;
 }

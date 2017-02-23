@@ -1,0 +1,22 @@
+BasicGame square_size=40
+    SpriteSet
+        wall > Immovable color=LIGHTGRAY img=oryx/backOBrown
+        moving >
+            avatar  > MovingAvatar img=newset/submarine
+        mole > Immovable shrinkfactor=0.7
+            good > color=BLUE img=newset/hydrant
+            bad  > color=GREEN img=newset/tree2
+
+    LevelMapping
+        0 > wall bad
+        1 > wall good
+        A > wall avatar
+
+    TerminationSet
+        SpriteCounter stype=good win=True
+        SpriteCounter stype=bad win=False
+
+    InteractionSet
+        moving  EOS  > stepBack
+        good avatar > killSprite scoreChange=1
+        bad avatar > killSprite scoreChange=-1

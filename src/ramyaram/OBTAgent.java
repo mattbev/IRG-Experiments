@@ -168,9 +168,6 @@ public class OBTAgent extends OFQAgent {
 		if(updateQValues) //in qvalues phase and value functions are already copied into model.qValueFunctions
 			return model.qValueFunctions.get(obj.getObjClassId());
 		else{ //in mapping phase
-//			System.out.println(currMapping);
-//			System.out.println(priorLearnedModel);
-//			System.out.println(priorLearnedModel.qValueFunctions);
 			if(currMapping.get(obj.getObjClassId()) >= priorLearnedModel.qValueFunctions.size())
 				return new ValueFunction(null, obj.getItype(), -1);
 			else

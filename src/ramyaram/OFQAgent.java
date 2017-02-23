@@ -76,18 +76,18 @@ public class OFQAgent extends Agent {
     /**
 	 * Updates each object class's Q-value function for the given state, action, and next state
 	 */
-    public void updateQValues(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions){		
+    public void updateQValues(StateObservation lastStateObs, Types.ACTIONS lastAction, StateObservation stateObs, double reward, ArrayList<Types.ACTIONS> actions){		
     	for(Observation obs : objectMap.keySet()) {
     		if(obs.category != Types.TYPE_AVATAR){
+	    		Object lastObj = objectLastStateMap.get(obs);
 	    		Object currObj = objectMap.get(obs);
-	    		Object nextObj = objectNextStateMap.get(obs);
-	    		ValueFunction qValues = getValueFunction(currObj);
-				double q = qValues.getOptimalQValue(getAvatarGridPos(stateObs), currObj.getGridPos(), action);
+	    		ValueFunction qValues = getValueFunction(lastObj);
+				double q = qValues.getOptimalQValue(getAvatarGridPos(stateObs), lastObj.getGridPos(), lastAction);
 				double maxQ = 0;
-				if(nextObj != null)
-					maxQ = optimalMaxQ(qValues, getAvatarGridPos(nextStateObs), nextObj.getGridPos(), actions);	
+				if(currObj != null)
+					maxQ = optimalMaxQ(qValues, getAvatarGridPos(stateObs), currObj.getGridPos(), actions);	
 		        double qValue = getOneQValueUpdate(q, reward, maxQ);
-		        qValues.setOptimalQValue(getAvatarGridPos(stateObs), currObj.getGridPos(), action, qValue);
+		        qValues.setOptimalQValue(getAvatarGridPos(stateObs), lastObj.getGridPos(), lastAction, qValue);
     		}
     	}
     }

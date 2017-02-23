@@ -28,14 +28,13 @@ public abstract class Agent extends AbstractPlayer {
     protected static int numCols;
     protected static int blockSize;
 	protected static StateObservation lastStateObs;
+	protected static Types.ACTIONS lastAction;
 	protected static double lastScore;
 	protected static boolean updateQValues;
 	protected static String gameName;
 	
+	protected static Map<Observation, Object> objectLastStateMap = new HashMap<Observation, Object>();
 	protected static Map<Observation, Object> objectMap = new HashMap<Observation, Object>();
-	protected static Map<Vector2d, Object> gridObjectMap = new HashMap<Vector2d, Object>();
-	protected static Map<Observation, Object> objectNextStateMap = new HashMap<Observation, Object>();
-	protected static Map<Vector2d, Object> gridObjectNextStateMap = new HashMap<Vector2d, Object>();
 	protected static Model model;
 
     /**
@@ -49,7 +48,6 @@ public abstract class Agent extends AbstractPlayer {
         	ArrayList<Observation>[][] observationGrid = so.getObservationGrid();
     		numCols = observationGrid.length;
     		numRows = observationGrid[0].length;
-//    		System.out.println(gameName+" "+numCols+" "+numRows);
         	blockSize = so.getBlockSize();	
         }
     }
@@ -81,7 +79,6 @@ public abstract class Agent extends AbstractPlayer {
 		int seed = rand.nextInt();
         double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         while(result[0] == Types.WINNER.PLAYER_DISQ.key()) //don't count any episodes in which the controller was disqualified for time
-//        	System.out.println("DQ!");
         	result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         
         if(episodeNum % Constants.numEpisodesLearn == 0){
@@ -95,7 +92,7 @@ public abstract class Agent extends AbstractPlayer {
 	    	//record reward
 	    	Main.reward[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalReward; //score of the game
 	    	Main.writeToFile(Main.allRewardFile, evalReward+", ");
-//	    	//record end game tick
+	    	//record end game tick
 	    	Main.gameTick[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalTicks; //game tick at the end of the game
 	    	Main.writeToFile(Main.allGameTickFile, evalTicks+", ");      	
 	    }
@@ -123,7 +120,7 @@ public abstract class Agent extends AbstractPlayer {
     /**
      * Converts the given state observation into a map to keep track of objects in the current state
      */
-    public void processStateObs(StateObservation stateObs, Map<Observation, Object> map, Map<Vector2d, Object> gridMap){
+    public void processStateObs(StateObservation stateObs, Map<Observation, Object> map){
     	ArrayList<Observation>[][] observationGrid = stateObs.getObservationGrid();
 		for (int i = 0; i < observationGrid.length; i++) {
 			for (int j = 0; j < observationGrid[i].length; j++) {
@@ -143,8 +140,6 @@ public abstract class Agent extends AbstractPlayer {
 					processObs(obs, map);
 			}
 		}
-		for(Object o : map.values())
-			gridMap.put(o.getGridPos(), o);
     }
     
     /**
@@ -177,6 +172,7 @@ public abstract class Agent extends AbstractPlayer {
 	    	case "eggomania": return Arrays.asList(3,8,11);
 	    	case "E": return Arrays.asList(3,7,8,11,12);
 	    	case "K": return Arrays.asList(3,4,6,8,9);
+	    	case "simpleGame": return Arrays.asList(4,5);
     	}
     	return null;
     }
@@ -197,6 +193,7 @@ public abstract class Agent extends AbstractPlayer {
      */
     public void clearEachRun(){
     	lastStateObs = null;
+    	lastAction = null;
     	lastScore = 0;
     	endedGame = false;
     	if(model != null)
@@ -207,35 +204,28 @@ public abstract class Agent extends AbstractPlayer {
      * Act function. Called every game step, it must return an action in 40 ms maximum.
      */
     public Types.ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer){
-    	processStateObs(stateObs, objectMap, gridObjectMap);
-    	lastStateObs = stateObs.copy();
+    	processStateObs(stateObs, objectMap);
     	
         //get the available actions in this game and choose one
         ArrayList<Types.ACTIONS> actions = stateObs.getAvailableActions();
         Types.ACTIONS action = chooseAction(stateObs, actions);
-
-        stateObs.advance(action);    
-        processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore(); 
         
-//		System.out.println("QValueFunctions size "+model.qValueFunctions.size());
-//		System.out.print(stateObsStr(lastStateObs, gridObjectMap));
-////		for(Observation obs : objectMap.keySet())
-////        	System.out.println(objectMap.get(obs).getGridPos()+" "+objectMap.get(obs).getItype());
+//		System.out.print(stateObsStr(stateObs));
+//		for(Observation obs : objectMap.keySet())
+//        	System.out.println(objectMap.get(obs).getGridPos()+" "+objectMap.get(obs).getItype());
 //		System.out.println(action);
-//		System.out.print(stateObsStr(stateObs, gridObjectNextStateMap));
-////		for(Observation obs : objectNextStateMap.keySet())
-////        	System.out.println(objectNextStateMap.get(obs).getGridPos()+" "+objectNextStateMap.get(obs).getItype());
-//		System.out.println("Current Game Score: "+currScore+", Score Change: "+(currScore-lastScore)+"\n");    
-//		scan.nextLine();
-		
-        updateEachStep(lastStateObs, action, stateObs, (currScore-lastScore), actions);
+//		System.out.println("Current Game Score: "+currScore+", Score Change: "+(currScore-lastScore)+"\n"); 
+        
+		if(lastStateObs != null)
+			updateEachStep(lastStateObs, lastAction, stateObs, (currScore-lastScore), actions);
+        
+		lastStateObs = stateObs.copy();
+        lastAction = action;
         lastScore = currScore;
         
+        objectLastStateMap = new HashMap<Observation, Object>(objectMap); 
         objectMap.clear();
-        objectNextStateMap.clear();
-        gridObjectMap.clear();
-        gridObjectNextStateMap.clear();
 
         return action;
     }
@@ -251,7 +241,7 @@ public abstract class Agent extends AbstractPlayer {
 	 * Print the given state observation using object itypes 
 	 * Only prints one object at each grid coordinate for easy visualization but there might be multiple objects at each
 	 */
-	public String stateObsStr(StateObservation stateObs, Map<Vector2d, Object> gridMap){
+	public String stateObsStr(StateObservation stateObs){
     	String str = " ";
     	ArrayList<Observation>[][] observationGrid = stateObs.getObservationGrid();
     	for (int c = 0; c < observationGrid.length; c++)
@@ -260,17 +250,23 @@ public abstract class Agent extends AbstractPlayer {
     	for (int r = 0; r < observationGrid[0].length; r++) {
     		str+=r;
 			for (int c = 0; c < observationGrid.length; c++) {
-				if(gridMap.containsKey(new Vector2d(c,r))){
-					Object o = gridMap.get(new Vector2d(c,r));
-					str += o.getItype();
-				} else {
-					str += "-";
+				boolean isObject = false;
+				for(Observation obs : observationGrid[c][r]){
+					if(getImportantObjects(gameName).contains(obs.itype)){
+						str += obs.itype;
+						isObject = true;
+						break;
+					}
 				}
+				if(!isObject)
+					str += "-";
 			}
 			str += "\n";
 		}
     	return str;
     }
+	
+	public void result(StateObservation stateObservation, ElapsedCpuTimer elapsedCpuTimer) {}
 	
 	/**
      * Converts position in pixels to position in grid coordinates

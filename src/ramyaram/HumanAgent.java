@@ -1,17 +1,14 @@
 package ramyaram;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import core.ArcadeMachine;
 import core.game.Game;
-import core.game.Observation;
 import core.game.StateObservation;
 import ontology.Types;
 import tools.Direction;
 import tools.ElapsedCpuTimer;
 import tools.Utils;
-import tools.Vector2d;
 
 /**
  * Records data as a participant plays a game
@@ -45,18 +42,14 @@ public class HumanAgent extends Agent {
         if(action == Types.ACTIONS.ACTION_NIL && useOn)
             action = Types.ACTIONS.ACTION_USE;
         
-        processStateObs(stateObs, objectMap, gridObjectMap);
-    	lastStateObs = stateObs.copy();
+        processStateObs(stateObs, objectMap);
 
-        stateObs.advance(action);    
-        processStateObs(stateObs, objectNextStateMap, gridObjectNextStateMap);
         double currScore = stateObs.getGameScore();
         
         if(action != Types.ACTIONS.ACTION_NIL){ //only save "important" actions and record the tick at which the action happened (skips recording nil actions)
         	Main.writeToFile(Main.humanDataFile, "TICK: "+stateObs.getGameTick()+"\n");
-	        Main.writeToFile(Main.humanDataFile, stateObsStr(lastStateObs, gridObjectMap));
+	        Main.writeToFile(Main.humanDataFile, stateObsStr(lastStateObs));
 	        Main.writeToFile(Main.humanDataFile, action.name()+", "+(currScore-lastScore)+"\n");
-	        Main.writeToFile(Main.humanDataFile, stateObsStr(stateObs, gridObjectNextStateMap)+"\n");
         }
         if(stateObs.isGameOver()){ //save end-of-game stats
         	Main.writeToFile(Main.humanDataFile, "WINNER: "+stateObs.getGameWinner()+", SCORE: "+stateObs.getGameScore()+"\n**********************\n\n");
@@ -67,24 +60,14 @@ public class HumanAgent extends Agent {
         	lastGameScore = stateObs.getGameScore();
         }
         
+    	lastStateObs = stateObs.copy();
+    	lastAction = action;
         lastScore = currScore;
+        
+        objectLastStateMap.clear();
         objectMap.clear();
-        objectNextStateMap.clear();
-        gridObjectMap.clear();
-        gridObjectNextStateMap.clear();
 
         return action;
-    }
-    
-    public void processStateObs(StateObservation stateObs, Map<Observation, Object> map, Map<Vector2d, Object> gridMap){
-    	super.processStateObs(stateObs, map, gridMap);
-    	Vector2d avatarGridPos = getAvatarGridPos(stateObs);
-    	Object agent = new Object(-1, -1, avatarGridPos); //add the agent so that when the states are printed to a file, you can also see the avatar position
-		gridMap.put(avatarGridPos, agent);
-    }
-
-    public void result(StateObservation stateObservation, ElapsedCpuTimer elapsedCpuTimer) {
-        //System.out.println("Thanks for playing! " + stateObservation.isAvatarAlive());
     }
     
     public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel){

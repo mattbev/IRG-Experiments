@@ -29,12 +29,8 @@ public class OFQAgent extends Agent {
 		//run OF-Q
 		for(int i=0; i<numEpisodes; i++)
 			runOneEpisode(conditionNum, i, game, level1, visuals, controller);
-		if(Constants.writeModelToFile){
-			//save learned model to a file
-			for(ValueFunction q : model.qValueFunctions)
-				System.out.println(q.objClassItype+": "+q.getNumNonZero());
-			model.writeToFile(Main.writeModelFile);	
-		}
+		//save learned model to a file
+		model.writeToFile(Constants.writeModelFile);
 		return model;
 	}
 	

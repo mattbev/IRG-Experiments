@@ -36,20 +36,16 @@ public class OBTAgent extends OFQAgent {
 	 * Runs the Object-Based Transfer algorithm with the given parameters
 	 */
 	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel) {
-		if(Constants.numEpisodesMapping > Constants.numTargetEpisodes){ //sanity check - cannot have more episodes in the mapping phase than total episodes in the full run
+		if(Constants.numEpisodesMapping > Constants.numTotalEpisodes){ //sanity check - cannot have more episodes in the mapping phase than total episodes in the full run
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
 		}
 		model = new Model();
 		OBTAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		
-		if(Constants.readModelFromFile){
-			try{
-				OBTAgent.priorLearnedModel = new Model();
-				OBTAgent.priorLearnedModel.readFile(Main.readModelFile);
-			} catch(Exception e){
-				e.printStackTrace();
-			}
+		if(Constants.readModelFile != null){
+			OBTAgent.priorLearnedModel = new Model();
+			OBTAgent.priorLearnedModel.readFile(Constants.readModelFile);
 		} else if(priorLearnedModel != null){
 			OBTAgent.priorLearnedModel = priorLearnedModel;
 		}

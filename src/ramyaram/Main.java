@@ -33,8 +33,7 @@ public class Main {
 	public static File humanWinsFile;
 	public static File humanScoresFile;
 	public static File humanTicksFile;
-	public static File writeModelFile;
-	public static File readModelFile;
+
 	
 	//path and names for all games
 	public static String gamesPath = "../examples/gridphysics/";
@@ -63,16 +62,15 @@ public class Main {
 		//args[0] - directory name
 		//args[1] - play or run
 		//args[2] and on - can include any of these flags:
-		//"-s": source task flag, usage: <game><index> (e.g., "-s W5" which means run source task: game W level 5)
-		//"-t": target task flag, usage: <game><index> (e.g., "-t W5" which means run target task: game W level 5)
-		//"-ns": number of episodes to run the source task, usage: <number of episodes to run the task for> (e.g., "-ns 5000" which means run source task for 5000 episodes)
-		//"-nt": number of episodes to run the target task, usage: <number of episodes to run the task for> (e.g., "-nt 5000" which means run target task for 5000 episodes)
-		//"-c": which Constants.conditions to run, usage: <condition1>,<condition2>... (e.g., "-c qs,qt,tt,rt,rs" which means you run all Constants.conditions: of-q on source (qs), of-q on target (qt), obt on target (tt), random on target (rt), random on source (rs))
-		//"-m": mapping between two tasks, usage: {<target obj itype>:<source obj itype>,<target obj itype>:<source obj itype>} (e.g., "-m {3:4,5:16}" which means target obj class itype 3 is mapped to 4 from earlier task and similarly 5 is mapped to 16)
-		//"-a": number of runs to average over flag, usage: <number of runs> (e.g., "-a 50" which means run 50 runs and average over them)
-		//"-i": interval for recording, usage: <interval> (e.g., "-i 10" which means record reward every 10 episodes)
+		//"-g": specifies game and level, usage: <game><index> (e.g., "-g W5" which means run game W level 5)
+		//"-n": number of total episodes to run the game, usage: <number of episodes to run the game for> (e.g., "-n 5000" which means run game for 5000 episodes)
+		//"-nl": number of episodes the agent learns before being evaluated, usage: <number of learning episodes> (e.g., "-nl 10" which means learn for 10 episodes, evaluate for ne episodes, then again learn for 10 episodes, evaluate until total # of episodes)
+		//"-ne": number of episodes agent is evaluated (no learning takes place), usage: <number of evaluation episodes> (e.g., "-ne 50" which means you run 50 episodes in each evaluation period and average the reward to get the current performance of agent)
+		//"-c": which conditions to run, usage: <condition1>,<condition2>... (e.g., "-c ofq,obt" which means you run only the specified conditions), options are: of-q on source (qs), of-q on target (qt), obt on target (tt), random on target (rt), random on source (rs))
+		//"-a": number of runs to average over, usage: <number of runs> (e.g., "-a 50" which means run 50 runs and average over them)
 		//"-f": file with saved model to read from, usage: <file directory> (e.g., "-f src/F5" which means read from directory src/F5)
-		//"-v": watch the agent play the game, usage: <true or false> (e.g., "-v true" which means Constants.visuals is turned on, default is no Constants.visuals)
+		//"-m": mapping between two tasks, usage: {<target obj itype>:<source obj itype>,<target obj itype>:<source obj itype>} (e.g., "-m {3:4,5:16}" which means target obj class itype 3 is mapped to 4 from earlier task and similarly 5 is mapped to 16)
+		//"-v": watch the agent play the game, usage: <true or false> (e.g., "-v true" which means visuals is turned on, default is no visuals)
 
 		//pass in directory name (if code is run using run.sh, this directory will already be created and passed in)
 		File dir = new File(args[0]);
@@ -96,54 +94,27 @@ public class Main {
 			String flag = tokens[i];
 			String argument = tokens[i+1];
 			switch(flag){
-				case "-s": 
-					Constants.sourceGame = getGameLvlIdx(argument, games);
-					Constants.writeModelToFile = true; break;
-				case "-t":
-					Constants.targetGame = getGameLvlIdx(argument, games); break;
-				case "-ns":
-					Constants.numSourceEpisodes = Integer.parseInt(argument); break;
-				case "-nt":
-					Constants.numTargetEpisodes = Integer.parseInt(argument); break;
+				case "-g": Constants.game = getGameLvlIdx(argument, games);
+				case "-n": Constants.numTotalEpisodes = Integer.parseInt(argument); break;
+				case "-nl": Constants.numEpisodesLearn = Integer.parseInt(argument); break;
+				case "-ne": Constants.numEpisodesEval = Integer.parseInt(argument); break;
 				case "-c":
 					String[] conditions_args = argument.split(",");
 					for(String c : conditions_args){
 						switch(c){
-							case "qs": Constants.conditions.put("OF_Q_SOURCE", Constants.conditions.size()); break;
-							case "qt": Constants.conditions.put("OF_Q_TARGET", Constants.conditions.size()); break;
-							case "tt": Constants.conditions.put("OBT_TARGET", Constants.conditions.size()); break;
-							case "rt": Constants.conditions.put("RANDOM_TARGET", Constants.conditions.size()); break;
-							case "rs": Constants.conditions.put("RANDOM_SOURCE", Constants.conditions.size()); break;
+							case "ofq": Constants.conditions.add("ramyaram.OFQAgent"); break;
+							case "ran": Constants.conditions.add("ramyaram.RandomAgent"); break;
+							case "obt": Constants.conditions.add("ramyaram.OBTAgent"); break;
 						}
 					} break;
-				case "-a":
-					Constants.numAveraging = Integer.parseInt(argument); break;
-				case "-nl":
-					Constants.numEpisodesLearn = Integer.parseInt(argument); break;
-				case "-ne":
-					Constants.numEpisodesEval = Integer.parseInt(argument); break;
-				case "-m":
-					Constants.fixedMapping = parseGivenMapping(argument); break;
-				case "-f":
-					Constants.readModelFromFile = true;
-					readModelFile = new File(argument); break;
-				case "-v":
-					Constants.visuals = argument.equalsIgnoreCase("true")? true : false; break;
+				case "-a": Constants.numAveraging = Integer.parseInt(argument); break;
+				case "-f": Constants.readModelFile = new File(argument); break;
+				case "-m": Constants.fixedMapping = parseGivenMapping(argument); break;
+				case "-v": Constants.visuals = argument.equalsIgnoreCase("true")? true : false; break;
 			}
 			i++;
 		}
-		
-		Constants.numEpisodesMapping = 0;
-
-//		if(fixedMapping != null){ //when a fixed mapping is given
-//			if(fixedMapping.isEmpty()) //if the given mapping is empty, run only the Q-values phase (equivalent to OF-Q)
-//				numEpisodesMapping = 0;
-//			else //otherwise, run only the mapping phase (no update of Q-values)
-//				numEpisodesMapping = numTargetEpisodes;
-//		} else {
-//			numEpisodesMapping = numTargetEpisodes;
-//		}
-		
+				
         if(Constants.runType == RunType.RUN){
 	        avgRewardFile = new File(dir.getPath()+"/reward.csv");
 	        allRewardFile = new File(dir.getPath()+"/allReward.csv");
@@ -152,9 +123,9 @@ public class Main {
 	        avgNumWinsFile = new File(dir.getPath()+"/numWins.csv");
 	        allNumWinsFile = new File(dir.getPath()+"/allNumWins.csv");
 	        runInfoFile = new File(dir.getPath()+"/runInfo.txt");
-	        writeInfoToFile(runInfoFile, getGameStrFromIndices(Constants.sourceGame), getGameStrFromIndices(Constants.targetGame));
-	        writeModelFile = new File(dir.getPath()+"/learnedQ");
-	        writeModelFile.mkdir();
+	        writeInfoToFile(runInfoFile);
+	        Constants.writeModelFile = new File(dir.getPath()+"/learnedQ");
+	        Constants.writeModelFile.mkdir();
         } else if(Constants.runType == RunType.PLAY){
         	humanDataFile = new File(dir.getPath()+"/humanData.txt");
         	humanWinsFile = new File(dir.getPath()+"/humanWins.csv");
@@ -162,19 +133,15 @@ public class Main {
         	humanTicksFile = new File(dir.getPath()+"/humanTicks.csv");
         }
 
-		int maxDataPoints = Math.max(Constants.numSourceEpisodes,Constants.numTargetEpisodes)/Constants.numEpisodesLearn;
-		reward = new double[Constants.conditions.size()][maxDataPoints];
-		numWins = new double[Constants.conditions.size()][maxDataPoints];
-		gameTick = new double[Constants.conditions.size()][maxDataPoints];
+		reward = new double[Constants.conditions.size()][Constants.numTotalEpisodes/Constants.numEpisodesLearn];
+		numWins = new double[Constants.conditions.size()][Constants.numTotalEpisodes/Constants.numEpisodesLearn];
+		gameTick = new double[Constants.conditions.size()][Constants.numTotalEpisodes/Constants.numEpisodesLearn];
 		
 		switch(Constants.runType){
 			case RUN:
 		        String conditionsStr = "";
-		        int numDataPoints = 0;
-		        for(String condition : Constants.conditions.keySet())
-		        	numDataPoints += condition.contains("SOURCE") ? Constants.numSourceEpisodes : Constants.numTargetEpisodes; 
-		        numDataPoints = numDataPoints/Constants.numEpisodesLearn;
-		        for(String condition : Constants.conditions.keySet()){
+		        int numDataPoints = Constants.numTotalEpisodes/Constants.numEpisodesLearn;
+		        for(String condition : Constants.conditions){
 		        	conditionsStr+=condition;
 		        	for(int i=0; i<numDataPoints; i++)
 		        		conditionsStr+=", ";
@@ -185,14 +152,14 @@ public class Main {
 		        
 		        //number of episodes for each condition (currently, first condition is using numSourceEpisodes and second two Constants.conditions are using numTargetEpisodes)
 		        int[] numEpisodes = new int[Constants.conditions.size()];
-				for(String condition : Constants.conditions.keySet())
-					numEpisodes[Constants.conditions.get(condition)] = condition.contains("SOURCE") ? Constants.numSourceEpisodes : Constants.numTargetEpisodes;
+				for(int c=0; c<Constants.conditions.size(); c++)
+					numEpisodes[c] = Constants.numTotalEpisodes;
 		        for(int num=0; num<Constants.numAveraging; num++){
 		        	learnedModels = new Model[Constants.conditions.size()];
-		        	for(String condition : Constants.conditions.keySet()){
-		        		int gameIdx = condition.contains("SOURCE") ? Constants.sourceGame[0] : Constants.targetGame[0];
-		        		int levelIdx = condition.contains("SOURCE") ? Constants.sourceGame[1] : Constants.targetGame[1];
-		        		if(Constants.fixedMapping == null && Constants.readModelFromFile && Model.getSourceGame(readModelFile).equals(games[gameIdx])){
+		        	for(int c=0; c<Constants.conditions.size(); c++){
+		        		int gameIdx = Constants.game[0];
+		        		int levelIdx = Constants.game[1];
+		        		if(Constants.fixedMapping == null && Constants.readModelFile != null && Model.getSourceGame(Constants.readModelFile).equals(games[gameIdx])){
 		        			Constants.fixedMapping = new HashMap<Integer, Integer>();
 		        			for(int itype : Agent.getImportantObjects(games[gameIdx]))
 		        				Constants.fixedMapping.put(itype, itype); //if a file is given but no mapping, assume that object itypes are mapped to themselves
@@ -200,12 +167,11 @@ public class Main {
 		        		String game = gamesPath + games[gameIdx] + ".txt";
 		        		String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
 		                System.out.println("PLAYING "+games[gameIdx]+" level "+levelIdx);
-		        		String controller = initController(condition);
+		        		String controller = initController(Constants.conditions.get(c));
 		        		if(Agent.INSTANCE != null){
-		        			System.out.println("Running condition "+condition);
+		        			System.out.println("Running condition "+Constants.conditions.get(c));
 		        			Agent.INSTANCE.clearEachRun(); //clear learned data before each condition
 				        	System.out.println("Averaging "+num);
-				        	int c = Constants.conditions.get(condition);
 				        	//run the condition for a full run and save learned model
 				        	//currently, only the OBT_TARGET condition uses the source task model (learnedModels[0]) to learn in the target task, but it is passed to all Constants.conditions
 				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes[c], game, level1, Constants.visuals, controller, learnedModels[0]).clone();
@@ -220,10 +186,10 @@ public class Main {
 		        System.exit(0);
 		        
 			case PLAY:
-				System.out.println("Playing "+games[Constants.sourceGame[0]]);
+				System.out.println("Playing "+games[Constants.game[0]]);
 		        if(Constants.runType == RunType.PLAY){
-		        	String game = gamesPath + games[Constants.sourceGame[0]] + ".txt";
-		        	String level1 = gamesPath + games[Constants.sourceGame[0]] + "_lvl" + Constants.sourceGame[1] +".txt";
+		        	String game = gamesPath + games[Constants.game[0]] + ".txt";
+		        	String level1 = gamesPath + games[Constants.game[0]] + "_lvl" + Constants.game[1] +".txt";
 		        	new HumanAgent(null,null);
 		        	String controller = "ramyaram.HumanAgent";
 		        	while(GAME_PLAY_NUM <= 10){ //human can keep playing the game until the max number of episodes
@@ -239,17 +205,13 @@ public class Main {
 	 * Initialize controller for the given condition
 	 */
 	public static String initController(String condition){
-		if(condition.contains("OF_Q")){
+		if(condition.contains("OFQ"))
 			new OFQAgent(null,null);
-			return "ramyaram.OFQAgent";
-		} else if(condition.contains("OBT")){
+		else if(condition.contains("OBT"))
 			new OBTAgent(null,null);
-			return "ramyaram.OBTAgent";
-		} else if(condition.contains("RANDOM")){
+		else if(condition.contains("Random"))
 			new RandomAgent(null, null);
-			return "ramyaram.RandomAgent";
-		}
-		return null;
+		return condition;
 	}
 	
 	/**
@@ -271,12 +233,6 @@ public class Main {
 				break;
 		}
 		return mapping;
-	}
-	
-	public static String getGameStrFromIndices(int[] game){
-		if(game[0] >= 0 && game[1] >= 0)
-			return games[game[0]]+game[1];
-		return "";
 	}
 	
 	/**
@@ -305,7 +261,7 @@ public class Main {
 		}
 	}
 	
-	public static void writeInfoToFile(File runInfoFile, String sourceGameStr, String targetGameStr){
+	public static void writeInfoToFile(File runInfoFile){
 		try{
 			Field[]fields = Constants.class.getFields();
 			for(Field field : fields)
@@ -324,9 +280,8 @@ public class Main {
 	public static void writeFinalResultsToFile(File file, double[][] results, int numAveraging, int[] numEpisodes){
 		try{
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-			for(String condition : Constants.conditions.keySet()){ //all Constants.conditions
-				int c = Constants.conditions.get(condition);
-				writer.write(condition+", ");
+			for(int c=0; c<Constants.conditions.size(); c++){ //all conditions
+				writer.write(Constants.conditions.get(c)+", ");
 				for(int j=0; j<results[c].length; j++){
 					if(j < numEpisodes[c]){
 						//divides the total reward by the number of simulation runs and gets the average reward the agent received over time
@@ -341,14 +296,5 @@ public class Main {
 		} catch(Exception e){
 			e.printStackTrace(); 
 		}
-	}
-	
-	public static void delete(File f) {
-		if (f.isDirectory()) {
-			for (File c : f.listFiles())
-				delete(c);
-		}
-		if (!f.delete())
-		    System.out.println("Failed to delete file: " + f);
 	}
 }

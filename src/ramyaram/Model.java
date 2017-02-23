@@ -87,7 +87,6 @@ public class Model {
 			String dirPath = dir.getPath();
 			File infoFile = new File(dirPath+"/modelInfo.txt");
 			if(!infoFile.exists()){ //write info to file if not rewritten in previous run
-//				return;
 				Main.writeToFile(infoFile, "numRows="+Agent.numRows+"\n");
 				Main.writeToFile(infoFile, "numCols="+Agent.numCols+"\n");
 			}

@@ -94,7 +94,8 @@ public abstract class Agent extends AbstractPlayer {
 	    	Main.writeToFile(Main.allRewardFile, evalReward+", ");
 	    	//record end game tick
 	    	Main.gameTick[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalTicks; //game tick at the end of the game
-	    	Main.writeToFile(Main.allGameTickFile, evalTicks+", ");      	
+	    	Main.writeToFile(Main.allGameTickFile, evalTicks+", ");
+	    	return evalReward;
 	    }
 	    return result[1];
 	}

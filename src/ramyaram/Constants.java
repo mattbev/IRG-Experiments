@@ -1,18 +1,19 @@
 package ramyaram;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import ramyaram.Main.RunType;
 
 public class Constants {
 	//settings for current run
-	public static HashMap<String, Integer> conditions = new HashMap<String,Integer>();
+	public static ArrayList<String> conditions = new ArrayList<String>();
     public static RunType runType;
-	public static int[] sourceGame = new int[]{-1,-1}; //this array has 2 indices, the first specifies the game index and the second is the level index
-	public static int[] targetGame = new int[]{-1,-1}; //this array has 2 indices, the first specifies the game index and the second is the level index
+	public static int[] game = new int[]{-1,-1}; //this array has 2 indices, the first specifies the game index and the second is the level index
 	public static HashMap<Integer, Integer> fixedMapping; //fixed mapping if given prior to running the task
-	public static boolean writeModelToFile = false;
-	public static boolean readModelFromFile = false;
+	public static File writeModelFile = null;
+	public static File readModelFile = null;
 	public static boolean visuals = false;
 
 	//parameters for standard Q-learning
@@ -28,9 +29,8 @@ public class Constants {
 	
 	//parameters to denote number of episodes
 	public static int numAveraging = 0;
-	public static int numSourceEpisodes = 0;
-	public static int numTargetEpisodes = 0;
+	public static int numTotalEpisodes = 0;
 	public static int numEpisodesLearn = 0;
 	public static int numEpisodesEval = 0;
-	public static int numEpisodesMapping = -1;
+	public static int numEpisodesMapping = 0;
 }

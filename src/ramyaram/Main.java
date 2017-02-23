@@ -94,7 +94,7 @@ public class Main {
 			String flag = tokens[i];
 			String argument = tokens[i+1];
 			switch(flag){
-				case "-g": Constants.game = getGameLvlIdx(argument, games);
+				case "-g": Constants.game = getGameLvlIdx(argument, games); break;
 				case "-n": Constants.numTotalEpisodes = Integer.parseInt(argument); break;
 				case "-nl": Constants.numEpisodesLearn = Integer.parseInt(argument); break;
 				case "-ne": Constants.numEpisodesEval = Integer.parseInt(argument); break;
@@ -183,7 +183,6 @@ public class Main {
 		        writeFinalResultsToFile(avgRewardFile, reward, Constants.numAveraging, numEpisodes);
 		        writeFinalResultsToFile(avgNumWinsFile, numWins, Constants.numAveraging, numEpisodes);
 		        writeFinalResultsToFile(avgGameTickFile, gameTick, Constants.numAveraging, numEpisodes);
-		        System.exit(0);
 		        
 			case PLAY:
 				System.out.println("Playing "+games[Constants.game[0]]);

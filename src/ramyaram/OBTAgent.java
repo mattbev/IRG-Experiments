@@ -41,7 +41,7 @@ public class OBTAgent extends OFQAgent {
 			System.exit(0);
 		}
 		model = new Model();
-		OBTAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
+		gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		
 		if(Constants.readModelFile != null){
 			OBTAgent.priorLearnedModel = new Model();

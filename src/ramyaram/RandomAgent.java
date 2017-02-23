@@ -21,7 +21,7 @@ public class RandomAgent extends Agent {
 	 */
 	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel) {
 		model = new Model();
-		RandomAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
+		gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		for(int i=0; i<numEpisodes; i++)
 			runOneEpisode(conditionNum, i, game, level1, visuals, controller);
 		return model;

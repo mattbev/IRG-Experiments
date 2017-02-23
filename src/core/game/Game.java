@@ -1036,24 +1036,24 @@ public abstract class Game
             //For sanity: winning a game always gives a positive score
 //            else if(avatars[i].getWinState() == Types.WINNER.PLAYER_WINS)
 //                if(avatars[i].getScore() <= 0) avatars[i].setScore(1);
-            if(!Agent.endedGame){
-	            if(avatars[i].getWinState() == Types.WINNER.PLAYER_WINS){
-//	            	System.out.println("WIN");
-//	            	System.out.println("before "+avatars[i].getScore());
-	        		avatars[i].addScore(Types.SCORE_WIN);
-	        		double rounded =  Math.round(avatars[i].getScore() * 100.0) / 100.0;
-	        		avatars[i].setScore(rounded);
-//	        		System.out.println("after "+avatars[i].getScore());
-	            } else if(avatars[i].getWinState() == Types.WINNER.PLAYER_LOSES){
-//	            	System.out.println("LOSE");
-//	            	System.out.println("before "+avatars[i].getScore());
-	        		avatars[i].addScore(Types.SCORE_LOSE);
-	        		double rounded =  Math.round(avatars[i].getScore() * 100.0) / 100.0;
-	        		avatars[i].setScore(rounded);
-//	        		System.out.println("after "+avatars[i].getScore());
-	            }
-	            Agent.endedGame = true;
-            }
+//            if(!Agent.endedGame){
+//	            if(avatars[i].getWinState() == Types.WINNER.PLAYER_WINS){
+////	            	System.out.println("WIN");
+////	            	System.out.println("before "+avatars[i].getScore());
+//	        		avatars[i].addScore(Types.SCORE_WIN);
+//	        		double rounded =  Math.round(avatars[i].getScore() * 100.0) / 100.0;
+//	        		avatars[i].setScore(rounded);
+////	        		System.out.println("after "+avatars[i].getScore());
+//	            } else if(avatars[i].getWinState() == Types.WINNER.PLAYER_LOSES){
+////	            	System.out.println("LOSE");
+////	            	System.out.println("before "+avatars[i].getScore());
+//	        		avatars[i].addScore(Types.SCORE_LOSE);
+//	        		double rounded =  Math.round(avatars[i].getScore() * 100.0) / 100.0;
+//	        		avatars[i].setScore(rounded);
+////	        		System.out.println("after "+avatars[i].getScore());
+//	            }
+//	            Agent.endedGame = true;
+//            }
         }
 
         //Prints the result: score, time and winner.

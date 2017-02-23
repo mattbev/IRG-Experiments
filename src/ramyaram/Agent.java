@@ -21,7 +21,6 @@ import tools.Vector2d;
  */
 public abstract class Agent extends AbstractPlayer {
 	public static Agent INSTANCE;
-	public static boolean endedGame;
     protected static Random rand;
     protected static Scanner scan;
     protected static int numRows;
@@ -73,9 +72,6 @@ public abstract class Agent extends AbstractPlayer {
 	 */
 	public double runOneEpisode(int conditionNum, int episodeNum, String game, String level1, boolean visuals, String controller){
 		System.out.println("Episode "+episodeNum);
-		lastScore = 0;
-		lastStateObs = null;
-		endedGame = false;
 		int seed = rand.nextInt();
         double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         while(result[0] == Types.WINNER.PLAYER_DISQ.key()) //don't count any episodes in which the controller was disqualified for time
@@ -127,8 +123,6 @@ public abstract class Agent extends AbstractPlayer {
 			for (int j = 0; j < observationGrid[i].length; j++) {
 				ArrayList<Observation> obsList = new ArrayList<Observation>();
 				for (Observation obs : observationGrid[i][j]) {
-//					if(obs.category == Types.TYPE_AVATAR) //uncomment if you want to see the avatar in the console, along with the important objects
-//						obsList.add(obs);
 					if(getImportantObjects(gameName) != null){
 						if(getImportantObjects(gameName).contains(obs.itype))
 							obsList.add(obs);
@@ -196,7 +190,6 @@ public abstract class Agent extends AbstractPlayer {
     	lastStateObs = null;
     	lastAction = null;
     	lastScore = 0;
-    	endedGame = false;
     	if(model != null)
     		model.clear();
     }
@@ -212,11 +205,13 @@ public abstract class Agent extends AbstractPlayer {
         Types.ACTIONS action = chooseAction(stateObs, actions);
         double currScore = stateObs.getGameScore(); 
         
-//		System.out.print(stateObsStr(stateObs));
+//      if(lastStateObs != null)
+//      	System.out.print(stateObsStr(lastStateObs));
 //		for(Observation obs : objectMap.keySet())
 //        	System.out.println(objectMap.get(obs).getGridPos()+" "+objectMap.get(obs).getItype());
-//		System.out.println(action);
-//		System.out.println("Current Game Score: "+currScore+", Score Change: "+(currScore-lastScore)+"\n"); 
+//		System.out.println(lastAction);
+//		System.out.print(stateObsStr(stateObs));
+//		System.out.println("CurrentScore: "+currScore+", LastScore: "+lastScore+", ScoreChange: "+(currScore-lastScore)+"\n"); 
         
 		if(lastStateObs != null)
 			updateEachStep(lastStateObs, lastAction, stateObs, (currScore-lastScore), actions);
@@ -253,7 +248,7 @@ public abstract class Agent extends AbstractPlayer {
 			for (int c = 0; c < observationGrid.length; c++) {
 				boolean isObject = false;
 				for(Observation obs : observationGrid[c][r]){
-					if(getImportantObjects(gameName).contains(obs.itype)){
+					if(getImportantObjects(gameName).contains(obs.itype) || obs.category == Types.TYPE_AVATAR){
 						str += obs.itype;
 						isObject = true;
 						break;
@@ -267,7 +262,21 @@ public abstract class Agent extends AbstractPlayer {
     	return str;
     }
 	
-	public void result(StateObservation stateObservation, ElapsedCpuTimer elapsedCpuTimer) {}
+	public void result(StateObservation stateObservation, ElapsedCpuTimer elapsedCpuTimer) {
+		double currScore = stateObservation.getGameScore();
+		updateEachStep(lastStateObs, lastAction, stateObservation, (currScore-lastScore), stateObservation.getAvailableActions());
+
+//		System.out.println("In result");
+//		if(lastStateObs != null)
+//        	System.out.print(stateObsStr(lastStateObs));
+//		System.out.println(lastAction);
+//		System.out.print(stateObsStr(stateObservation));
+//		System.out.println("CurrentScore: "+currScore+", LastScore: "+lastScore+", ScoreChange: "+(currScore-lastScore)+"\n");
+		
+		lastScore = 0;
+		lastAction = null;
+		lastStateObs = null;
+	}
 	
 	/**
      * Converts position in pixels to position in grid coordinates

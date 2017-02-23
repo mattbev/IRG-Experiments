@@ -24,7 +24,7 @@ public class OFQAgent extends Agent {
 	 */
 	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel) {
 		model = new Model();
-		OFQAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
+		gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
 		updateQValues = true;
 		//run OF-Q
 		for(int i=0; i<numEpisodes; i++)

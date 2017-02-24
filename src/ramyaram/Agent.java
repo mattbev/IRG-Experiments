@@ -78,10 +78,13 @@ public abstract class Agent extends AbstractPlayer {
         	result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
         
         if(episodeNum % Constants.numEpisodesLearn == 0){
-    		double[] eval = evaluate(Constants.numEpisodesEval, conditionNum, game, level1, visuals, controller, seed);
-	    	double evalWins = eval[0];
-	    	double evalReward = eval[1];
-	    	double evalTicks = eval[2];
+//    		double[] eval = evaluate(Constants.numEpisodesEval, conditionNum, game, level1, visuals, controller, seed);
+//	    	double evalWins = eval[0];
+//	    	double evalReward = eval[1];
+//	    	double evalTicks = eval[2];
+    		double evalWins = result[0];
+	    	double evalReward = result[1];
+	    	double evalTicks = result[2];
 	    	//record game winner
 	    	Main.numWins[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalWins;
 	    	Main.writeToFile(Main.allNumWinsFile, evalWins+", ");
@@ -96,23 +99,23 @@ public abstract class Agent extends AbstractPlayer {
 	    return result[1];
 	}
     
-	/**
-	* Runs N episodes for evaluation of the current model
-	* Returns [average number of wins, average reward in an episode, average number of ticks per episode]
-	*/
-	public double[] evaluate(int numEpisodes, int conditionNum, String game, String level1, boolean visuals, String controller, int seed){
-		double[] eval = new double[]{0,0,0};
-		Agent.updateQValues = false;
-		for(int i=0; i<numEpisodes; i++){
-			double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
-			for(int j=0; j<eval.length; j++)
-				eval[j] += result[j];
-		}
-		for(int j=0; j<eval.length; j++)
-			eval[j] = eval[j] / numEpisodes;
-		Agent.updateQValues = true;
-		return eval;
-	}
+//   /**
+//	* Runs N episodes for evaluation of the current model
+//	* Returns [average number of wins, average reward in an episode, average number of ticks per episode]
+//	*/
+//	public double[] evaluate(int numEpisodes, int conditionNum, String game, String level1, boolean visuals, String controller, int seed){
+//		double[] eval = new double[]{0,0,0};
+//		Agent.updateQValues = false;
+//		for(int i=0; i<numEpisodes; i++){
+//			double[] result = ArcadeMachine.runOneGame(game, level1, visuals, controller, null, seed, 0);
+//			for(int j=0; j<eval.length; j++)
+//				eval[j] += result[j];
+//		}
+//		for(int j=0; j<eval.length; j++)
+//			eval[j] = eval[j] / numEpisodes;
+//		Agent.updateQValues = true;
+//		return eval;
+//	}
 	
     /**
      * Converts the given state observation into a map to keep track of objects in the current state

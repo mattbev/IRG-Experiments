@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -32,8 +31,8 @@ public abstract class Agent extends AbstractPlayer {
 	protected static boolean updateQValues;
 	protected static String gameName;
 	
-	protected static Map<Observation, Object> objectLastStateMap = new HashMap<Observation, Object>();
-	protected static Map<Observation, Object> objectMap = new HashMap<Observation, Object>();
+	protected static HashMap<Observation, Object> objectLastStateMap = new HashMap<Observation, Object>();
+	protected static HashMap<Observation, Object> objectMap = new HashMap<Observation, Object>();
 	protected static Model model;
 
     /**
@@ -64,8 +63,8 @@ public abstract class Agent extends AbstractPlayer {
     /**
      * Updates the agent's learning model after each experience
      */
-    public abstract void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions);
-	
+    public abstract void updateEachStep(StateObservation state, HashMap<Observation, Object> stateObjMap, Types.ACTIONS action, StateObservation state2, HashMap<Observation, Object> state2ObjMap, double reward, ArrayList<Types.ACTIONS> actions);
+    
 	/**
 	 * Runs one episode of the task (start state to goal state)
 	 * Records stats from the game
@@ -120,7 +119,7 @@ public abstract class Agent extends AbstractPlayer {
     /**
      * Converts the given state observation into a map to keep track of objects in the current state
      */
-    public void processStateObs(StateObservation stateObs, Map<Observation, Object> map){
+    public void processStateObs(StateObservation stateObs, HashMap<Observation, Object> map){
     	ArrayList<Observation>[][] observationGrid = stateObs.getObservationGrid();
 		for (int i = 0; i < observationGrid.length; i++) {
 			for (int j = 0; j < observationGrid[i].length; j++) {
@@ -178,7 +177,7 @@ public abstract class Agent extends AbstractPlayer {
     /**
      * Process a single observation
      */
-    public void processObs(Observation obs, Map<Observation, Object> map){
+    public void processObs(Observation obs, HashMap<Observation, Object> map){
     	if(!model.getItype_to_objClassId().containsKey(obs.itype))
     		model.getItype_to_objClassId().put(obs.itype, model.getItype_to_objClassId().size());
     	Vector2d gridPos = getGridCellFromPixels(obs.position);
@@ -217,7 +216,7 @@ public abstract class Agent extends AbstractPlayer {
 //		System.out.println("CurrentScore: "+currScore+", LastScore: "+lastScore+", ScoreChange: "+(currScore-lastScore)+"\n"); 
         
 		if(lastStateObs != null)
-			updateEachStep(lastStateObs, lastAction, stateObs, (currScore-lastScore), actions);
+			updateEachStep(lastStateObs, objectLastStateMap, lastAction, stateObs, objectMap, (currScore-lastScore), actions);
         
 		lastStateObs = stateObs.copy();
         lastAction = action;
@@ -267,7 +266,7 @@ public abstract class Agent extends AbstractPlayer {
 	
 	public void result(StateObservation stateObservation, ElapsedCpuTimer elapsedCpuTimer) {
 		double currScore = stateObservation.getGameScore();
-		updateEachStep(lastStateObs, lastAction, stateObservation, (currScore-lastScore), stateObservation.getAvailableActions());
+		updateEachStep(lastStateObs, objectLastStateMap, lastAction, stateObservation, objectMap, (currScore-lastScore), stateObservation.getAvailableActions());
 
 //		System.out.println("In result");
 //		if(lastStateObs != null)

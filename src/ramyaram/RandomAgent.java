@@ -1,10 +1,11 @@
 package ramyaram;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import core.game.Observation;
 import core.game.StateObservation;
 import ontology.Types;
-import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 
 /**
@@ -34,7 +35,5 @@ public class RandomAgent extends Agent {
 		return actions.get(rand.nextInt(actions.size()));
 	}
 
-	public void updateEachStep(StateObservation stateObs, ACTIONS action, StateObservation nextStateObs, double reward,
-			ArrayList<ACTIONS> actions) {		
-	}
+    public void updateEachStep(StateObservation state, HashMap<Observation, Object> stateObjMap, Types.ACTIONS action, StateObservation state2, HashMap<Observation, Object> state2ObjMap, double reward, ArrayList<Types.ACTIONS> actions){}
 }

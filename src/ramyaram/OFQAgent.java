@@ -1,8 +1,8 @@
 package ramyaram;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import core.game.Observation;
 import core.game.StateObservation;
@@ -76,18 +76,20 @@ public class OFQAgent extends Agent {
     /**
 	 * Updates each object class's Q-value function for the given state, action, and next state
 	 */
-    public void updateQValues(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions){		
-    	for(Observation obs : objectMap.keySet()) {
+    public void updateQValues(StateObservation state, HashMap<Observation, Object> stateObjMap, Types.ACTIONS action, StateObservation state2, HashMap<Observation, Object> state2ObjMap, double reward, ArrayList<Types.ACTIONS> actions){		
+    	Vector2d avatarPos = getAvatarGridPos(state);
+    	Vector2d avatarPos2 = getAvatarGridPos(state2);
+    	for(Observation obs : stateObjMap.keySet()) {
     		if(obs.category != Types.TYPE_AVATAR){
-	    		Object currObj = objectLastStateMap.get(obs);
-	    		Object nextObj = objectMap.get(obs);
-	    		ValueFunction qValues = getValueFunction(currObj);
-				double q = qValues.getOptimalQValue(getAvatarGridPos(stateObs), currObj.getGridPos(), action);
+	    		Object o_state = stateObjMap.get(obs);
+	    		Object o_state2 = state2ObjMap.get(obs);
+	    		ValueFunction qValues = getValueFunction(o_state);
+				double q = qValues.getOptimalQValue(avatarPos, o_state.getGridPos(), action);
 				double maxQ = 0;
-				if(nextObj != null)
-					maxQ = optimalMaxQ(qValues, getAvatarGridPos(nextStateObs), nextObj.getGridPos(), actions);	
+				if(o_state2 != null)
+					maxQ = optimalMaxQ(qValues, avatarPos2, o_state2.getGridPos(), actions);	
 		        double qValue = getOneQValueUpdate(q, reward, maxQ);
-		        qValues.setOptimalQValue(getAvatarGridPos(stateObs), currObj.getGridPos(), action, qValue);
+		        qValues.setOptimalQValue(avatarPos, o_state.getGridPos(), action, qValue);
     		}
     	}
     }
@@ -95,7 +97,7 @@ public class OFQAgent extends Agent {
     /**
      * Adds an object class to the model when it's first seen in this task
      */
-    public void processObs(Observation obs, Map<Observation, Object> map){
+    public void processObs(Observation obs, HashMap<Observation, Object> map){
     	super.processObs(obs, map);
     	if(model.getItype_to_objClassId().get(obs.itype) >= model.qValueFunctions.size())
 			model.addObjClassToModel(obs.itype);
@@ -124,8 +126,8 @@ public class OFQAgent extends Agent {
 	/**
 	 * Update Q-value functions if updateQValues variable is set to true (in Object-Focused Q-learning, this is always set to true)
 	 */
-    public void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions) {
+    public void updateEachStep(StateObservation state, HashMap<Observation, Object> stateObjMap, Types.ACTIONS action, StateObservation state2, HashMap<Observation, Object> state2ObjMap, double reward, ArrayList<Types.ACTIONS> actions){		
         if(updateQValues)
-        	updateQValues(stateObs, action, nextStateObs, reward, actions);
+        	updateQValues(state, stateObjMap, action, state2, state2ObjMap, reward, actions);
     }
 }

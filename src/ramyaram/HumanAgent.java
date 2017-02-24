@@ -1,9 +1,11 @@
 package ramyaram;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import core.ArcadeMachine;
 import core.game.Game;
+import core.game.Observation;
 import core.game.StateObservation;
 import ontology.Types;
 import tools.Direction;
@@ -81,6 +83,6 @@ public class HumanAgent extends Agent {
     	return null; //no agent controller here as the person is playing the game
     }
     
-    public void updateEachStep(StateObservation stateObs, Types.ACTIONS action, StateObservation nextStateObs, double reward, ArrayList<Types.ACTIONS> actions){}
+    public void updateEachStep(StateObservation state, HashMap<Observation, Object> stateObjMap, Types.ACTIONS action, StateObservation state2, HashMap<Observation, Object> state2ObjMap, double reward, ArrayList<Types.ACTIONS> actions){}
 }
 

@@ -2,7 +2,6 @@ package ramyaram;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import core.game.Observation;
@@ -137,7 +136,7 @@ public class OBTAgent extends OFQAgent {
 	/**
 	 * If a new object class is seen, add it to the model
 	 */
-	public void processObs(Observation obs, Map<Observation, Object> map){
+	public void processObs(Observation obs, HashMap<Observation, Object> map){
     	super.processObs(obs, map);
 		if(model.getItype_to_objClassId().get(obs.itype) >= currMapping.size()){
 			if(Constants.fixedMapping != null){

@@ -13,7 +13,8 @@ cnt=0
 f = file(sys.argv[1]+'/'+sys.argv[2]).read().strip().split('\n')
 for line in f:
     label = line.split(',')[0]
-    y = line.split(',')[1:]
+    values = line.split(',')
+    y = values[1:len(values)-1] #skip the last item (empty item after final comma)
     y = [e for e in y if e] #use non-null elements
     x = [i for i in range(len(y))]
 #    x_int = np.linspace(x[0], x[-1], 100)

@@ -50,22 +50,11 @@ public class HumanAgent extends Agent {
         if(action == Types.ACTIONS.ACTION_NIL && useOn)
             action = Types.ACTIONS.ACTION_USE;
         
-        processStateObs(stateObs);
-
         double currScore = stateObs.getGameScore();
-        
         if(action != Types.ACTIONS.ACTION_NIL){ //only save "important" actions and record the tick at which the action happened (skips recording nil actions)
         	Main.writeToFile(Main.humanDataFile, "TICK: "+stateObs.getGameTick()+"\n");
 	        Main.writeToFile(Main.humanDataFile, stateObsStr(lastStateObs));
-	        Main.writeToFile(Main.humanDataFile, action.name()+", "+(currScore-lastScore)+"\n");
-        }
-        if(stateObs.isGameOver()){ //save end-of-game stats
-        	Main.writeToFile(Main.humanDataFile, "WINNER: "+stateObs.getGameWinner()+", SCORE: "+stateObs.getGameScore()+"\n**********************\n\n");
-        	Main.writeToFile(Main.humanWinsFile, stateObs.getGameWinner()+",");
-        	Main.writeToFile(Main.humanScoresFile, stateObs.getGameScore()+",");
-        	Main.writeToFile(Main.humanTicksFile, stateObs.getGameTick()+",");
-        	lastWin = stateObs.getGameWinner() == Types.WINNER.PLAYER_WINS ? 1 : 0;
-        	lastGameScore = stateObs.getGameScore();
+	        Main.writeToFile(Main.humanDataFile, action.name()+", "+Agent.roundDouble(currScore-lastScore)+"\n");
         }
         
     	lastStateObs = stateObs.copy();
@@ -74,6 +63,22 @@ public class HumanAgent extends Agent {
 
         return action;
     }
+    
+    /**
+     * Save end-of-game stats
+     */
+    public void result(StateObservation stateObs, ElapsedCpuTimer elapsedCpuTimer) {
+    	Main.writeToFile(Main.humanDataFile, "WINNER: "+stateObs.getGameWinner()+", SCORE: "+stateObs.getGameScore()+"\n**********************\n\n");
+    	Main.writeToFile(Main.humanWinsFile, stateObs.getGameWinner()+",");
+    	Main.writeToFile(Main.humanScoresFile, stateObs.getGameScore()+",");
+    	Main.writeToFile(Main.humanTicksFile, stateObs.getGameTick()+",");
+    	lastWin = stateObs.getGameWinner() == Types.WINNER.PLAYER_WINS ? 1 : 0;
+    	lastGameScore = Agent.roundDouble(stateObs.getGameScore());
+		
+		lastScore = 0;
+		lastAction = null;
+		lastStateObs = null;
+	}
    
     @Override
     public Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){

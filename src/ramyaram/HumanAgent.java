@@ -1,11 +1,9 @@
 package ramyaram;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import core.ArcadeMachine;
 import core.game.Game;
-import core.game.Observation;
 import core.game.StateObservation;
 import ontology.Types;
 import tools.Direction;
@@ -26,6 +24,13 @@ public class HumanAgent extends Agent {
     public HumanAgent(StateObservation so, ElapsedCpuTimer elapsedTimer) {
     	super(so, elapsedTimer);
     }  
+    
+    @Override
+    public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller){
+    	HumanAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
+    	ArcadeMachine.runOneGame(game, level1, visuals, controller, null, 1, 0);
+    	return null;
+    }
 
     /**
      * Picks an action. This function is called every game step to request an
@@ -34,6 +39,7 @@ public class HumanAgent extends Agent {
      * @param elapsedTimer Timer when the action returned is due.
      * @return An action for the current state
      */
+    @Override
     public Types.ACTIONS act(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
         Direction move = Utils.processMovementActionKeys(Game.ki.getMask(), Types.DEFAULT_SINGLE_PLAYER_KEYIDX);
         boolean useOn = Utils.processUseKey(Game.ki.getMask(), Types.DEFAULT_SINGLE_PLAYER_KEYIDX);
@@ -44,7 +50,7 @@ public class HumanAgent extends Agent {
         if(action == Types.ACTIONS.ACTION_NIL && useOn)
             action = Types.ACTIONS.ACTION_USE;
         
-        processStateObs(stateObs, objectMap);
+        processStateObs(stateObs);
 
         double currScore = stateObs.getGameScore();
         
@@ -65,24 +71,19 @@ public class HumanAgent extends Agent {
     	lastStateObs = stateObs.copy();
     	lastAction = action;
         lastScore = currScore;
-        
-        objectLastStateMap.clear();
-        objectMap.clear();
 
         return action;
     }
-    
-    public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel){
-    	model = new Model();
-    	HumanAgent.gameName = game.substring(game.lastIndexOf('/')+1, game.lastIndexOf('.'));
-    	ArcadeMachine.runOneGame(game, level1, visuals, controller, null, 1, 0);
-    	return null;
-    }
    
+    @Override
     public Types.ACTIONS chooseAction(StateObservation stateObs, ArrayList<Types.ACTIONS> actions){
     	return null; //no agent controller here as the person is playing the game
     }
     
-    public void updateEachStep(StateObservation state, HashMap<Observation, Object> stateObjMap, Types.ACTIONS action, StateObservation state2, HashMap<Observation, Object> state2ObjMap, double reward, ArrayList<Types.ACTIONS> actions){}
+    @Override
+    public void updateEachStep(StateObservation state, Types.ACTIONS action, StateObservation state2, double reward, ArrayList<Types.ACTIONS> actions){}
+
+	@Override
+	public void processStateObs(StateObservation stateObs) {}
 }
 

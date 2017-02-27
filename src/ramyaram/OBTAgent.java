@@ -34,7 +34,8 @@ public class OBTAgent extends OFQAgent {
 	/**
 	 * Runs the Object-Based Transfer algorithm with the given parameters
 	 */
-	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller, Model priorLearnedModel) {
+	@Override
+	public Model run(int conditionNum, int numEpisodes, String game, String level1, boolean visuals, String controller) {
 		if(Constants.numEpisodesMapping > Constants.numTotalEpisodes){ //sanity check - cannot have more episodes in the mapping phase than total episodes in the full run
 			System.out.println("Error: number of total episodes is less than the sum of episodes of each phase.");
 			System.exit(0);
@@ -45,8 +46,6 @@ public class OBTAgent extends OFQAgent {
 		if(Constants.readModelFile != null){
 			OBTAgent.priorLearnedModel = new Model();
 			OBTAgent.priorLearnedModel.readFile(Constants.readModelFile);
-		} else if(priorLearnedModel != null){
-			OBTAgent.priorLearnedModel = priorLearnedModel;
 		}
 
 		currMapping = new ArrayList<Integer>();
@@ -110,6 +109,15 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	/**
+	 * Update Q-values of new value functions
+	 */
+	public void qValuesPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, boolean visuals, String controller){
+		updateQValues = true;
+		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++)
+			runOneEpisode(conditionNum, k, game, level1, visuals, controller);
+	}
+	
+	/**
 	 * Based on the current mapping, copy the most similar value functions to use as a prior for the Q-values phase
 	 */
 	public void copyMappedValueFunctions(){
@@ -125,17 +133,9 @@ public class OBTAgent extends OFQAgent {
 	}
 	
 	/**
-	 * Update Q-values of new value functions
-	 */
-	public void qValuesPhase(int conditionNum, int iterationNum, int numEpisodes, String game, String level1, boolean visuals, String controller){
-		updateQValues = true;
-		for(int k=iterationNum; k<(iterationNum+numEpisodes); k++)
-			runOneEpisode(conditionNum, k, game, level1, visuals, controller);
-	}
-	
-	/**
 	 * If a new object class is seen, add it to the model
 	 */
+	@Override
 	public void processObs(Observation obs, HashMap<Observation, Object> map){
     	super.processObs(obs, map);
 		if(model.getItype_to_objClassId().get(obs.itype) >= currMapping.size()){
@@ -159,6 +159,7 @@ public class OBTAgent extends OFQAgent {
 	 * Gets the value function for the given object 
 	 * It can be either a previously learned value function (during the mapping phase) or the new value function for that object class (during the Q-values phase)
 	 */
+	@Override
 	public ValueFunction getValueFunction(Object obj){
 		if(updateQValues) //in qvalues phase and value functions are already copied into model.qValueFunctions
 			return model.qValueFunctions.get(obj.getObjClassId());
@@ -301,6 +302,7 @@ public class OBTAgent extends OFQAgent {
 		return -1;
 	}
 	
+	@Override
 	public void clearEachRun(){
 		super.clearEachRun();
 		priorLearnedModel = null;

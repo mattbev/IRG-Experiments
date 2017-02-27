@@ -15,6 +15,7 @@ BasicGame square_size=40
     TerminationSet
         SpriteCounter stype=good win=True
         SpriteCounter stype=bad win=False
+        Timeout limit=50 win=False
 
     InteractionSet
         moving  EOS  > stepBack

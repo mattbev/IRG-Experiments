@@ -1032,7 +1032,7 @@ public abstract class Game
                 avatars[i].setWinState(Types.WINNER.PLAYER_DISQ);
                 avatars[i].setScore(Types.SCORE_DISQ);
             }
-            avatars[i].setScore(avatars[i].getScore()-0.1);
+            avatars[i].setScore(avatars[i].getScore()-0.01);
             //For sanity: winning a game always gives a positive score
 //            else if(avatars[i].getWinState() == Types.WINNER.PLAYER_WINS)
 //                if(avatars[i].getScore() <= 0) avatars[i].setScore(1);

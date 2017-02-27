@@ -30,7 +30,7 @@ public class Constants {
 	//parameters to denote number of episodes
 	public static int numAveraging = 0;
 	public static int numTotalEpisodes = 0;
-	public static int numEpisodesLearn = 0;
+	public static int numEpisodesLearn = 1;
 	public static int numEpisodesEval = 0;
 	public static int numEpisodesMapping = 0;
 }

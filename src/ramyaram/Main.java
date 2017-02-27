@@ -18,7 +18,6 @@ public class Main {
 	public static double[][] reward;
 	public static double[][] gameTick;
 	public static double[][] numWins;
-	public static Model[] learnedModels;
 	public static int GAME_PLAY_NUM = 1;
 	
 	//files for saving results
@@ -155,7 +154,6 @@ public class Main {
 				for(int c=0; c<Constants.conditions.size(); c++)
 					numEpisodes[c] = Constants.numTotalEpisodes;
 		        for(int num=0; num<Constants.numAveraging; num++){
-		        	learnedModels = new Model[Constants.conditions.size()];
 		        	for(int c=0; c<Constants.conditions.size(); c++){
 		        		int gameIdx = Constants.game[0];
 		        		int levelIdx = Constants.game[1];
@@ -172,9 +170,9 @@ public class Main {
 		        			System.out.println("Running condition "+Constants.conditions.get(c));
 		        			Agent.INSTANCE.clearEachRun(); //clear learned data before each condition
 				        	System.out.println("Averaging "+num);
-				        	//run the condition for a full run and save learned model
-				        	//currently, only the OBT_TARGET condition uses the source task model (learnedModels[0]) to learn in the target task, but it is passed to all Constants.conditions
-				        	learnedModels[c] = Agent.INSTANCE.run(c, numEpisodes[c], game, level1, Constants.visuals, controller, learnedModels[0]).clone();
+				        	//run the condition for a full run
+				        	System.out.println(Agent.INSTANCE);
+				        	Agent.INSTANCE.run(c, numEpisodes[c], game, level1, Constants.visuals, controller);
 		        		}
 		        		writeToAllFiles(",");
 		        	}
@@ -193,7 +191,7 @@ public class Main {
 		        	String controller = "ramyaram.HumanAgent";
 		        	while(GAME_PLAY_NUM <= 10){ //human can keep playing the game until the max number of episodes
 		        		writeToFile(humanDataFile, "PLAY #"+GAME_PLAY_NUM+"\n");
-	        			Agent.INSTANCE.run(-1, -1, game, level1, true, controller, null);
+	        			Agent.INSTANCE.run(-1, -1, game, level1, true, controller);
 	        			GAME_PLAY_NUM++;
 		        	}
 		       }

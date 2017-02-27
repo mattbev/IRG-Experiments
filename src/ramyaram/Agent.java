@@ -125,15 +125,13 @@ public abstract class Agent extends AbstractPlayer {
         double currScore = stateObs.getGameScore(); 
         
 //      if(lastStateObs != null)
-//      	System.out.print(stateObsStr(lastStateObs));
-//		for(Observation obs : objectMap.keySet())
-//        	System.out.println(objectMap.get(obs).getGridPos()+" "+objectMap.get(obs).getItype());
+//        	System.out.print(stateObsStr(lastStateObs));
 //		System.out.println(lastAction);
 //		System.out.print(stateObsStr(stateObs));
-//		System.out.println("CurrentScore: "+currScore+", LastScore: "+lastScore+", ScoreChange: "+(currScore-lastScore)+"\n"); 
-        
+//		System.out.println("CurrentScore: "+currScore+", LastScore: "+lastScore+", ScoreChange: "+roundDouble(currScore-lastScore)+"\n"); 
+      
 		if(lastStateObs != null)
-			updateEachStep(lastStateObs, lastAction, stateObs, (currScore-lastScore), actions);
+			updateEachStep(lastStateObs, lastAction, stateObs, roundDouble(currScore-lastScore), actions);
         
 		lastStateObs = stateObs.copy();
         lastAction = action;
@@ -144,14 +142,14 @@ public abstract class Agent extends AbstractPlayer {
 	
 	public void result(StateObservation stateObservation, ElapsedCpuTimer elapsedCpuTimer) {
 		double currScore = stateObservation.getGameScore();
-		updateEachStep(lastStateObs, lastAction, stateObservation, (currScore-lastScore), stateObservation.getAvailableActions());
+		updateEachStep(lastStateObs, lastAction, stateObservation, roundDouble(currScore-lastScore), stateObservation.getAvailableActions());
 
 //		System.out.println("In result");
 //		if(lastStateObs != null)
 //        	System.out.print(stateObsStr(lastStateObs));
 //		System.out.println(lastAction);
 //		System.out.print(stateObsStr(stateObservation));
-//		System.out.println("CurrentScore: "+currScore+", LastScore: "+lastScore+", ScoreChange: "+(currScore-lastScore)+"\n");
+//		System.out.println("CurrentScore: "+currScore+", LastScore: "+lastScore+", ScoreChange: "+roundDouble(currScore-lastScore)+"\n");
 		
 		lastScore = 0;
 		lastAction = null;
@@ -202,7 +200,7 @@ public abstract class Agent extends AbstractPlayer {
 	    	case "W": return Arrays.asList(3,5,6,8,9,10);
 	    	case "whackamole": return Arrays.asList(3,4,6,8,9);
 	    	case "eggomania": return Arrays.asList(3,8,11);
-	    	case "E": return Arrays.asList(3,7,8,11,12);
+	    	case "E": case "simple2Game": return Arrays.asList(3,7,8,11,12);
 	    	case "K": return Arrays.asList(3,4,6,8,9);
 	    	case "simpleGame": return Arrays.asList(4,5);
     	}
@@ -239,6 +237,10 @@ public abstract class Agent extends AbstractPlayer {
      */
 	public static int getYDist(Vector2d agent, Vector2d obj){
 		return (int)agent.y - (int)obj.y;
+	}
+	
+	public static double roundDouble(double num){
+		return Math.round(num * 100.0) / 100.0;
 	}
 	
 	/**

@@ -1032,7 +1032,6 @@ public abstract class Game
                 avatars[i].setWinState(Types.WINNER.PLAYER_DISQ);
                 avatars[i].setScore(Types.SCORE_DISQ);
             }
-            avatars[i].setScore(avatars[i].getScore()-0.01);
             //For sanity: winning a game always gives a positive score
 //            else if(avatars[i].getWinState() == Types.WINNER.PLAYER_WINS)
 //                if(avatars[i].getScore() <= 0) avatars[i].setScore(1);
@@ -1238,8 +1237,7 @@ public abstract class Game
         for (int i = 0; i < no_players; i++) {
 //        	System.out.println("before "+avatars[i].getScore());
         	avatars[i].addScore(Types.SCORE_TICK);
-        	double rounded =  Math.round(avatars[i].getScore() * 100.0) / 100.0;
-    		avatars[i].setScore(rounded);
+    		avatars[i].setScore(Agent.roundDouble(avatars[i].getScore()));
 //        	System.out.println("after "+avatars[i].getScore());
             if (avatars[i] != null && !avatars[i].is_disabled()) {
                 avatars[i].preMovement();

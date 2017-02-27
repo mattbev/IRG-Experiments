@@ -54,7 +54,7 @@ public class Main {
             "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
             "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
             "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem", "sheriffTopBottom",
-            "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D", "E", "K", "A", "simpleGame"};
+            "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D", "E", "K", "A", "simpleGame", "simple2Game"};
 	
 	public static void main(String[] args) {
 		//argument list

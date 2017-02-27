@@ -200,7 +200,7 @@ public abstract class Agent extends AbstractPlayer {
 	    	case "W": return Arrays.asList(3,5,6,8,9,10);
 	    	case "whackamole": return Arrays.asList(3,4,6,8,9);
 	    	case "eggomania": return Arrays.asList(3,8,11);
-	    	case "E": case "simple2Game": return Arrays.asList(3,7,8,11,12);
+	    	case "E": return Arrays.asList(3,7,8,11,12);
 	    	case "K": return Arrays.asList(3,4,6,8,9);
 	    	case "simpleGame": return Arrays.asList(4,5);
     	}

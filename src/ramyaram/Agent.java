@@ -21,8 +21,8 @@ public abstract class Agent extends AbstractPlayer {
 	public static Agent INSTANCE;
     protected static Random rand;
     protected static Scanner scan;
-    protected static int numRows;
-    protected static int numCols;
+    protected static int numX;
+    protected static int numY;
     protected static int blockSize;
 	protected static StateObservation lastStateObs;
 	protected static Types.ACTIONS lastAction;
@@ -39,8 +39,8 @@ public abstract class Agent extends AbstractPlayer {
         INSTANCE = this;
         if(so != null){
         	ArrayList<Observation>[][] observationGrid = so.getObservationGrid();
-    		numCols = observationGrid.length;
-    		numRows = observationGrid[0].length;
+    		numX = observationGrid.length;
+    		numY = observationGrid[0].length;
         	blockSize = so.getBlockSize();	
         }
     }
@@ -125,13 +125,12 @@ public abstract class Agent extends AbstractPlayer {
         double currScore = stateObs.getGameScore(); 
         
 //      if(lastStateObs != null)
-//        	System.out.print(stateObsStr(lastStateObs));
-//		System.out.println(lastAction);
-//		System.out.print(stateObsStr(stateObs));
+//        	System.out.print("lastStateObs\n"+stateObsStr(lastStateObs));
+//		System.out.println("lastAction: "+lastAction);
+//		System.out.print("stateObs\n"+stateObsStr(stateObs));
 //		System.out.println("CurrentScore: "+currScore+", LastScore: "+lastScore+", ScoreChange: "+roundDouble(currScore-lastScore)+"\n"); 
       
-		if(lastStateObs != null)
-			updateEachStep(lastStateObs, lastAction, stateObs, roundDouble(currScore-lastScore), actions);
+		updateEachStep(lastStateObs, lastAction, stateObs, roundDouble(currScore-lastScore), actions);
         
 		lastStateObs = stateObs.copy();
         lastAction = action;
@@ -146,9 +145,9 @@ public abstract class Agent extends AbstractPlayer {
 
 //		System.out.println("In result");
 //		if(lastStateObs != null)
-//        	System.out.print(stateObsStr(lastStateObs));
-//		System.out.println(lastAction);
-//		System.out.print(stateObsStr(stateObservation));
+//        	System.out.print("lastStateObs\n"+stateObsStr(lastStateObs));
+//		System.out.println("lastAction: "+lastAction);
+//		System.out.print("stateObs\n"+stateObsStr(stateObservation));
 //		System.out.println("CurrentScore: "+currScore+", LastScore: "+lastScore+", ScoreChange: "+roundDouble(currScore-lastScore)+"\n");
 		
 		lastScore = 0;
@@ -213,8 +212,8 @@ public abstract class Agent extends AbstractPlayer {
     public static Vector2d getGridCellFromPixels(Vector2d position){
 	 	int x = position.x >= 0 ? ((int)position.x)/Agent.blockSize : 0;
     	int y = position.y >= 0 ? ((int)position.y)/Agent.blockSize : 0;
-    	x = x >= Agent.numCols ? Agent.numCols-1 : x;
-    	y = y >= Agent.numRows ? Agent.numRows-1 : y;
+    	x = x >= Agent.numX ? Agent.numX-1 : x;
+    	y = y >= Agent.numY ? Agent.numY-1 : y;
 		return new Vector2d(x, y);
 	}
     
@@ -224,20 +223,6 @@ public abstract class Agent extends AbstractPlayer {
     public static Vector2d getAvatarGridPos(StateObservation stateObs){
     	return getGridCellFromPixels(stateObs.getAvatarPosition());
     }
-    
-    /**
-     * Gets X distance between agent and object
-     */
-    public static int getXDist(Vector2d agent, Vector2d obj){
-		return (int)agent.x - (int)obj.x;
-	}
-	
-    /**
-     * Gets Y distance between agent and object
-     */
-	public static int getYDist(Vector2d agent, Vector2d obj){
-		return (int)agent.y - (int)obj.y;
-	}
 	
 	public static double roundDouble(double num){
 		return Math.round(num * 100.0) / 100.0;

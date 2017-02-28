@@ -39,26 +39,23 @@ public class Model {
 	 */
 	public void addObjClassToModel(int objClassItype){
 		qValueFunctions.add(new ValueFunction(null, objClassItype, -1)); //no previous object class
-		transitionEstimates.add(new int[Agent.numCols*2][Agent.numRows*2][Types.ACTIONS.values().length][Agent.numCols*2][Agent.numRows*2]);
-		rewardEstimates.add(new int[Agent.numCols*2][Agent.numRows*2][Types.ACTIONS.values().length][3]);
+		transitionEstimates.add(new int[Agent.numX*2][Agent.numY*2][Types.ACTIONS.values().length][Agent.numX*2][Agent.numY*2]);
+		rewardEstimates.add(new int[Agent.numX*2][Agent.numY*2][Types.ACTIONS.values().length][3]);
 	}
 
 	/**
 	 * Update transition and reward function estimate for the given object class index
 	 */
 	public void updateModelEstimate(int objClassIndex, Vector2d agent, Vector2d obj, Types.ACTIONS action, Vector2d agentNext, Vector2d objNext, double reward){
-		transitionEstimates.get(objClassIndex)[Agent.getXDist(agent, obj)+Agent.numCols-1][Agent.getYDist(agent, obj)+Agent.numRows-1][action.ordinal()]
-				[Agent.getXDist(agentNext, objNext)+Agent.numCols-1][Agent.getYDist(agentNext, objNext)+Agent.numRows-1]++;
-		rewardEstimates.get(objClassIndex)[Agent.getXDist(agent, obj)+Agent.numCols-1][Agent.getYDist(agent, obj)+Agent.numRows-1][action.ordinal()]
-				[getRewardIndex(reward)]++;
+		transitionEstimates.get(objClassIndex)[getXDistId(agent, obj)][getYDistId(agent, obj)][action.ordinal()][getXDistId(agentNext, objNext)][getYDistId(agentNext, objNext)]++;
+		rewardEstimates.get(objClassIndex)[getXDistId(agent, obj)][getYDistId(agent, obj)][action.ordinal()][getRewardIndex(reward)]++;
 	}
 	
 	/**
 	 * Get the number of times a particular transition tuple <s,a,s'> has been seen for the given object class index
 	 */
 	public int getTransitionCounts(int objClassIndex, Vector2d agent, Vector2d obj, Types.ACTIONS action, Vector2d agentNext, Vector2d objNext, double reward){
-		return transitionEstimates.get(objClassIndex)[Agent.getXDist(agent, obj)+Agent.numCols-1][Agent.getYDist(agent, obj)+Agent.numRows-1][action.ordinal()]
-				[Agent.getXDist(agentNext, objNext)+Agent.numCols-1][Agent.getYDist(agentNext, objNext)+Agent.numRows-1];
+		return transitionEstimates.get(objClassIndex)[getXDistId(agent, obj)][getYDistId(agent, obj)][action.ordinal()][getXDistId(agentNext, objNext)][getYDistId(agentNext, objNext)];
 	}
 	
 	/**
@@ -66,8 +63,17 @@ public class Model {
 	 * Reward is discretized into three buckets: negative, close to 0, and positive
 	 */
 	public int getRewardCounts(int objClassIndex, Vector2d agent, Vector2d obj, Types.ACTIONS action, Vector2d agentNext, Vector2d objNext, double reward){
-		return rewardEstimates.get(objClassIndex)[Agent.getXDist(agent, obj)+Agent.numCols-1][Agent.getYDist(agent, obj)+Agent.numRows-1][action.ordinal()]
-				[getRewardIndex(reward)];
+		return rewardEstimates.get(objClassIndex)[getXDistId(agent, obj)][getYDistId(agent, obj)][action.ordinal()][getRewardIndex(reward)];
+	}
+	
+	public static int getXDistId(Vector2d agent, Vector2d obj){
+		int xdist = (int)agent.x - (int)obj.x;
+		return xdist+Agent.numX-1;
+	}
+	
+	public static int getYDistId(Vector2d agent, Vector2d obj){
+		int ydist = (int)agent.y - (int)obj.y;
+		return ydist+Agent.numY-1;
 	}
 	
 	/**
@@ -87,8 +93,8 @@ public class Model {
 			String dirPath = dir.getPath();
 			File infoFile = new File(dirPath+"/modelInfo.txt");
 			if(!infoFile.exists()){ //write info to file if not rewritten in previous run
-				Main.writeToFile(infoFile, "numRows="+Agent.numRows+"\n");
-				Main.writeToFile(infoFile, "numCols="+Agent.numCols+"\n");
+				Main.writeToFile(infoFile, "numX="+Agent.numX+"\n");
+				Main.writeToFile(infoFile, "numY="+Agent.numY+"\n");
 			}
 			for(ValueFunction q : qValueFunctions){
 				File qFile = new File(dirPath+"/"+q.objClassItype+".csv");
@@ -142,8 +148,8 @@ public class Model {
 				BufferedReader reader = new BufferedReader(new FileReader(file));
 				String[] tokens = reader.readLine().split(",");
 				int count = 0;
-				ValueFunction q = new ValueFunction(null, itype, -1, DataAnalysis.getVariableValueFromFile(dir.getPath()+"/modelInfo.txt", "numRows"), 
-						DataAnalysis.getVariableValueFromFile(dir.getPath()+"/modelInfo.txt", "numCols"));
+				ValueFunction q = new ValueFunction(null, itype, -1, DataAnalysis.getVariableValueFromFile(dir.getPath()+"/modelInfo.txt", "numX"), 
+						DataAnalysis.getVariableValueFromFile(dir.getPath()+"/modelInfo.txt", "numY"));
 				for(int i=0; i<q.optimalQValues.length; i++){
 					for(int j=0; j<q.optimalQValues[i].length; j++){
 						for(int k=0; k<q.optimalQValues[i][j].length; k++){

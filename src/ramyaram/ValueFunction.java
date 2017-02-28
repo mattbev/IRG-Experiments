@@ -12,11 +12,11 @@ public class ValueFunction {
 	public int previousObjClassItype; //previous object class itype if copied from a previous object class
 	
 	public ValueFunction(double[][][] optimalQValues, int objClassItype, int previousObjClassItype){
-		this(optimalQValues, objClassItype, previousObjClassItype, Agent.numRows, Agent.numCols);
+		this(optimalQValues, objClassItype, previousObjClassItype, Agent.numX, Agent.numY);
 	}
 	
-	public ValueFunction(double[][][] optimalQValues, int objClassItype, int previousObjClassItype, int numRows, int numCols){
-		this.optimalQValues = new double[numCols*2+1][numRows*2+1][Types.ACTIONS.values().length];
+	public ValueFunction(double[][][] optimalQValues, int objClassItype, int previousObjClassItype, int numX, int numY){
+		this.optimalQValues = new double[numX*2+1][numY*2+1][Types.ACTIONS.values().length];
 		this.objClassItype = objClassItype;
 		this.previousObjClassItype = previousObjClassItype;
 		
@@ -33,11 +33,21 @@ public class ValueFunction {
 	}
 	
 	public double getOptimalQValue(Vector2d agent, Vector2d obj, Types.ACTIONS action){
-		return optimalQValues[Agent.getXDist(agent, obj)+Agent.numCols-1][Agent.getYDist(agent, obj)+Agent.numRows-1][action.ordinal()];
+		return optimalQValues[Model.getXDistId(agent, obj)][Model.getYDistId(agent, obj)][action.ordinal()];
 	}
 	
 	public void setOptimalQValue(Vector2d agent, Vector2d obj, Types.ACTIONS action, double value){
-		optimalQValues[Agent.getXDist(agent, obj)+Agent.numCols-1][Agent.getYDist(agent, obj)+Agent.numRows-1][action.ordinal()] = value;
+//		System.out.println("agent pos "+agent);
+//		System.out.println("obj pos "+obj);
+//		System.out.println("action "+action);
+//		System.out.println("value "+value);
+//		System.out.println("first index "+(Model.getXDistId(agent, obj)));
+//		System.out.println("second index "+(Model.getYDistId(agent, obj)));
+//		System.out.println("third index action "+action.ordinal());
+//		System.out.println("old value "+optimalQValues[Model.getXDistId(agent, obj)][Model.getYDistId(agent, obj)][action.ordinal()]);
+		optimalQValues[Model.getXDistId(agent, obj)][Model.getYDistId(agent, obj)][action.ordinal()] = value;
+//		System.out.println("new value "+optimalQValues[Model.getXDistId(agent, obj)][Model.getYDistId(agent, obj)][action.ordinal()]);
+//		return;
 	}
 
 	public double[][][] getOptimalQValues() {

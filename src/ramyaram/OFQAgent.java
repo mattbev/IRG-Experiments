@@ -58,7 +58,7 @@ public class OFQAgent extends Agent {
     public void updateEachStep(StateObservation state, Types.ACTIONS action, StateObservation state2, double reward, ArrayList<Types.ACTIONS> actions){		
     	HashMap<Observation, Object> stateObjMap = objectLastStateMap;
     	HashMap<Observation, Object> state2ObjMap = objectMap;
-    	if(updateQValues)
+    	if(updateQValues && !objectLastStateMap.isEmpty())
         	updateQValues(state, stateObjMap, action, state2, state2ObjMap, reward, actions);
         objectLastStateMap = new HashMap<Observation, Object>(objectMap); 
         objectMap.clear();
@@ -87,6 +87,8 @@ public class OFQAgent extends Agent {
 					processObs(obs, map);
 			}
 		}
+//		for(Observation obs : map.keySet())
+//			System.out.println(obs.itype+"/"+map.get(obs).getItype()+": "+map.get(obs).getGridPos());
     }
     
     @Override
@@ -119,6 +121,22 @@ public class OFQAgent extends Agent {
 				}
     		}
 		}
+//		System.out.println("Q size "+model.qValueFunctions.size());
+//		for(ValueFunction q : model.qValueFunctions){
+//			System.out.println(q.objClassItype);
+//			System.out.println("size: "+q.optimalQValues.length+" "+q.optimalQValues[0].length+" "+q.optimalQValues[0][0].length);
+//			System.out.println(q.getNumNonZero());
+//			for(int i=0; i<q.optimalQValues.length; i++){
+//				for(int j=0; j<q.optimalQValues[i].length; j++){
+//					for(int k=0; k<q.optimalQValues[i][j].length; k++){
+//						System.out.print((q.optimalQValues[i][j][k])+" ");
+//					}
+//					System.out.println();
+//				}
+//				System.out.println();
+//			}
+//			System.out.println();
+//		}
 //		for(int j=0; j<possibleActions.size(); j++)
 //			System.out.print(possibleActions.get(j)+" ");
 //		System.out.println();
@@ -131,6 +149,8 @@ public class OFQAgent extends Agent {
     public void updateQValues(StateObservation state, HashMap<Observation, Object> stateObjMap, Types.ACTIONS action, StateObservation state2, HashMap<Observation, Object> state2ObjMap, double reward, ArrayList<Types.ACTIONS> actions){		
     	Vector2d avatarPos = getAvatarGridPos(state);
     	Vector2d avatarPos2 = getAvatarGridPos(state2);
+//    	for(Observation obs : stateObjMap.keySet())
+//    		System.out.println(obs.itype+": "+stateObjMap.get(obs).getGridPos());
     	for(Observation obs : stateObjMap.keySet()) {
     		if(obs.category != Types.TYPE_AVATAR){
 	    		Object o_state = stateObjMap.get(obs);
@@ -142,6 +162,12 @@ public class OFQAgent extends Agent {
 					maxQ = optimalMaxQ(qValues, avatarPos2, o_state2.getGridPos(), actions);	
 		        double qValue = getOneQValueUpdate(q, reward, maxQ);
 		        qValues.setOptimalQValue(avatarPos, o_state.getGridPos(), action, qValue);
+//		        if(reward > 0.01 || reward < -0.01)
+//		        	System.out.println("obj "+obs.itype+": old value="+q+", new value="+qValues.getOptimalQValue(avatarPos, o_state.getGridPos(), action));
+//		        double[] actionQ = qValues.optimalQValues[Model.getXDistId(avatarPos, o_state.getGridPos())][Model.getYDistId(avatarPos, o_state.getGridPos())];
+//		        for(int i=0; i<actionQ.length; i++)
+//		        	System.out.print(actionQ[i]+" ");
+//		        System.out.println();
     		}
     	}
     }

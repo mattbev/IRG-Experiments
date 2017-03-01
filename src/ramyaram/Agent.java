@@ -1,5 +1,8 @@
 package ramyaram;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -82,14 +85,14 @@ public abstract class Agent extends AbstractPlayer {
 	    	double evalReward = eval[1];
 	    	double evalTicks = eval[2];
 	    	//record game winner
-	    	Main.numWins[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalWins;
-	    	Main.writeToFile(Main.allNumWinsFile, evalWins+", ");
+	    	Constants.numWins[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalWins;
+	    	writeToFile(Constants.allNumWinsFile, evalWins+", ");
 	    	//record reward
-	    	Main.reward[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalReward; //score of the game
-	    	Main.writeToFile(Main.allRewardFile, evalReward+", ");
+	    	Constants.reward[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalReward; //score of the game
+	    	writeToFile(Constants.allRewardFile, evalReward+", ");
 	    	//record end game tick
-	    	Main.gameTick[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalTicks; //game tick at the end of the game
-	    	Main.writeToFile(Main.allGameTickFile, evalTicks+", ");
+	    	Constants.gameTick[conditionNum][(episodeNum/Constants.numEpisodesLearn)] += evalTicks; //game tick at the end of the game
+	    	writeToFile(Constants.allGameTickFile, evalTicks+", ");
 	    	return evalReward;
 	    }
 	    return result[1];
@@ -256,4 +259,14 @@ public abstract class Agent extends AbstractPlayer {
 		}
     	return str;
     }
+	
+	public static void writeToFile(File file, String str){
+		try{
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+	     	writer.write(str);
+	     	writer.close();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 }

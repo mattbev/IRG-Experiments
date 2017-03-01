@@ -4,9 +4,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import ramyaram.Main.RunType;
-
 public class Constants {
+	public enum RunType {PLAY, RUN}	
+	public static int GAME_PLAY_NUM = 1;
+	//structures to store information from runs
+	public static double[][] reward;
+	public static double[][] gameTick;
+	public static double[][] numWins;
+	
 	//settings for current run
 	public static ArrayList<String> conditions = new ArrayList<String>();
     public static RunType runType;
@@ -34,4 +39,17 @@ public class Constants {
 	public static int numEpisodesLearn = 1;
 	public static int numEpisodesEval = 0;
 	public static int numEpisodesMapping = 0;
+	
+	//files for saving results
+	public static File avgRewardFile;
+	public static File allRewardFile;
+	public static File avgGameTickFile;
+	public static File allGameTickFile;
+	public static File avgNumWinsFile;
+	public static File allNumWinsFile;
+	public static File runInfoFile;
+	public static File humanDataFile;
+	public static File humanWinsFile;
+	public static File humanScoresFile;
+	public static File humanTicksFile;
 }

@@ -1,39 +1,15 @@
-package ramyaram;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import ramyaram.Constants;
 
-import core.competition.CompetitionParameters;
+import ramyaram.*;
 
 /**
  * Main method that runs simulations of agents playing various games and analyzes the data
  */
-public class Main {
-	public enum RunType {PLAY, RUN}	
-	//structures to store information from runs
-	public static double[][] reward;
-	public static double[][] gameTick;
-	public static double[][] numWins;
-	public static int GAME_PLAY_NUM = 1;
-	
-	//files for saving results
-	public static File avgRewardFile;
-	public static File allRewardFile;
-	public static File avgGameTickFile;
-	public static File allGameTickFile;
-	public static File avgNumWinsFile;
-	public static File allNumWinsFile;
-	public static File runInfoFile;
-	public static File humanDataFile;
-	public static File humanWinsFile;
-	public static File humanScoresFile;
-	public static File humanTicksFile;
-
-	
+public class Main {	
 	//path and names for all games
 	public static String gamesPath = "../examples/gridphysics/";
 	public static String games[] = new String[]
@@ -73,12 +49,8 @@ public class Main {
 
 		//pass in directory name (if code is run using run.sh, this directory will already be created and passed in)
 		File dir = new File(args[0]);
-		if(!dir.exists()){ //when not running Java program from run.sh, no directory has been created yet
-			dir.mkdir();
-			//when running on Eclipse, the following two paths are different than when running with run.sh
-			gamesPath = gamesPath.substring(gamesPath.indexOf('/')+1);
-			CompetitionParameters.IMG_PATH = CompetitionParameters.IMG_PATH.substring(CompetitionParameters.IMG_PATH.indexOf('/')+1);
-		}
+		if(!dir.exists()) //when not running Java program from run.sh, no directory has been created yet
+			dir.mkdir();	
 
 		//read in arguments
 		String[] tokens = args[1].split(" ");
@@ -86,8 +58,8 @@ public class Main {
 			System.out.print(token+",");
 		System.out.println();
 		switch(tokens[0]){
-			case "play": Constants.runType = RunType.PLAY; break;
-			case "run": Constants.runType = RunType.RUN; break;
+			case "play": Constants.runType = Constants.RunType.PLAY; break;
+			case "run": Constants.runType = Constants.RunType.RUN; break;
 		}
 		for(int i=1; i<tokens.length; i++){
 			String flag = tokens[i];
@@ -115,27 +87,27 @@ public class Main {
 			i++;
 		}
 				
-        if(Constants.runType == RunType.RUN){
-	        avgRewardFile = new File(dir.getPath()+"/reward.csv");
-	        allRewardFile = new File(dir.getPath()+"/allReward.csv");
-	        avgGameTickFile = new File(dir.getPath()+"/gameTick.csv");
-	        allGameTickFile = new File(dir.getPath()+"/allGameTick.csv");
-	        avgNumWinsFile = new File(dir.getPath()+"/numWins.csv");
-	        allNumWinsFile = new File(dir.getPath()+"/allNumWins.csv");
-	        runInfoFile = new File(dir.getPath()+"/runInfo.txt");
-	        writeInfoToFile(runInfoFile);
+        if(Constants.runType == Constants.RunType.RUN){
+        	Constants.avgRewardFile = new File(dir.getPath()+"/reward.csv");
+        	Constants.allRewardFile = new File(dir.getPath()+"/allReward.csv");
+        	Constants.avgGameTickFile = new File(dir.getPath()+"/gameTick.csv");
+        	Constants.allGameTickFile = new File(dir.getPath()+"/allGameTick.csv");
+        	Constants.avgNumWinsFile = new File(dir.getPath()+"/numWins.csv");
+        	Constants.allNumWinsFile = new File(dir.getPath()+"/allNumWins.csv");
+        	Constants.runInfoFile = new File(dir.getPath()+"/runInfo.txt");
+	        writeInfoToFile(Constants.runInfoFile);
 	        Constants.writeModelFile = new File(dir.getPath()+"/learnedQ");
 	        Constants.writeModelFile.mkdir();
-        } else if(Constants.runType == RunType.PLAY){
-        	humanDataFile = new File(dir.getPath()+"/humanData.txt");
-        	humanWinsFile = new File(dir.getPath()+"/humanWins.csv");
-        	humanScoresFile = new File(dir.getPath()+"/humanScores.csv");
-        	humanTicksFile = new File(dir.getPath()+"/humanTicks.csv");
+        } else if(Constants.runType == Constants.RunType.PLAY){
+        	Constants.humanDataFile = new File(dir.getPath()+"/humanData.txt");
+        	Constants.humanWinsFile = new File(dir.getPath()+"/humanWins.csv");
+        	Constants.humanScoresFile = new File(dir.getPath()+"/humanScores.csv");
+        	Constants.humanTicksFile = new File(dir.getPath()+"/humanTicks.csv");
         }
 
-		reward = new double[Constants.conditions.size()][Constants.numTotalEpisodes/Constants.numEpisodesLearn];
-		numWins = new double[Constants.conditions.size()][Constants.numTotalEpisodes/Constants.numEpisodesLearn];
-		gameTick = new double[Constants.conditions.size()][Constants.numTotalEpisodes/Constants.numEpisodesLearn];
+        Constants.reward = new double[Constants.conditions.size()][Constants.numTotalEpisodes/Constants.numEpisodesLearn];
+        Constants.numWins = new double[Constants.conditions.size()][Constants.numTotalEpisodes/Constants.numEpisodesLearn];
+        Constants.gameTick = new double[Constants.conditions.size()][Constants.numTotalEpisodes/Constants.numEpisodesLearn];
 		
 		switch(Constants.runType){
 			case RUN:
@@ -177,21 +149,21 @@ public class Main {
 		        	}
 		        	writeToAllFiles("\n");
 		        } 
-		        writeFinalResultsToFile(avgRewardFile, reward, Constants.numAveraging, numEpisodes);
-		        writeFinalResultsToFile(avgNumWinsFile, numWins, Constants.numAveraging, numEpisodes);
-		        writeFinalResultsToFile(avgGameTickFile, gameTick, Constants.numAveraging, numEpisodes);
+		        writeFinalResultsToFile(Constants.avgRewardFile, Constants.reward, Constants.numAveraging, numEpisodes);
+		        writeFinalResultsToFile(Constants.avgNumWinsFile, Constants.numWins, Constants.numAveraging, numEpisodes);
+		        writeFinalResultsToFile(Constants.avgGameTickFile, Constants.gameTick, Constants.numAveraging, numEpisodes);
 		        
 			case PLAY:
 				System.out.println("Playing "+games[Constants.gameIdx]);
-		        if(Constants.runType == RunType.PLAY){
+		        if(Constants.runType == Constants.RunType.PLAY){
 		        	String game = gamesPath + games[Constants.gameIdx] + ".txt";
 		        	String level1 = gamesPath + games[Constants.gameIdx] + "_lvl" + Constants.levelIdx +".txt";
 		        	new HumanAgent(null,null);
 		        	String controller = "ramyaram.HumanAgent";
-		        	while(GAME_PLAY_NUM <= 10){ //human can keep playing the game until the max number of episodes
-		        		writeToFile(humanDataFile, "PLAY #"+GAME_PLAY_NUM+"\n");
+		        	while(Constants.GAME_PLAY_NUM <= 10){ //human can keep playing the game until the max number of episodes
+		        		Agent.writeToFile(Constants.humanDataFile, "PLAY #"+Constants.GAME_PLAY_NUM+"\n");
 	        			Agent.INSTANCE.run(-1, -1, game, level1, true, controller);
-	        			GAME_PLAY_NUM++;
+	        			Constants.GAME_PLAY_NUM++;
 		        	}
 		       }
 		}
@@ -243,30 +215,20 @@ public class Main {
 		return -1;
 	}
 	
-	public static void writeToFile(File file, String str){
-		try{
-			BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-	     	writer.write(str);
-	     	writer.close();
-		} catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-	
 	public static void writeInfoToFile(File runInfoFile){
 		try{
 			Field[]fields = Constants.class.getFields();
 			for(Field field : fields)
-				writeToFile(runInfoFile, field.getName()+"="+field.get(null)+"\n");
+				Agent.writeToFile(runInfoFile, field.getName()+"="+field.get(null)+"\n");
 		} catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 	
 	public static void writeToAllFiles(String str){
-		writeToFile(allRewardFile, str);
-        writeToFile(allNumWinsFile, str);
-        writeToFile(allGameTickFile, str);
+		Agent.writeToFile(Constants.allRewardFile, str);
+		Agent.writeToFile(Constants.allNumWinsFile, str);
+		Agent.writeToFile(Constants.allGameTickFile, str);
 	}
 	
 	public static void writeFinalResultsToFile(File file, double[][] results, int numAveraging, int[] numEpisodes){

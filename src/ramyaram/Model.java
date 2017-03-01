@@ -93,8 +93,8 @@ public class Model {
 			String dirPath = dir.getPath();
 			File infoFile = new File(dirPath+"/modelInfo.txt");
 			if(!infoFile.exists()){ //write info to file if not rewritten in previous run
-				Main.writeToFile(infoFile, "numX="+Agent.numX+"\n");
-				Main.writeToFile(infoFile, "numY="+Agent.numY+"\n");
+				Agent.writeToFile(infoFile, "numX="+Agent.numX+"\n");
+				Agent.writeToFile(infoFile, "numY="+Agent.numY+"\n");
 			}
 			for(ValueFunction q : qValueFunctions){
 				File qFile = new File(dirPath+"/"+q.objClassItype+".csv");

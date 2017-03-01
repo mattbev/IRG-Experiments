@@ -10,7 +10,8 @@ public class Constants {
 	//settings for current run
 	public static ArrayList<String> conditions = new ArrayList<String>();
     public static RunType runType;
-	public static int[] game = new int[]{-1,-1}; //this array has 2 indices, the first specifies the game index and the second is the level index
+	public static int gameIdx = -1; //the index of the game specified
+	public static int levelIdx = -1; //the level of the game specified
 	public static HashMap<Integer, Integer> fixedMapping; //fixed mapping if given prior to running the task
 	public static File writeModelFile = null;
 	public static File readModelFile = null;

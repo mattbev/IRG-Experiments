@@ -93,7 +93,8 @@ public class Main {
 			String flag = tokens[i];
 			String argument = tokens[i+1];
 			switch(flag){
-				case "-g": Constants.game = getGameLvlIdx(argument, games); break;
+				case "-g": Constants.gameIdx = getGameIdx(argument, games);
+						   Constants.levelIdx = Integer.parseInt(argument.substring(argument.length()-1)); break;
 				case "-n": Constants.numTotalEpisodes = Integer.parseInt(argument); break;
 				case "-nl": Constants.numEpisodesLearn = Integer.parseInt(argument); break;
 				case "-ne": Constants.numEpisodesEval = Integer.parseInt(argument); break;
@@ -155,16 +156,14 @@ public class Main {
 					numEpisodes[c] = Constants.numTotalEpisodes;
 		        for(int num=0; num<Constants.numAveraging; num++){
 		        	for(int c=0; c<Constants.conditions.size(); c++){
-		        		int gameIdx = Constants.game[0];
-		        		int levelIdx = Constants.game[1];
-		        		if(Constants.fixedMapping == null && Constants.readModelFile != null && Model.getSourceGame(Constants.readModelFile).equals(games[gameIdx])){
+		        		if(Constants.fixedMapping == null && Constants.readModelFile != null && Model.getSourceGame(Constants.readModelFile).equals(games[Constants.gameIdx])){
 		        			Constants.fixedMapping = new HashMap<Integer, Integer>();
-		        			for(int itype : Agent.getImportantObjects(games[gameIdx]))
+		        			for(int itype : Agent.getImportantObjects(games[Constants.gameIdx]))
 		        				Constants.fixedMapping.put(itype, itype); //if a file is given but no mapping, assume that object itypes are mapped to themselves
 		        		}
-		        		String game = gamesPath + games[gameIdx] + ".txt";
-		        		String level1 = gamesPath + games[gameIdx] + "_lvl" + levelIdx +".txt";
-		                System.out.println("PLAYING "+games[gameIdx]+" level "+levelIdx);
+		        		String game = gamesPath + games[Constants.gameIdx] + ".txt";
+		        		String level1 = gamesPath + games[Constants.gameIdx] + "_lvl" + Constants.levelIdx +".txt";
+		                System.out.println("PLAYING "+games[Constants.gameIdx]+" level "+Constants.levelIdx);
 		        		String controller = initController(Constants.conditions.get(c));
 		        		if(Agent.INSTANCE != null){
 		        			System.out.println("Running condition "+Constants.conditions.get(c));
@@ -183,10 +182,10 @@ public class Main {
 		        writeFinalResultsToFile(avgGameTickFile, gameTick, Constants.numAveraging, numEpisodes);
 		        
 			case PLAY:
-				System.out.println("Playing "+games[Constants.game[0]]);
+				System.out.println("Playing "+games[Constants.gameIdx]);
 		        if(Constants.runType == RunType.PLAY){
-		        	String game = gamesPath + games[Constants.game[0]] + ".txt";
-		        	String level1 = gamesPath + games[Constants.game[0]] + "_lvl" + Constants.game[1] +".txt";
+		        	String game = gamesPath + games[Constants.gameIdx] + ".txt";
+		        	String level1 = gamesPath + games[Constants.gameIdx] + "_lvl" + Constants.levelIdx +".txt";
 		        	new HumanAgent(null,null);
 		        	String controller = "ramyaram.HumanAgent";
 		        	while(GAME_PLAY_NUM <= 10){ //human can keep playing the game until the max number of episodes
@@ -235,17 +234,13 @@ public class Main {
 	/**
 	 * Given the set of all games and a string in the form of game+level (e.g., aliens0), get the game index and level index
 	 */
-	public static int[] getGameLvlIdx(String game_lvl, String[] allGames){
-		int[] gameLvlIdx = new int[2];
-		for(int i=0; i<gameLvlIdx.length; i++)
-			gameLvlIdx[i] = -1;
+	public static int getGameIdx(String game_lvl, String[] allGames){
 		String gameStr = game_lvl.substring(0, game_lvl.length()-1);
 		for(int i=0; i<allGames.length; i++){
 			if(gameStr.equalsIgnoreCase(allGames[i]))
-				gameLvlIdx[0] = i;
+				return i;
 		}		
-		gameLvlIdx[1] = Integer.parseInt(game_lvl.substring(game_lvl.length()-1));
-		return gameLvlIdx;
+		return -1;
 	}
 	
 	public static void writeToFile(File file, String str){

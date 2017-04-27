@@ -72,7 +72,7 @@ public class Feedback {
        SplashScreen n = new SplashScreen();
        n.showSplash(loc);
        
-            System.out.println(ScoreChange);
+//            System.out.println(ScoreChange);
         
         }
     }

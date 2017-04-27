@@ -1,4 +1,4 @@
-BasicGame key_handler=Pulse square_size=85
+BasicGame key_handler=Pulse square_size=43
     SpriteSet
         floor > Immovable img=oryx/space1 hidden=True
         city    > Immovable    color=WHITE img=newset/city1

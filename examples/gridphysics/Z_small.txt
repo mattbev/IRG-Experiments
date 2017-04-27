@@ -1,4 +1,4 @@
-BasicGame square_size=85
+BasicGame square_size=43
     SpriteSet
         floor > Immovable hidden=True img=oryx/backlBrown
         goodies > Immovable

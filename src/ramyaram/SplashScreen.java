@@ -18,8 +18,8 @@ public class SplashScreen extends JWindow {
     content.setBackground(Color.white);
 
     // Set the window's bounds, centering the window
-    int width = 300;
-    int height = 300;
+    int width = 100;
+    int height = 100;
     Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
     int x = 0; //1*(screen.width-width)/20;
     int y = 0; //1*(screen.height-height)/10;

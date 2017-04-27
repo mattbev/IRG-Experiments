@@ -1,6 +1,6 @@
 #Chip's Challenge
 
-BasicGame square_size=85 key_handler=Pulse
+BasicGame square_size=43 key_handler=Pulse
     SpriteSet
         floor > Immovable hidden=True img=oryx/floor3
 

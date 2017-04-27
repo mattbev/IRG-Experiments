@@ -1,4 +1,4 @@
-BasicGame square_size=85
+BasicGame square_size=43
 	SpriteSet
 		background > Immovable img=oryx/backBlack hidden=True
 		wall > Immovable autotiling=true img=oryx/dirtWall

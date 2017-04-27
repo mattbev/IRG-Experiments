@@ -1,4 +1,4 @@
-BasicGame key_handler=Pulse square_size=85
+BasicGame key_handler=Pulse square_size=43
     SpriteSet
         floor > Immovable img=oryx/floor3 hidden=True
         exit > Door color=GREEN img=oryx/doorclosed1

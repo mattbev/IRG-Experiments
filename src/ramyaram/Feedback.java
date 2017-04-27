@@ -20,10 +20,10 @@ public class Feedback {
     public static void addSound(char sign) throws IOException{
         String loc = "";
         if (sign == '+'){
-            loc = "media/good.au";
+            loc = "media/good.m4a";
         }
         else if (sign == '-') {
-            loc = "media/bad.au";
+            loc = "media/bad.m4a";
         }
         String soundFile = loc;
         InputStream in = new FileInputStream(soundFile);

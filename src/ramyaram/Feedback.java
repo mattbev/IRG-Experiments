@@ -33,8 +33,8 @@ public class Feedback {
     
     public static void addFeedback(double ScoreChange, int gameTick) throws IOException{
         String loc = "";
-        SplashScreen m = new SplashScreen();
-        m.showSplash(loc);
+//        SplashScreen m = new SplashScreen();
+//        m.showSplash(loc);
         if(ScoreChange > 0){
             addSound('+');
 //            if (ScoreChange == 10){
@@ -69,8 +69,8 @@ public class Feedback {
             loc = "media/-10.jpg";
         }
         
-       SplashScreen n = new SplashScreen();
-       n.showSplash(loc);
+//       SplashScreen n = new SplashScreen();
+//       n.showSplash(loc);
        
 //            System.out.println(ScoreChange);
         

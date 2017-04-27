@@ -31,7 +31,8 @@ public class Main {
             "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
             "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem", "sheriffTopBottom",
             "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D", "E", "K", "A", "simpleGame",
-            "X", "Y", "Z", "L", "V", "U", "Q"};
+            "X", "Y", "Z", "L", "V", "U", "Q",
+            "X_small", "Y_small", "Z_small", "L_small", "V_small", "U_small", "Q_small"};
 	
 	public static void main(String[] args) {
 	    Feedback n = new Feedback();

@@ -20,10 +20,10 @@ public class Feedback {
     public static void addSound(char sign) throws IOException{
         String loc = "";
         if (sign == '+'){
-            loc = "good.au";
+            loc = "media/good.au";
         }
         else if (sign == '-') {
-            loc = "bad.au";
+            loc = "media/bad.au";
         }
         String soundFile = loc;
         InputStream in = new FileInputStream(soundFile);
@@ -50,7 +50,7 @@ public class Feedback {
 //            else {
 //                loc = "C:\\Users\\mattj\\OneDrive\\Pictures\\IRG\\plus.jpg";
 //                }
-            loc = "+10.jpg";
+            loc = "media/+10.jpg";
         }
         else if (ScoreChange < 0){
             addSound('-');
@@ -66,7 +66,7 @@ public class Feedback {
 //            else {
 //                loc = "C:\\Users\\mattj\\OneDrive\\Pictures\\IRG\\minus.jpg";
 //           }
-            loc = "-10.jpg";
+            loc = "media/-10.jpg";
         }
         
        SplashScreen n = new SplashScreen();

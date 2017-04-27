@@ -51,11 +51,11 @@ public class HumanAgent extends Agent {
             action = Types.ACTIONS.ACTION_USE;
         
         double currScore = stateObs.getGameScore();
-        if(action != Types.ACTIONS.ACTION_NIL){ //only save "important" actions and record the tick at which the action happened (skips recording nil actions)
-        	Agent.writeToFile(Constants.humanDataFile, "TICK: "+stateObs.getGameTick()+"\n");
-        	Agent.writeToFile(Constants.humanDataFile, stateObsStr(lastStateObs));
-        	Agent.writeToFile(Constants.humanDataFile, action.name()+", "+Agent.roundDouble(currScore-lastScore)+"\n");
-        }
+//        if(action != Types.ACTIONS.ACTION_NIL){ //only save "important" actions and record the tick at which the action happened (skips recording nil actions)
+//        	Agent.writeToFile(Constants.humanDataFile, "TICK: "+stateObs.getGameTick()+"\n");
+//        	Agent.writeToFile(Constants.humanDataFile, stateObsStr(lastStateObs));
+//        	Agent.writeToFile(Constants.humanDataFile, action.name()+", "+Agent.roundDouble(currScore-lastScore)+"\n");
+//        }
         
     	lastStateObs = stateObs.copy();
     	lastAction = action;
@@ -68,7 +68,7 @@ public class HumanAgent extends Agent {
      * Save end-of-game stats
      */
     public void result(StateObservation stateObs, ElapsedCpuTimer elapsedCpuTimer) {
-    	Agent.writeToFile(Constants.humanDataFile, "WINNER: "+stateObs.getGameWinner()+", SCORE: "+stateObs.getGameScore()+"\n**********************\n\n");
+    	//Agent.writeToFile(Constants.humanDataFile, "WINNER: "+stateObs.getGameWinner()+", SCORE: "+stateObs.getGameScore()+"\n**********************\n\n");
     	Agent.writeToFile(Constants.humanWinsFile, stateObs.getGameWinner()+",");
     	Agent.writeToFile(Constants.humanScoresFile, stateObs.getGameScore()+",");
     	Agent.writeToFile(Constants.humanTicksFile, stateObs.getGameTick()+",");

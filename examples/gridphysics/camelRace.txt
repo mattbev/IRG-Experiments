@@ -1,4 +1,4 @@
-BasicGame
+BasicGame square_size=50
     SpriteSet
         floor > Immovable hidden=True img=oryx/backBiege
         camel > color=BROWN

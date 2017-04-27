@@ -30,9 +30,11 @@ public class Main {
             "surround", "survivezombies", "tercio", "thecitadel", "thesnowman",           //70-74
             "waitforbreakfast", "watergame", "waves", "whackamole", "witnessprotection",  //75-79
             "zelda", "zenpuzzle","solarfoxShoot","solarfoxShootGem", "sheriffTopBottom",
-            "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D", "E", "K", "A", "simpleGame"};
+            "aliens1", "solarfoxShootGem1", "sheriff1", "S", "M", "P", "F", "W", "H", "D", "E", "K", "A", "simpleGame",
+            "X", "Y", "Z", "L", "V", "U", "Q"};
 	
 	public static void main(String[] args) {
+	    Feedback n = new Feedback();
 		//argument list
 		//args[0] - directory name
 		//args[1] - play or run
@@ -86,7 +88,7 @@ public class Main {
 			}
 			i++;
 		}
-				
+		
         if(Constants.runType == Constants.RunType.RUN){
         	Constants.avgRewardFile = new File(dir.getPath()+"/reward.csv");
         	Constants.allRewardFile = new File(dir.getPath()+"/allReward.csv");
@@ -99,7 +101,7 @@ public class Main {
 	        Constants.writeModelFile = new File(dir.getPath()+"/learnedQ");
 	        Constants.writeModelFile.mkdir();
         } else if(Constants.runType == Constants.RunType.PLAY){
-        	Constants.humanDataFile = new File(dir.getPath()+"/humanData.txt");
+//        	Constants.humanDataFile = new File(dir.getPath()+"/humanData.txt");
         	Constants.humanWinsFile = new File(dir.getPath()+"/humanWins.csv");
         	Constants.humanScoresFile = new File(dir.getPath()+"/humanScores.csv");
         	Constants.humanTicksFile = new File(dir.getPath()+"/humanTicks.csv");
@@ -161,7 +163,7 @@ public class Main {
 		        	new HumanAgent(null,null);
 		        	String controller = "ramyaram.HumanAgent";
 		        	while(Constants.GAME_PLAY_NUM <= 10){ //human can keep playing the game until the max number of episodes
-		        		Agent.writeToFile(Constants.humanDataFile, "PLAY #"+Constants.GAME_PLAY_NUM+"\n");
+//		        		Agent.writeToFile(Constants.humanDataFile, "PLAY #"+Constants.GAME_PLAY_NUM+"\n");
 	        			Agent.INSTANCE.run(-1, -1, game, level1, true, controller);
 	        			Constants.GAME_PLAY_NUM++;
 		        	}

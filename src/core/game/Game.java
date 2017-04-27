@@ -5,7 +5,15 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.*;
 
+import sun.audio.*;
+import java.io.*;
+
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import core.SpriteGroup;
 import core.VGDLFactory;
@@ -28,6 +36,7 @@ import ontology.effects.TimeEffect;
 import ontology.sprites.Resource;
 import ramyaram.Agent;
 import ramyaram.Constants;
+import ramyaram.Feedback;
 import ramyaram.HumanAgent;
 import tools.*;
 import tools.pathfinder.Node;
@@ -908,8 +917,9 @@ public abstract class Game
             		
             		if(HumanAgent.lastWin == -1)
             			JOptionPane.showMessageDialog(frame, "Click OK to start playing.");           		
-            		else
-            			JOptionPane.showMessageDialog(frame, str);
+            		else{
+            		    JOptionPane.showMessageDialog(frame, str);
+            		}
             	}
             	
             	firstRun = false;
@@ -1008,7 +1018,7 @@ public abstract class Game
         //System.out.println(avatars[0].rect);
 
         //Execute a game cycle:
-        this.tick();                    //update for all entities.
+        this.tick(gameTick);                    //update for all entities.
         this.eventHandling();           //handle events such collisions.
         this.clearAll(fwdModel);        //clear all additional data, including dead sprites.
         this.terminationHandling();     //check for game termination.
@@ -1230,14 +1240,24 @@ public abstract class Game
      * opposite order of the drawing order (inverse spriteOrder[]). Avatar is always
      * updated first.
      * Doesn't update disabled sprites.
+     * @throws IOException 
      */
-    protected void tick()
+    protected void tick(int gameTick) 
     {
         //Now, do all of the avatars.
         for (int i = 0; i < no_players; i++) {
 //        	System.out.println("before "+avatars[i].getScore());
         	avatars[i].addScore(Types.SCORE_TICK);
     		avatars[i].setScore(Agent.roundDouble(avatars[i].getScore()));
+    		double ScoreChange = avatars[i].getScore()- Agent.lastScore;
+    		if (ScoreChange != 0){
+    		    try {
+                    Feedback.addFeedback(ScoreChange, gameTick);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+    		}    		
+//    		
 //        	System.out.println("after "+avatars[i].getScore());
             if (avatars[i] != null && !avatars[i].is_disabled()) {
                 avatars[i].preMovement();

@@ -1,4 +1,4 @@
-BasicGame square_size=30
+BasicGame square_size=50
     SpriteSet
         floor > Immovable img=oryx/grass autotiling=True hidden=True
         water > Immovable color=BLUE img=oryx/seaWater

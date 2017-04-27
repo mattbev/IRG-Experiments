@@ -1,6 +1,6 @@
 #Bait: http://www.mobygames.com/game/bait
 
-BasicGame  key_handler=Pulse square_size=50
+BasicGame  key_handler=Pulse square_size=100
     SpriteSet
 
         floor > Immovable hidden=True img=oryx/backLBrown

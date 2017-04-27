@@ -1,4 +1,4 @@
-BasicGame key_handler=Pulse
+BasicGame key_handler=Pulse square_size=85
     SpriteSet
         floor > Immovable img=newset/floor2
 

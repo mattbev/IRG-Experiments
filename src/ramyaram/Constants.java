@@ -48,7 +48,7 @@ public class Constants {
 	public static File avgNumWinsFile;
 	public static File allNumWinsFile;
 	public static File runInfoFile;
-	public static File humanDataFile;
+//	public static File humanDataFile;
 	public static File humanWinsFile;
 	public static File humanScoresFile;
 	public static File humanTicksFile;

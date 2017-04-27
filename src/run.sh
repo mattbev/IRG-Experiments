@@ -41,4 +41,4 @@ mkdir "$newdir"
 
 javac Main.java
 java Main $newdir "$args"
-python plots.py $newdir "reward.csv"
+#python plots.py $newdir "reward.csv"

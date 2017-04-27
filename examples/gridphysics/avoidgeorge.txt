@@ -1,4 +1,4 @@
-BasicGame
+BasicGame square_size = 80
     SpriteSet
 
         floor > Immovable img=newset/floor6 hidden=True

@@ -29,7 +29,7 @@ public abstract class Agent extends AbstractPlayer {
     protected static int blockSize;
 	protected static StateObservation lastStateObs;
 	protected static Types.ACTIONS lastAction;
-	protected static double lastScore;
+	public static double lastScore;
 	protected static boolean updateQValues;
 	protected static String gameName;
 	
@@ -236,6 +236,8 @@ public abstract class Agent extends AbstractPlayer {
 	 * Only prints one object at each grid coordinate for easy visualization but there might be multiple objects at each
 	 */
 	public String stateObsStr(StateObservation stateObs){
+	    if(getImportantObjects(gameName) == null)
+	        return "";
     	String str = " ";
     	ArrayList<Observation>[][] observationGrid = stateObs.getObservationGrid();
     	for (int c = 0; c < observationGrid.length; c++)

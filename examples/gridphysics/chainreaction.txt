@@ -1,4 +1,4 @@
-BasicGame key_handler=Pulse
+BasicGame key_handler=Pulse square_size=110
     SpriteSet
         floor > Immovable img=oryx/backLBrown
         hole   > Immovable color=DARKBLUE img=newset/hole1 portal=true

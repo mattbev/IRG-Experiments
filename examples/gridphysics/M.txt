@@ -1,11 +1,11 @@
-BasicGame square_size=53
+BasicGame square_size=80
   SpriteSet
     floor > Immovable img=oryx/backBlack
     explosion > Flicker limit=5 img=newset/sugar shrinkfactor=0.5
 
     movable >
       avatar  > ShootAvatar stype=explosion img=newset/cherries
-      incoming >
+      incoming > 
         incoming_slow  > Chaser stype=city color=ORANGE speed=0.1 img=newset/camel1
         incoming_fast  > Chaser stype=city color=YELLOW speed=0.3 img=newset/camel1_1
 

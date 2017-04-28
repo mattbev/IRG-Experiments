@@ -16,18 +16,15 @@ arrTmp=${!tmp}
 arr=( $arrTmp )
 
 i=0
-echo "Playing game $i"
-./run.sh play -g "${arr[i]}"
-
 while [ "$i" -lt "${#arr[@]}" ]; do
-	while true; do
+	while [ "$i" -gt 0 ]; do
 		read -p "Are you ready to continue?" y
 		case $y in
 			[Yy]* ) break;;
 			* ) echo "Please answer 'y' when ready.";;
 		esac
 	done
-	i=$((i+1)) 
 	echo "Playing game $i"
 	./run.sh play -g "${arr[i]}"
+	i=$((i+1))
 done

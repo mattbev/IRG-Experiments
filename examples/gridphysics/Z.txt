@@ -36,9 +36,9 @@ BasicGame square_size=85
         boulder wall > transformToAll stype=boulder stypeTo=resting
         resting wall > stepBack
         avatar gold  > stepBack
-        avatar monster  > killSprite scoreChange=-10
+        avatar monster  > killSprite scoreChange=-1
         monster wall EOS resting > flipDirection
-        monster boulder > killSprite scoreChange=10
+        monster boulder > killSprite scoreChange=1
         falling wall > killSprite
 
         shovel shovel > transformTo stype=boulder

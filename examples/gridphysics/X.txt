@@ -37,11 +37,11 @@ BasicGame key_handler=Pulse square_size=85
         alien   EOS  > killSprite
         missile EOS city > killSprite
 
-        city bomb > killSprite scoreChange=-10
+        city bomb > killSprite scoreChange=-1
         city sam alien > killSprite
 
         supply alien > killSprite
-        alien  sam   > killBoth scoreChange=10
+        alien  sam   > killBoth scoreChange=1
 
         supply supply > stepBack
         supply wall city > stepBack pixelPerfect=True

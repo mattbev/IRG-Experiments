@@ -25,18 +25,18 @@ BasicGame square_size=85
 
 	InteractionSet
 		dirt avatar sword > killSprite
-		diamond avatar > collectResource  scoreChange=10
+		diamond avatar > collectResource  scoreChange=1
 		moving wall boulder > stepBack
 
-		avatar boulder > killIfFromAbove scoreChange=-10
-		avatar butterfly crab > killSprite scoreChange=-10
+		avatar boulder > killIfFromAbove scoreChange=-1
+		avatar butterfly crab > killSprite scoreChange=-1
 
 		boulder dirt wall diamond boulder > stepBack
 
 		enemy dirt diamond > stepBack
 
 		crab butterfly > killSprite
-		butterfly crab > transformTo stype=diamond scoreChange=10
+		butterfly crab > transformTo stype=diamond scoreChange=1
 		exitdoor avatar > killIfOtherHasMore resource=diamond limit=9
 
 	TerminationSet

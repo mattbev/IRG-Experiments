@@ -48,7 +48,7 @@ BasicGame square_size=85
         avatar sam > killSprite
         sam avatar wall EOS > killSprite
 
-        tank bomb > killSprite scoreChange=10
+        tank bomb > killSprite scoreChange=1
         bomb tank wall EOS > killSprite
 
         bomb sam > killBoth
@@ -56,7 +56,7 @@ BasicGame square_size=85
         tank wall EOS  > reverseDirection
         tank wall EOS  > stepBack
 
-        satellite sam > killBoth scoreChange=-10
+        satellite sam > killBoth scoreChange=-1
         satellite wall EOS > stepBack
 
         avatar supply > changeResource resource=bullet value=5  killResource=True

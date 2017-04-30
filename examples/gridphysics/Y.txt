@@ -2,7 +2,7 @@
 
 BasicGame square_size=85 key_handler=Pulse
     SpriteSet
-        floor > Immovable hidden=True img=oryx/floor3
+        floor > Immovable hidden=True img=oryx/backlBrown
 
         water > Immovable img=newset/water
         mud > Immovable img=oryx/backLBrown
@@ -31,7 +31,7 @@ BasicGame square_size=85 key_handler=Pulse
         chip > Resource img=oryx/gold1 shrinkfactor=0.5 limit=11
         avatar > MovingAvatar img=oryx/rogue
 
-        wall > Immovable img=oryx/wall3 autotiling=True
+        wall > Immovable img=oryx/dirtWall autotiling=True
             
     
     LevelMapping

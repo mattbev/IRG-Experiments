@@ -2,7 +2,7 @@
 
 BasicGame square_size=85 key_handler=Pulse
     SpriteSet
-        floor > Immovable hidden=True img=oryx/floor3
+        floor > Immovable hidden=True img=oryx/backlBrown
 
         water > Immovable img=newset/water
         mud > Immovable img=oryx/backLBrown
@@ -31,7 +31,7 @@ BasicGame square_size=85 key_handler=Pulse
         chip > Resource img=oryx/gold1 shrinkfactor=0.5 limit=11
         avatar > MovingAvatar img=oryx/rogue
 
-        wall > Immovable img=oryx/wall3 autotiling=True
+        wall > Immovable img=oryx/dirtWall autotiling=True
             
     
     LevelMapping
@@ -71,27 +71,27 @@ BasicGame square_size=85 key_handler=Pulse
         
         mud avatar > killSprite
         
-        gate avatar > killIfOtherHasMore resource=chip limit=11 scoreChange=10
+        gate avatar > killIfOtherHasMore resource=chip limit=11 scoreChange=1
         avatar gate > stepBack
 
-        chip avatar > collectResource scoreChange=10
+        chip avatar > collectResource scoreChange=1
         key avatar > collectResource
-        boots avatar > collectResource scoreChange=10
+        boots avatar > collectResource scoreChange=1
 
-        reddoor avatar > killIfOtherHasMore resource=redkey limit=1 scoreChange=10
+        reddoor avatar > killIfOtherHasMore resource=redkey limit=1 scoreChange=1
         avatar reddoor > changeResource resource=redkey value=-1
 
-        greendoor avatar > killIfOtherHasMore resource=greenkey limit=1  scoreChange=10
+        greendoor avatar > killIfOtherHasMore resource=greenkey limit=1  scoreChange=1
         avatar greendoor > changeResource resource=greenkey value=-1
 
-        bluedoor avatar > killIfOtherHasMore resource=bluekey limit=1  scoreChange=10
+        bluedoor avatar > killIfOtherHasMore resource=bluekey limit=1  scoreChange=1
         avatar bluedoor > changeResource resource=bluekey value=-1
 
-        yellowdoor avatar > killIfOtherHasMore resource=yellowkey limit=1  scoreChange=10
+        yellowdoor avatar > killIfOtherHasMore resource=yellowkey limit=1  scoreChange=1
         avatar yellowdoor > changeResource resource=yellowkey value=-1
         
         avatar wall door > undoAll
         avatar water > killIfHasLess resource=flippers limit=0
         avatar fire > killIfHasLess resource=fireboots limit=0
 
-        exit avatar > killSprite scoreChange=10
+        exit avatar > killSprite scoreChange=1

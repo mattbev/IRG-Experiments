@@ -1,6 +1,6 @@
 BasicGame square_size=85
     SpriteSet
-        floor > Immovable hidden=True img=oryx/backlBrown
+        floor > Immovable hidden=True img=oryx/seaWater
         goodies > Immovable
             gold > color=GOLD img=oryx/gold2 shrinkfactor=0.5
             gem  > color=GREEN shrinkfactor=0.6 img=oryx/diamond1
@@ -10,10 +10,10 @@ BasicGame square_size=85
             boulder > Missile speed=0.2 img=oryx/planet
         moving >
             avatar  > ShootAvatar stype=shovel img=oryx/axeman1
-            monster > Missile color=RED orientation=DOWN cooldown=4 img=oryx/scorpion3
+            monster > Missile color=RED orientation=DOWN cooldown=4 img=newset/shark2
             falling > Missile orientation=DOWN color=YELLOW speed=0.5 img=oryx/planet
         entrance > SpawnPoint total=5 cooldown=200 stype=monster img=newset/hole1 portal=True
-        wall > Immovable img=oryx/dirtwall autotiling=True
+        wall > Immovable img=oryx/backBiege
 
     LevelMapping
         0 > gem floor
@@ -36,9 +36,9 @@ BasicGame square_size=85
         boulder wall > transformToAll stype=boulder stypeTo=resting
         resting wall > stepBack
         avatar gold  > stepBack
-        avatar monster  > killSprite scoreChange=-10
+        avatar monster  > killSprite scoreChange=-1
         monster wall EOS resting > flipDirection
-        monster boulder > killSprite scoreChange=10
+        monster boulder > killSprite scoreChange=1
         falling wall > killSprite
 
         shovel shovel > transformTo stype=boulder

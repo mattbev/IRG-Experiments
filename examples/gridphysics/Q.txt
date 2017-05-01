@@ -45,13 +45,13 @@ BasicGame square_size=85
         fallingcivilian building > transformTo stype=standingcivilian
 
         fallingcivilian wall > transformTo stype=hurtcivilian
-        fallingcivilian avatar > killSprite scoreChange=10
+        fallingcivilian avatar > killSprite scoreChange=1
 
-        avatar bandit > changeResource resource=villain value=1 killResource=True scoreChange=10
+        avatar bandit > changeResource resource=villain value=1 killResource=True scoreChange=1
 
         avatar jail > spawnIfHasMore resource=villain stype=villaingang limit=8
         avatar jail > changeResource resource=villain value=-8
-        villaingang jail > killSprite scoreChange=10
+        villaingang jail > killSprite scoreChange=1
 
 
     LevelMapping

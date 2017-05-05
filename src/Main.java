@@ -163,7 +163,7 @@ public class Main {
 		        	String level1 = gamesPath + games[Constants.gameIdx] + "_lvl" + Constants.levelIdx +".txt";
 		        	new HumanAgent(null,null);
 		        	String controller = "ramyaram.HumanAgent";
-		        	while(Constants.GAME_PLAY_NUM <= 10){ //human can keep playing the game until the max number of episodes
+		        	while(Constants.GAME_PLAY_NUM <= 5){ //human can keep playing the game until the max number of episodes
 //		        		Agent.writeToFile(Constants.humanDataFile, "PLAY #"+Constants.GAME_PLAY_NUM+"\n");
 	        			Agent.INSTANCE.run(-1, -1, game, level1, true, controller);
 	        			Constants.GAME_PLAY_NUM++;

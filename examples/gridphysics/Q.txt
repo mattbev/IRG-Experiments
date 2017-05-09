@@ -2,17 +2,17 @@ BasicGame square_size=85
     SpriteSet
 
         sky > Immovable hidden=True img=oryx/backGrey
-        building > Immovable img=newset/cloud2
+        building > Immovable img=newset/cocoonb1
         street > Immovable img=newset/street3
         emptyspace > Immovable invisible=True
-        jail > Immovable img=newset/jail
+        jail > Immovable img=newset/flag1
 
-        portal  > SpawnPoint img=newset/jaildoor1 portal=True cooldown=50   total=20
+        portal  > SpawnPoint img=newset/lineup portal=True cooldown=50   total=20
             portalLeft  > stype=bleft
             portalRight  > stype=bright
 
-        bandit > Bomber prob=0.1 cooldown=6 speed=0.5 img=newset/bandit1 stype=missile orientation=UP
-            bleft > spawnorientation=LEFT img=newset/bandit1h
+        bandit > Bomber prob=0.1 cooldown=6 speed=0.5 img=newset/potatofull stype=missile orientation=UP
+            bleft > spawnorientation=LEFT img=newset/potatofull
             bright > spawnorientation=RIGHT
 
         villain  > Resource color=GREEN limit=8 value=0
@@ -24,7 +24,7 @@ BasicGame square_size=85
             fallingcivilian > Missile orientation=DOWN color=GRAY speed=0.2 img=newset/man3
 
 
-        missile > Missile img=oryx/bullet1 speed=0.6
+        missile > Missile img=oryx/goldsack speed=0.6 shrinkfactor=0.5
 
         avatar > MovingAvatar
             superman > img=newset/superman frameRate=8

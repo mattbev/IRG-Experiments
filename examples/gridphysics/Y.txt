@@ -9,16 +9,16 @@ BasicGame square_size=85 key_handler=Pulse
         fire > Immovable img=oryx/fire1
 
         key > Resource shrinkfactor=0.5
-            redkey > img=oryx/potion3
-            bluekey > img=oryx/potion1
-            greenkey > img=oryx/potion4
-            yellowkey > img=oryx/potion5
+            redkey > img=oryx/worm1
+            bluekey > img=oryx/yeti3
+            greenkey > img=oryx/planet1
+            yellowkey > img=oryx/dragon1
 
         door > Immovable
-            reddoor > Immovable img=oryx/slime3
-            bluedoor > Immovable img=oryx/slime1
-            greendoor > Immovable img=oryx/slime2
-            yellowdoor > Immovable img=oryx/slime6
+            reddoor > Immovable img=oryx/bookDown
+            bluedoor > Immovable img=oryx/bookRight
+            greendoor > Immovable img=oryx/bookLeft
+            yellowdoor > Immovable img=oryx/bookUp
 
         boots > Resource limit=1
             flippers > img=oryx/boots3
@@ -26,9 +26,9 @@ BasicGame square_size=85 key_handler=Pulse
         
         crate > Passive img=newset/block3
         
-        gate > Immovable img=oryx/doorclosed1
-        exit > Immovable img=newset/exit2
-        chip > Resource img=oryx/gold1 shrinkfactor=0.5 limit=11
+        gate > Immovable img=oryx/shield2
+        exit > Immovable img=oryx/angel1
+        chip > Resource img=newset/tooth1 shrinkfactor=0.5 limit=11
         avatar > MovingAvatar img=oryx/rogue
 
         wall > Immovable img=oryx/dirtWall autotiling=True

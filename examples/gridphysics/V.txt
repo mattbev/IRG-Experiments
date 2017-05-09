@@ -1,8 +1,8 @@
 BasicGame key_handler=Pulse square_size=85
     SpriteSet
         floor > Immovable img=oryx/floor3 hidden=True
-        exit > Door color=GREEN img=oryx/doorclosed1
-        hole   > Immovable color=DARKBLUE img=oryx/spike2 portal=True
+        exit > Door color=GREEN img=oryx/scroll1
+        hole   > Immovable color=DARKBLUE img=oryx/explosion2 portal=True
 
         boxes   > Passive  shrinkfactor=0.8
             box > img=newset/block2
@@ -11,16 +11,16 @@ BasicGame key_handler=Pulse square_size=85
             greenbox > img=newset/blockG
 
         switch > Immovable
-             normalSwitch > img=newset/floor6
-             blueSwitch > img=newset/tile1
-             redSwitch > img=newset/tile3
-             greenSwitch > img=newset/tile4
+             normalSwitch > img=oryx/bear1
+             blueSwitch > img=oryx/bush4
+             redSwitch > img=oryx/alien1
+             greenSwitch > img=oryx/eyes2
 
         avatar > MovingAvatar
              normalAvatar > img=newset/girl3
-             blueAvatar > img=newset/girl2
-             redAvatar > img=newset/girl5
-             greenAvatar > img=newset/girl1
+             blueAvatar > img=newset/girl3
+             redAvatar > img=newset/girl3
+             greenAvatar > img=newset/girl3
 
         wall > Immovable img=oryx/wall3 autotiling=True
 

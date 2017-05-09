@@ -5,13 +5,13 @@ BasicGame square_size=85
 		sword > Flicker color=LIGHTGRAY limit=1 singleton=True img=oryx/pickaxe
 		dirt > Immovable color=BROWN img=oryx/backLBrown
 		exitdoor > Door color=GREEN img=oryx/door2
-		diamond > Resource color=YELLOW limit=10 shrinkfactor=0.75 img=oryx/diamond3
-		boulder > Missile orientation=DOWN color=GRAY speed=0.2 img=oryx/mineral1
+		diamond > Resource color=YELLOW limit=10 shrinkfactor=0.75 img=newset/bomb
+		boulder > Missile orientation=DOWN color=GRAY speed=0.2 img=newset/football
 		moving >
 			avatar  > ShootAvatar   stype=sword frameRate=8 img=oryx/spelunky
 			enemy > RandomNPC cons=1
-				crab > color=RED img=oryx/scorpion2
-				butterfly > color=PINK img=oryx/bat2
+				crab > color=RED img=newset/nurse
+				butterfly > color=PINK img=newset/girl2_0
 
 	LevelMapping
 		. > background dirt
